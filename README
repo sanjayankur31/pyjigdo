@@ -1,0 +1,6 @@
+Not much to read about yet.
+
+Checkout the source and ask the help:
+
+git-clone git://git.fedoraproject.org/git/hosted/pyjigdo.git && cd pyjigdo
+./pyjigdo.py --help
