@@ -1,0 +1,59 @@
+%{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+
+Summary: Python version of Jigdo, Modified
+Name: pyjigdo
+Version: @VERSION@
+Release: 1%{?dist}
+License: GPLv2
+Group: Applications/System
+URL: https://hosted.fedoraproject.org/projects/pyjigdo
+Source0: http://files.pyjigdo.fedoraunity.org/%{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: jigdo
+BuildArch: noarch
+ExcludeArch: ppc ppc64
+BuildRequires: intltool, gettext, python, desktop-file-utils
+
+%description
+PyJigdo is a slightly modified version of the popular Jigdo distribution
+framework.
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+desktop-file-install --vendor="fedora"              \
+  --delete-original                                 \
+  --dir=%{buildroot}%{_datadir}/applications        \
+  %{buildroot}/%{_datadir}/applications/pyjigdo.desktop
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root,-)
+%doc README NEWS AUTHORS COPYING
+%dir %{python_sitelib}/pyjigdo
+%{python_sitelib}/pyjigdo/*.py
+%{python_sitelib}/pyjigdo/*.pyc
+%{python_sitelib}/pyjigdo/*.pyo
+%{_bindir}/*
+%{_sbindir}/*
+%dir %{_sysconfdir}/pyjigdo
+%dir %{_sysconfdir}/pyjigdo/conf.d
+%config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
+%config(noreplace) %{_sysconfdir}/pyjigdo/conf.d/*
+%config(noreplace) %{_sysconfdir}/pam.d/*
+%config(noreplace) %{_sysconfdir}/security/console.apps/*
+%{_datadir}/locale/*/LC_MESSAGES/pyjigdo.mo
+
+%changelog
+* Sun Oct 07 2007 Jonathan Steffan <jon a fedoraunity.org> 0.1-1
+- Initial build 0.1-1
+

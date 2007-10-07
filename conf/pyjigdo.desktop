@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=pyJigdo
+GenericName=pyJigdo
+Comment=pyJigdo, get bits
+Categories=System;X-Red-Hat-Base;X-Fedora;PackageManager;GNOME;GTK;
+Exec=/usr/bin/pyjigdo
+Terminal=false
+Type=Application
+Icon=pyjigdo.png
+Encoding=UTF-8
+StartupNotify=true
