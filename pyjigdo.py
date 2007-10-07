@@ -987,6 +987,9 @@ else:
         choosing_mirrors = True
         while choosing_mirrors:
             mirror_choice = raw_input("What mirror would you like to use? [1-%s] " % jigdo_config.mirror_num)
+            # FIXME: Filter response to allow users to give more then one response at a time and not throw a traceback when
+            # invalid input is given
+            # Such: choices = mirror_choice.split(' ') ... then validate and select
             if int(mirror_choice) > jigdo_config.mirror_num:
                 print "Invalid mirror number."
             elif mirror_choice not in preferred_mirrors:
