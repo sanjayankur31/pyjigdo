@@ -11,7 +11,7 @@ Source0: 	http://files.pyjigdo.fedoraunity.org/%{name}-%{version}.tar.gz
 BuildRoot: 	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: 	jigdo
 BuildArch: 	noarch
-BuildRequires: 	intltool, gettext, python, diffutil
+BuildRequires: 	intltool, gettext, python, diffutils
 
 %description
 PyJigdo is a slightly modified version of the popular Jigdo distribution
