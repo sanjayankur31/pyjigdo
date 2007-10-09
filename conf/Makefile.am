@@ -5,7 +5,7 @@ desktopdatadir = $(datadir)/applications/
 desktopdata_DATA = pyjigdo.desktop
 
 PYJIGDOCONFIG = \
-	pyjigdo.conf                       \
+	pyjigdo.conf 
 #	pyjigdo.desktop
 
 EXTRA_DIST = \
