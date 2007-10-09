@@ -1,0 +1,28 @@
+#!/bin/sh
+# Reconfigure automake
+autoreconf -v
+
+echo -n Run configure? 
+read -n 2 INPUT
+echo ""
+if [ "$INPUT" != "y" ]; then
+  exit
+fi
+./configure
+
+echo -n Run make srpm? 
+read -n 2 INPUT
+echo ""
+if [ "$INPUT" != "y" ]; then
+  exit
+fi
+make srpm
+
+echo -n Run make rpm? 
+read -n 2 INPUT
+echo ""
+if [ "$INPUT" != "y" ]; then
+  exit
+fi
+make rpm
+
