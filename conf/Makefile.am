@@ -6,7 +6,7 @@ desktopdata_DATA = pyjigdo.desktop
 
 PYJIGDOCONFIG = \
 	pyjigdo.conf                       \
-	pyjigdo.desktop
+#	pyjigdo.desktop
 
 EXTRA_DIST = \
 	$(PYJIGDOCONFIG)
