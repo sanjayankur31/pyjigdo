@@ -14,8 +14,8 @@ EXTRA_DIST = \
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/pam.d
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/security/console.apps/
-	$(INSTALL) -m 644 pyjigdo.pam $(DESTDIR)$(sysconfdir)/pam.d/pyjigdo
-	$(INSTALL) -m 644 pyjigdo.console $(DESTDIR)$(sysconfdir)/security/console.apps/pyjigdo
+#	$(INSTALL) -m 644 pyjigdo.pam $(DESTDIR)$(sysconfdir)/pam.d/pyjigdo
+#	$(INSTALL) -m 644 pyjigdo.console $(DESTDIR)$(sysconfdir)/security/console.apps/pyjigdo
 
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/pam.d/pyjigdo

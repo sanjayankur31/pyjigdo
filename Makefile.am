@@ -47,6 +47,8 @@ clean:
 	find -type f -name "Makefile.in" -exec rm -f {} \;
 	find -type f -name "*.log" -exec rm -f {} \;
 	find -type f -name "pyjigdo-*.tar.gz" -exec mv -f {} .. \;
+	rm -f aclocal.m4 configure intltool-extract intltool-merge intltool-update po/POTFILES
+
 
 rpm: dist
 	@(rpmbuild -ta pyjigdo-$(PACKAGE_VERSION).tar.gz)
