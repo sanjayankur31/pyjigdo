@@ -40,7 +40,6 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/pyjigdo/*.pyo
 %{_bindir}/*
 %dir %{_sysconfdir}/pyjigdo
-%dir %{_sysconfdir}/pyjigdo/conf.d
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog

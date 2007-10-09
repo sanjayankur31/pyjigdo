@@ -1,8 +1,8 @@
 etcconfdir = $(sysconfdir)/pyjigdo/
 etcconf_DATA = pyjigdo.conf
 
-desktopdatadir = $(datadir)/applications/
-desktopdata_DATA = pyjigdo.desktop
+#desktopdatadir = $(datadir)/applications/
+#desktopdata_DATA = pyjigdo.desktop
 
 PYJIGDOCONFIG = \
 	pyjigdo.conf 
@@ -20,7 +20,7 @@ install-data-local:
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/pam.d/pyjigdo
 	rm -f $(DESTDIR)$(sysconfdir)/security/console.apps/pyjigdo
-	rm -f $(DESTDIR)$(datadir)/applications/pyjigdo.desktop
+#	rm -f $(DESTDIR)$(datadir)/applications/pyjigdo.desktop
 
 clean:
 	rm -f *~
