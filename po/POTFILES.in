@@ -1,3 +1,7 @@
 [encoding: UTF-8]
 pyjigdo.py
 pyjigdo/__init__.py
+pyjigdo/image.py
+pyjigdo/interfaces.py
+pyjigdo/parse.py
+pyjigdo/misc.py

@@ -1,5 +1,9 @@
 PYTHON_FILES = \
-    __init__.py
+    __init__.py \
+    image.py \
+    interfaces.py \
+    parse.py \
+    misc.py
 
 EXTRA_DIST = \
     $(PYTHON_FILES)

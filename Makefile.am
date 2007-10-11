@@ -48,6 +48,7 @@ clean:
 	find -type f -name "*.log" -exec rm -f {} \;
 	find -type f -name "pyjigdo-*.tar.gz" -exec mv -f {} .. \;
 	rm -f aclocal.m4 configure intltool-extract intltool-merge intltool-update po/POTFILES
+	rm -f pyjigdo/__init__.py
 
 
 rpm: dist
