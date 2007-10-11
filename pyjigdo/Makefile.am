@@ -6,7 +6,8 @@ PYTHON_FILES = \
     misc.py
 
 EXTRA_DIST = \
-    $(PYTHON_FILES)
+    $(PYTHON_FILES) \
+    __init__.py.in
 
 pydir = $(pythondir)/pyjigdo
 py_PYTHON = $(PYTHON_FILES)
