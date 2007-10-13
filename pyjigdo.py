@@ -288,14 +288,19 @@ if not user_specified_images and not options.download_all and not options.host_a
     while choosing_images:
         misc.printOut(jigdo_config.Images, 0)
         num_images = len(jigdo_config.Images)
-        image_choice = raw_input("What image would you like to download? [1-%s] " % num_images )
+        image_choice = raw_input("What image(s) would you like to download? [1-%s] " % num_images )
         if image_choice == "":
-            print "No images selected for download. Exiting."
-            sys.exit(1)
-        if int(image_choice) > num_images:
-            print "Image not found."
-        elif image_choice not in active_images:
-            active_images.append(image_choice)
+            print "You must select at least one image to download..."
+            continue
+        image_choices = image_choice.split(' ')
+        for choice in image_choices:
+            try:
+                if int(choice) > num_images:
+                    print "Image number %s not found." % choice
+                elif image_choice not in active_images:
+                    active_images.append(image_choice)
+            except ValueError:
+                print "Input %s is not a valid selection." % choice
         print "Currently going to download image(s): %s" % ", ".join(active_images)
         continue_selecting = raw_input("Would you like to select another image for download? [y/N] ")
         if continue_selecting.lower() not in ["y", "yes"]:
@@ -361,9 +366,9 @@ jigdo_config.buildMirrors()
 
 preferred_mirrors = []
 if options.base_download_mirror or options.updates_download_mirror:
-    # FIXME: This needs some magic. I think just pushing these into the front of our
-    # geo mirrorlist would be best. The we at least still offer the user a preference
-    # selection while preserving a fallback if the selected mirror is incomplete
+    # FIXME: This needs some magic. We can use preferred_mirrors as the array will
+    # preserve the selection order. preferred_mirrors are used first when trying to
+    # download a slice.
     pass
 else:
     if len(jigdo_config.mirror_fallback.keys()) > 0: print "\nJigdo Provided Mirror Sources:\n"
@@ -374,15 +379,18 @@ else:
     for mirror in jigdo_config.mirror_geo.keys():
         print "\t%s: '%s' - %s" % (mirror, jigdo_config.mirror_geo[mirror][0], jigdo_config.mirror_geo[mirror][1])
 
-    if len(jigdo_config.mirror_global.keys()) > 0: print "\nGlobal Mirrors (from mirror list):\n"
-    for mirror in jigdo_config.mirror_global.keys():
-        print "\t%s: '%s' - %s" % (mirror, jigdo_config.mirror_global[mirror][0], jigdo_config.mirror_global[mirror][1])
+    if len(jigdo_config.mirror_global.keys()) > 0:
+        print "\n\tNot showing %s global fallback mirrors. They will be scanned last.\n" % len(jigdo_config.mirror_global.keys())
+    # FIXME: If we can find a better way to display this info, we should. In a GUI it can be shown, but in the CLI it is
+    # just too much data.
+    #for mirror in jigdo_config.mirror_global.keys():
+    #    print "\t%s: '%s' - %s" % (mirror, jigdo_config.mirror_global[mirror][0], jigdo_config.mirror_global[mirror][1])
 
     user_chose_mirrors = raw_input("\nWould you like to select a specific mirror to download from? (Default: Use all, closest first) [y/N] ")
     if user_chose_mirrors.lower() in ["y", "yes"]:
         choosing_mirrors = True
         while choosing_mirrors:
-            mirror_choice = raw_input("What mirror would you like to use? [1-%s] " % jigdo_config.mirror_num)
+            mirror_choice = raw_input("What mirror(s) would you like to use? [1-%s] " % jigdo_config.mirror_num)
             # FIXME: Filter response to allow users to give more then one response at a time and not throw a traceback when
             # invalid input is given
             # Such: choices = mirror_choice.split(' ') ... then validate and select
