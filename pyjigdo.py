@@ -307,17 +307,13 @@ if not user_specified_images and not options.download_all and not options.host_a
     building_images = True
 elif options.download_all or options.host_all:
     print "Downloading/Hosting all images selected, adding all images..."
-    # don't use for image, because it overwrites namespace.
-    #for image in jigdo_config.Images:
-    for imagee in jigdo_config.Images:
-        active_images.append(imagee)
+    for image_id in jigdo_config.Images:
+        active_images.append(image_id)
 elif user_specified_images:
     print "Adding selected images to download..."
-    # don't use for image, because it overwrites namespace.
-    #for image in (options.download_image_numbers + options.host_image_numbers):
-    for imagee in (options.download_image_numbers + options.host_image_numbers):
-        if int(imagee) in jigdo_config.Images:
-            active_images.append(imagee)
+    for image_selection in (options.download_image_numbers + options.host_image_numbers):
+        if int(image_selection) in jigdo_config.Images:
+            active_images.append(image_selection)
         else:
             print "Image number %s not found, not adding." % image
     if len(active_images) < 1:
@@ -436,9 +432,9 @@ test_jobs = SimpleTestJobDesign(jigdo_config, template_slices, file_name)
 if building_images:
     # don't use for image, because it overwrites namespace.
     #for image in jigdo_config.Images.keys():
-    for imagee in jigdo_config.Images.keys():
-        if str(imagee) in active_images:
-            iso = jigdo_config.Images[imagee]
+    for selected_image in jigdo_config.Images.keys():
+        if str(selected_image) in active_images:
+            iso = jigdo_config.Images[selected_image]
             # FIXME: Support all [Image] metadata
             test_jobs.initISO(iso["Template-MD5Sum"], iso["Template"], iso["Filename"])
 
