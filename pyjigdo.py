@@ -297,8 +297,8 @@ if not user_specified_images and not options.download_all and not options.host_a
             try:
                 if int(choice) > num_images:
                     print "Image number %s not found." % choice
-                elif image_choice not in active_images:
-                    active_images.append(image_choice)
+                elif choice not in active_images:
+                    active_images.append(choice)
             except ValueError:
                 print "Input %s is not a valid selection." % choice
         print "Currently going to download image(s): %s" % ", ".join(active_images)

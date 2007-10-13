@@ -29,6 +29,9 @@ import re
 
 from ConfigParser import ConfigParser
 from interfaces import options
+from urlgrabber import urlread
+from urlgrabber.grabber import URLGrabError
+
 
 class CustomParser(ConfigParser):
     """ Custom class to make sure we preserve case. """
@@ -124,20 +127,28 @@ class jigdoDefinition:
             self.mirror_fallback[mirror_id] = [server_id, self.Servers[server_id]]
             mirror_id += 1
         try:
+            global_mirrorlist_urls = []
             for server_id in self.Mirrorlists.keys():
                 try:
                     data = urlread(self.Mirrorlists[server_id]).splitlines()
-                    global_data = urlread("%s&country=global" % self.Mirrorlists[server_id]).splitlines()
+                    global_mirrorlist_urls.append("%s&country=global" % self.Mirrorlists[server_id])
                     for data_item in data:
                         if not re.compile("#").search(data_item):
                             self.mirror_geo[mirror_id] = [server_id, data_item + "/"]
                             mirror_id += 1
+                except URLGrabError:
+                    print "Failed fetching mirror list from %s not adding mirrors from this source..." % self.Mirrorlists[server_id]
+            for mirror_url in global_mirrorlist_urls:
+                try:
+                    global_data = urlread(mirror_url).splitlines()
                     for data_item in global_data:
-                        if not (re.compile("#").search(data_item)) and not (data_item in data):
+                        if not (re.compile("#").search(data_item)) and not (data_item in self.mirror_geo.keys()):
                             self.mirror_global[mirror_id] = [server_id, data_item + "/"]
                             mirror_id += 1
                 except URLGrabError:
-                    print "Failed fetching mirror list from %s not adding mirrors from this source..." % self.Mirrorlists[server_id]
+                    print "Failed fetching mirror list from %s not adding mirrors from this source..." % mirror_url
+
+
         except AttributeError:
             print "No mirror lists defined, not building mirror lists."
         self.mirror_num = mirror_id - 1
