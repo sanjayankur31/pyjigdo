@@ -189,6 +189,8 @@ if options.host_image_numbers or options.host_all:
 
 
 # Make download_workdir absolute
+# FIXME: This might be breaking. I've seen some strange directory paths
+# being created, but don't blame this, yet.
 download_workdir = os.path.abspath(options.download_workdir)
 misc.check_directory(download_workdir)
 options.download_workdir = download_workdir
@@ -220,6 +222,7 @@ if options.show_info_exit:
 if options.download_image_numbers or options.host_image_numbers:
     user_specified_images = True
 
+# Ask the user if they would like to scan directories for the needed files, if not passed via CLI
 if options.scan_dirs:
     for directory in options.scan_dirs:
         full_path = os.path.abspath(directory)
@@ -232,9 +235,9 @@ if options.scan_dirs:
         print "\t%s" % directory
 else:
     adding_scan_dirs = True
+    scan_question = raw_input("Would you like to scan any directories for needed files? [y/N] ")
+    if scan_question.lower() not in ["y", "yes"]: adding_scan_dirs = False
     while adding_scan_dirs:
-        scan_question = raw_input("Would you like to scan any directories for needed files? [y/N] ")
-        if scan_question.lower() not in ["y", "yes"]: break
         scan_directory = raw_input("What directory would you like to scan? ")
         full_path = os.path.abspath(scan_directory)
         if not os.access(full_path, os.R_OK):
@@ -245,6 +248,7 @@ else:
         scan_add_more = raw_input("Would you like to add another directory to scan? [y/N] ")
         if scan_add_more.lower() not in ["y", "yes"]: adding_scan_dirs = False
 
+# Ask the user if they would like to scan ISO images for needed files, if not passed via CLI
 if options.scan_isos:
     for iso_file in options.scan_isos:
         full_path = os.path.abspath(iso_file)
@@ -259,9 +263,9 @@ if options.scan_isos:
         print "\t%s" % iso_file["iso"]
 else:
     adding_iso_images = True
+    scan_question = raw_input("Would you like to scan any iso images for needed files? [y/N] ")
+    if scan_question.lower() not in ["y", "yes"]: adding_iso_images = False
     while adding_iso_images:
-        scan_question = raw_input("Would you like to scan any iso images for needed files? [y/N] ")
-        if scan_question.lower() not in ["y", "yes"]: break
         scan_directory = raw_input("What ISO image would you like to scan? ")
         full_path = os.path.abspath(scan_directory)
         if not os.access(full_path, os.R_OK):
@@ -278,9 +282,6 @@ else:
         if scan_add_more.lower() not in ["y", "yes"]: adding_iso_images = False
 
 # Ask the user what images they want to download
-# FIXME: So, this is where we start the interactive process. If they have not defined
-# what|where to download, we need to ask them.
-
 active_images = []
 if not user_specified_images and not options.download_all and not options.host_all:
     choosing_images = True
