@@ -139,8 +139,6 @@ class SimpleTestJobDesign:
 
     def scan_dir(self, directory):
         """ Scan a directory for local files that wont need to be downloaded. """
-        # FIME: We might be able to scan for all active templates at one time,
-        # otherwise we end up with more I/O from md5 checking then we would prefer.
         for iso_image in self.images:
             misc.check_directory(os.path.dirname(iso_image.location))
             print "Scanning directory %s for files needed by %s..." % (directory, iso_image.location)
