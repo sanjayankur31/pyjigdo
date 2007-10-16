@@ -126,7 +126,8 @@ class ISOImage:
         """ Check to make sure all needed files have been downloaded. """
         #for image_slice in self.image_slices:
         #    if not image_slice: return False
-        if options.debug: print "Checking Image %s against sum %s" % (self.location, self.image_sum)
+        if options.debug:
+            print "Checking Image %s against sum %s" % (self.location, self.image_sum)
         if not compare_sum(self.location, self.image_sum):
             return False
         return True
@@ -145,7 +146,6 @@ class ISOImage:
         template_data = run_command(["jigdo-file", "ls", "--template", self.template], inshell=True)
         md5_sum = [line.split()[2] for line in template_data
             if line.startswith('image-info')]
-        print template_data
         if options.debug: print "Image %s's sum is reported as %s..." % (self.location, md5_sum)
         self.image_sum = md5_sum
 
