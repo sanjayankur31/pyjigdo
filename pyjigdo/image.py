@@ -145,7 +145,6 @@ class ISOImage:
         template_data = run_command(["jigdo-file", "ls", "--template", self.template], inshell=True)
         md5_sum = [line.split()[2] for line in template_data
             if line.startswith('image-info')]
-        print template_data
         if options.debug: print "Image %s's sum is reported as %s..." % (self.location, md5_sum)
         self.image_sum = md5_sum
 
