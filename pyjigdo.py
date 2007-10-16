@@ -106,7 +106,7 @@ class SimpleTestJobDesign:
         else:
             template_url = template
         try:
-            local_template = os.path.join(options.download_workdir, "images", template)
+            local_template = os.path.join(options.download_workdir, "images", "%s.template" % file_name)
             iso_location = os.path.join(options.download_workdir, "images", file_name)
             misc.check_directory(os.path.dirname(local_template))
             misc.check_directory(os.path.dirname(iso_location))
