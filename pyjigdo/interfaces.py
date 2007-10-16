@@ -45,7 +45,7 @@ general_group.add_option("--info", dest="show_info_exit", action="store_true", d
 general_group.add_option("--debug", dest="debug", action="store_true", default=False,
                  help="Enable debug printing.")
 general_group.add_option("--fallback", dest="fallback_number", action="store", default=5,
-                 help="Number of public mirrors to try before using a fallback mirror. (Default: 5)")
+                 help="Number of public mirrors to try before using a fallback mirror. (Default: 5)", metavar="[number of tries]")
 
 #
 ## Downloading Options
@@ -98,13 +98,13 @@ hosting_group.add_option("--host-image", dest="host_image_numbers", default=[], 
 hosting_group.add_option("--host-all", dest="host_all", action="store_true", default=False,
                  help="Host all images defined in jigdo.")
 hosting_group.add_option("--host-dir", dest="host_directory", action="store", default="",
-                 help="Directory to download data to.")
+                 help="Directory to download data to.", metavar="[directory]")
 
 #
 ## Generation Options
 ## Purpose: Allow a user to generate jigdo configs and templates.
 ## FIXME: Move code from jigdo.py to here.
-generation_group = parser.add_option_group(_("Generation Options"))
+#generation_group = parser.add_option_group(_("Generation Options"))
 
 # Parse Options
 (options, args) = parser.parse_args()

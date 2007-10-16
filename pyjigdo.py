@@ -341,14 +341,20 @@ if hosting_images:
     choosing_servers = True
     while choosing_servers:
         num_servers = len(server_ids)
-        server_choice = raw_input("\nWhat server ID would you like to download? [1-%s] (Default: All) " % num_servers )
+        server_choice = raw_input("\nWhat server ID(s) would you like to download? [1-%s] (Default: All) " % num_servers )
         if server_choice == "":
             for sid in server_ids:
                 mirror_server_ids.append(server_ids[sid])
-        elif int(server_choice) > num_servers:
-            print "Source not found."
-        elif server_ids[server_choice] not in mirror_server_ids:
-            mirror_server_ids.append(server_ids[server_choice])
+            break
+        server_choices = server_choice.split(' ')
+        for choice in server_choices:
+            try:
+                if int(choice) > num_servers:
+                    print "Source number %s not found." % choice
+                elif server_ids[choice] not in mirror_server_ids:
+                    mirror_server_ids.append(server_ids[choice])
+            except ValueError:
+                print "Input %s is not a valid selection." % choice
         print "Currently going to host source(s): %s" % ", ".join(mirror_server_ids)
         continue_selecting = raw_input("Would you like to select another source for hosting? [y/N] ")
         if continue_selecting.lower() not in ["y", "yes"]:
@@ -381,6 +387,7 @@ else:
 
     if len(jigdo_config.mirror_global.keys()) > 0:
         print "\n\tNot showing %s global fallback mirrors. They will be scanned last.\n" % len(jigdo_config.mirror_global.keys())
+
     # FIXME: If we can find a better way to display this info, we should. In a GUI it can be shown, but in the CLI it is
     # just too much data.
     #for mirror in jigdo_config.mirror_global.keys():
@@ -391,13 +398,15 @@ else:
         choosing_mirrors = True
         while choosing_mirrors:
             mirror_choice = raw_input("What mirror(s) would you like to use? [1-%s] " % jigdo_config.mirror_num)
-            # FIXME: Filter response to allow users to give more then one response at a time and not throw a traceback when
-            # invalid input is given
-            # Such: choices = mirror_choice.split(' ') ... then validate and select
-            if int(mirror_choice) > jigdo_config.mirror_num:
-                print "Invalid mirror number."
-            elif mirror_choice not in preferred_mirrors:
-                preferred_mirrors.append(mirror_choice)
+            mirror_choices = server_choice.split(' ')
+            for choice in mirror_choices:
+                try:
+                    if int(choice) > jigdo_config.mirror_num:
+                        print "Mirror number %s not found." % choice
+                    elif choice not in preferred_mirrors:
+                        preferred_mirrors.append(choice)
+                except ValueError:
+                    print "Input %s is not a valid selection." % choice
             print "Currently going to download from: %s" % ", ".join(preferred_mirrors)
             continue_selecting = raw_input("Would you like to select another mirror? [y/N] ")
             if continue_selecting.lower() not in ["y", "yes"]:
