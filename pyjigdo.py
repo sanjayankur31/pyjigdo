@@ -78,11 +78,17 @@ class SimpleTestJobDesign:
         for iso_image in self.images:
             ## Ok, we have iso_image which is an ISOImage object ready to go. Just an example.
             ## We would want this to go into a queue and be blown away by threads ;-)
-            print "Downloading needed slices for %s..." % iso_image.location
-            num_download = len(iso_image.image_slices.keys()) + 1
-            for num, image_slice in enumerate(iso_image.image_slices.iterkeys()):
-                if not iso_image.image_slices[image_slice]:
-                    iso_image.downloadSlice(image_slice, num+1, num_download, self.jigdo_config, self.template_slices, self.file_name)
+            if not iso_image.finished:
+                print "Downloading needed slices for %s..." % iso_image.location
+                num_download = len(iso_image.image_slices.keys()) + 1
+                for num, image_slice in enumerate(iso_image.image_slices.iterkeys()):
+                    if not iso_image.image_slices[image_slice]:
+                        iso_image.downloadSlice(image_slice,
+                                                num+1,
+                                                num_download,
+                                                self.jigdo_config,
+                                                self.template_slices,
+                                                self.file_name)
 
         # FIXME: Put it all together
         # We need to run some checks to make sure we have all the slices, maybe md5sum
@@ -481,11 +487,12 @@ if building_images:
     for isoimage in test_jobs.images:
         print "Image defined by template %s is located %s" % (isoimage.template, isoimage.location)
         print "Checking if sums match..."
-        isoimage.getImageSum()
         if isoimage.checkImage():
-            print "Sums match. Image is complete."
+            print "Sums match. Image %s is complete." % isoimage.location
+            isoimage.finished = True
         else:
-            print "Sums don't match. Image is not complete."
+            print "Sums don't match. Image %s is not complete." % isoimage.location
+            isoimage.finished = False
 
 if hosting_images:
     # FIXME: Make it so this will actually scan stuff.

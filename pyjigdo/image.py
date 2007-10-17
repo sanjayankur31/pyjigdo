@@ -112,6 +112,14 @@ class ISOImage:
         self.finished = False
         self.location = location
         self.download = False
+        self.getImageSum()
+        if os.path.isfile(self.location):
+            print "Image %s is already present, checking if complete..." % self.location
+            if self.checkImage():
+                print "Image %s is complete, wont download." % self.location
+                self.finished = True
+            else:
+                print "Image %s is not complete, will download." % self.location
 
     def addSlices(self, slice_list):
         """ Add the given md5 sums to the list of files needed by this ISO image. """
@@ -119,13 +127,11 @@ class ISOImage:
             self.image_slices[image_slice_md5] = False
 
     def downloadSlice(self, slice_md5, current_num, num_download, jigdo_config, template_slices, file_name):
-        """ Find the SliceObject, download it if needed, and then mark as done. """
+        """ Call download_slice to get our slice for us. """
         download_slice(slice_md5, current_num, num_download, jigdo_config, template_slices, file_name, iso_image=self)
 
     def checkImage(self):
-        """ Check to make sure all needed files have been downloaded. """
-        #for image_slice in self.image_slices:
-        #    if not image_slice: return False
+        """ Check to see if image is built. """
         if options.debug:
             print "Checking Image %s against sum %s" % (self.location, self.image_sum)
         if not compare_sum(self.location, self.image_sum):
@@ -146,8 +152,8 @@ class ISOImage:
         template_data = run_command(["jigdo-file", "ls", "--template", self.template], inshell=True)
         md5_sum = [line.split()[2] for line in template_data
             if line.startswith('image-info')]
-        if options.debug: print "Image %s's sum is reported as %s..." % (self.location, md5_sum)
-        self.image_sum = md5_sum
+        if options.debug: print "Image %s's sum is reported as %s..." % (self.location, md5_sum[0])
+        self.image_sum = md5_sum[0]
 
     def checkSlices(self, template_slices):
         """ Check what slices have been merged into the image, and update the slice status. """

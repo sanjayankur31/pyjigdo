@@ -154,8 +154,8 @@ def run_command(command, rundir=None, inshell=False, env=None, stdout=subprocess
     for item in p.stdout.read().split('\n'):
         ret.append(item)
     p.stdout.close()
-    if options.debug:
-        print "\n==== %s Output ====\n%s\n==== End Output ====\n" % (' '.join(command), '\n'.join(ret))
+    #if options.debug:
+    #    print "\n==== %s Output ====\n%s\n==== End Output ====\n" % (' '.join(command), '\n'.join(ret))
     return ret
 
 #    p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=inshell, bufsize=1)
@@ -206,7 +206,7 @@ def compare_sum(target, base64_sum):
     base64_calc = base64.urlsafe_b64encode(calc)
     eq = re.compile('=')
     base64_strip = eq.sub('', base64_calc)
-    if options.debug: "Checking %s against %s..." % (base64_strip, base64_sum)
+    if options.debug: print "Checking %s against %s..." % (base64_strip, base64_sum)
     if base64_strip == base64_sum:
         return True
     else:
