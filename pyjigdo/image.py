@@ -153,19 +153,46 @@ class ISOImage:
         """ Check what slices have been merged into the image, and update the slice status. """
         template_tmp_file = self.location + ".tmp"
         if not os.path.isfile(template_tmp_file):
-            if self.checkImage():
-                for slice_md5 in self.image_slices:
-                    template_slices.slices[slice_md5].finished = True
-                    self.image_slices[slice_md5] = True
-            else:
-                return True
+            # The goal here was to have the logic, if we don't have a tmp file anymore, we must have been able to create the image
+            # using all local data, let's check if that is the case:
+            # FIXME: Don't assume self.location is a file if template_tmp_file is not. self.checkImage() would do this anyways, but
+            # we run into the issue of template_slices.slices[slice_md5].finished = True again, though I'm not sure it's even an issue.
+            # For now, i've just commented it out with a printed warning the image is done, rather then mathmatically checking.
+            #if self.checkImage():
+            #    for slice_md5 in self.image_slices:
+            #        template_slices.slices[slice_md5].finished = True
+            #        self.image_slices[slice_md5] = True
+            #else:
+            #    return True
+            # This should only happen if our iso was sucessfully completed with the pre-download scans.
+            if options.debug: print "\n%s is not a file!? Does that mean %s is done?!\n" % (template_tmp_file, self.location)
         template_data = run_command(["jigdo-file", "ls", "--template", template_tmp_file], inshell=True)
+        # This is supposed to filter us a list of files that the template is reporting as merged.
+        # The "template" is template_tmp_file which is basically the iso in the making. It will report
+        # have-file and need-file. We need to still download need-file and not download have-file.
+	# Since our directory scans are what would have changed a slice to have-file we need to update
+        # our python objects to state the files are downloaded. I do, now, see how  template_slices.slices[slice_md5].finished = True
+        # might cause issues when downloading multiple images :-/ but our current use case is only downloading one.
         slices = [line.split()[3] for line in template_data
             # FIXME: What is this!?
+            # This was added by ignacio. It should create an array of lines that start with have-file.. aka filter for lines that
+            # are reported by the tmp iso image where the slice is in the state "have-file". This used to be template_data.splitlines()
+            # and then regex match for lines that are "have-file", this seems more pythonfooish.. maybe it doesn't work as expected?
             if line.startswith('have-file')]
+        if options.debug: print "\n%s slices reported as downloaded: %s" % (len(slices), ", ".join(slices)) 
+        slices_needed = [line.split()[3] for line in template_data
+            if line.startswith('need-file')]
+        if options.debug: print "\n%s slices still needed: %s" % (len(slices_needed), ", ".join(slices_needed)) 
         for slice_md5 in slices:
+            # Make sure we are not working on something that doesn't exist:
             if slice_md5 in template_slices.slices:
-                template_slices.slices[slice_md5].finished = True
+                # FIXME: Figure out how to gracefully tell all iso_image objects that we have a file downloaded. Problem being,
+                # if a file was added to an image from a local location, we'll need to make sure it's available for all images.
+                # (which it should be, because scan_dir is run for all iso_image objects...
+                #template_slices.slices[slice_md5].finished = True
+                # FIXME: This change is to just update the single iso_image object to be aware we don't need to download the files
+                # the temp iso image already has (aka are marked "have-file")
+                # Tell the downloader this slice is not needing to be downloaded, it was merged in during an earlier operation:
                 self.image_slices[slice_md5] = True
         return True
 
