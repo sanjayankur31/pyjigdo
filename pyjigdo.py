@@ -462,6 +462,14 @@ if building_images:
         iso_image_file.mount()
         test_jobs.scan_dir(iso_image_file.location)
         iso_image_file.umount()
+    """for iso_image in test_jobs.images:
+            ## Ok, we have iso_image which is an ISOImage object ready to go. Just an example.
+            ## We would want this to go into a queue and be blown away by threads ;-)
+            print "Downloading needed slices for %s..." % iso_image.location
+            num_download = len(iso_image.image_slices.keys()) + 1
+            for num, image_slice in enumerate(iso_image.image_slices.iterkeys()):
+                print iso_image.image_slices[image_slice]"""
+    # ^ = all false... so it's after here
     test_jobs.checkISOslices()
 
     test_jobs.run(options.download_threads)

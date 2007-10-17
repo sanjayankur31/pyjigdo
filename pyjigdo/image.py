@@ -161,6 +161,7 @@ class ISOImage:
                 return True
         template_data = run_command(["jigdo-file", "ls", "--template", template_tmp_file], inshell=True)
         slices = [line.split()[3] for line in template_data
+            # FIXME: What is this!?
             if line.startswith('have-file')]
         for slice_md5 in slices:
             if slice_md5 in template_slices.slices:
@@ -180,7 +181,8 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
     if os.path.isfile(local_location):
         if compare_sum(local_location, slice_object.slice_sum):
             print "[%s/%s] %s is complete, skipping." % (current_num, num_download, local_location)
-            if iso_image: iso_image.image_slices[slice_md5] = True
+            if iso_image:
+                iso_image.image_slices[slice_md5] = True
             slice_object.finished = True
             slice_object.location = local_location
             return
@@ -191,7 +193,8 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
         try:
             print "[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location)
             urlgrab(url, filename=local_location, progress_obj=TextMeter())
-            if iso_image: iso_image.image_slices[slice_md5] = True
+            if iso_image:
+                iso_image.image_slices[slice_md5] = True
             slice_object.finished = True
             slice_object.location = local_location
             source.fallback_urls[url] = "200"
