@@ -470,7 +470,10 @@ if building_images:
             for num, image_slice in enumerate(iso_image.image_slices.iterkeys()):
                 print iso_image.image_slices[image_slice]"""
     # ^ = all false... so it's after here
+    # This is actually doing what it's supposed to do.
+    # It checks and updates our python objects based on what all our scan_dir() calls were able to do.
     test_jobs.checkISOslices()
+    # At this point, we should be ready to just download what the scan_dir() calls could not find.
 
     test_jobs.run(options.download_threads)
 
