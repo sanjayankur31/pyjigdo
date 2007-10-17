@@ -121,9 +121,10 @@ class SimpleTestJobDesign:
             if not template_local:
                 print "Fetching template %s" % template_url
                 urlgrab(template_url, filename=local_template, progress_obj=TextMeter())
-            isoimage = image.ISOImage(local_template, template_md5, iso_location)
-            isoimage.download = True
-            self.images.append(isoimage)
+            if template_local or misc.compare_sum(local_template, template_md5):
+                isoimage = image.ISOImage(local_template, template_md5, iso_location)
+                isoimage.download = True
+                self.images.append(isoimage)
         except URLGrabError:
             print "Failed fetching %s, not building image..." % template_url
 

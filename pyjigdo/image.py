@@ -220,15 +220,18 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
         try:
             print "[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location)
             urlgrab(url, filename=local_location, progress_obj=TextMeter())
-            if iso_image:
-                iso_image.image_slices[slice_md5] = True
-            slice_object.finished = True
-            slice_object.location = local_location
-            source.fallback_urls[url] = "200"
-            break
+            if compare_sum(local_location, slice_object.slice_sum):
+                if iso_image:
+                    iso_image.image_slices[slice_md5] = True
+                slice_object.finished = True
+                slice_object.location = local_location
+                source.fallback_urls[url] = "200"
+                break
+            else:
+                source.fallback_urls[url] = "404"
         except URLGrabError:
             print "Failed downloading %s (will try backup urls later)..." % url
-            pass
+            source.fallback_urls[url] = "404"
     download_found = False
     for source in slice_object.sources:
         slice_object_finished = False
@@ -243,8 +246,12 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                     try:
                         print "[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location)
                         urlgrab(url, filename=local_location, progress_obj=TextMeter())
-                        download_found = True
-                        break
+                        if compare_sum(local_location, slice_object.slice_sum):
+                            download_found = True
+                            break
+                        else:
+                            source.geo_urls[url] = "404"
+                            remaining_tries -= 1
                     except (URLGrabError, KeyboardInterrupt):
                         source.geo_urls[url] = "404"
                         remaining_tries -= 1
@@ -253,8 +260,12 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                     try:
                         print "[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location)
                         urlgrab(url, filename=local_location, progress_obj=TextMeter())
-                        download_found = True
-                        break
+                        if compare_sum(local_location, slice_object.slice_sum):
+                            download_found = True
+                            break
+                        else:
+                            source.global_urls[url] = "404"
+                            remaining_tries -= 1
                     except (URLGrabError, KeyboardInterrupt):
                         source.global_urls[url] = "404"
                         remaining_tries -= 1
@@ -263,8 +274,11 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                     try:
                         print "[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location)
                         urlgrab(url, filename=local_location, progress_obj=TextMeter())
-                        download_found = True
-                        break
+                        if compare_sum(local_location, slice_object.slice_sum):
+                            download_found = True
+                            break
+                        else:
+                            source.fallback_urls[url] = "404"
                     except (URLGrabError, KeyboardInterrupt):
                         source.fallback_urls[url] = "404"
         else:
