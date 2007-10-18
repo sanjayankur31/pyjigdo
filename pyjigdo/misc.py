@@ -206,7 +206,8 @@ def compare_sum(target, base64_sum):
     base64_calc = base64.urlsafe_b64encode(calc)
     eq = re.compile('=')
     base64_strip = eq.sub('', base64_calc)
-    if options.debug: print "Checking %s against %s..." % (base64_strip, base64_sum)
+    if options.debug:
+        print _("Checking %s against %s..." % (base64_strip, base64_sum))
     if base64_strip == base64_sum:
         return True
     else:
@@ -245,7 +246,7 @@ def getFileName(options_instance):
         jigdo_source = urlgrab(options_instance.jigdo_source, filename=jigdo_local_file,
         	progress_obj=TextMeter())
     except URLGrabError:
-        print "Unable to fetch %s" % options_instance.jigdo_source
+        print _("Unable to fetch %s" % options_instance.jigdo_source)
         sys.exit(1)
     return file_name, jigdo_local_file, jigdo_source
 

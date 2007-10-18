@@ -83,12 +83,14 @@ class SimpleTestJobDesign:
                 num_download = len(iso_image.image_slices.keys()) + 1
                 for num, image_slice in enumerate(iso_image.image_slices.iterkeys()):
                     if not iso_image.image_slices[image_slice]:
-                        iso_image.downloadSlice(image_slice,
-                                                num+1,
-                                                num_download,
-                                                self.jigdo_config,
-                                                self.template_slices,
-                                                self.file_name)
+                        while not iso_image.downloadSlice(image_slice,
+                                                      num+1,
+                                                      num_download,
+                                                      self.jigdo_config,
+                                                      self.template_slices,
+                                                      self.file_name):
+                            # Cheap hack to make it run until ^ works
+                            pass
 
         # FIXME: Put it all together
         # We need to run some checks to make sure we have all the slices, maybe md5sum
@@ -96,6 +98,7 @@ class SimpleTestJobDesign:
         # after we feed the downloaded data to jigdo, it rejects it and we want to check
         # for ourselves. The md5 infrastructure is here for when we start moving away from
         # jigdo-file for actually putting things back together.
+        # 20071018: Checking MD5 is now done (part of download_slice itself)
         
         # Have jigdo-file start stuffing data where it needs to go.
         self.scan_dir(self.jigdo_config.cache_dir)
@@ -509,19 +512,14 @@ if hosting_images:
         counter += 1
         image_slice_object = template_slices.slices[image_slice_sum]
         if image_slice_object.server_id in mirror_server_ids:
-            misc.download_slice(image_slice_object.slice_sum, counter, num_slices, 
-                           jigdo_config, template_slices, file_name,
-                           local_dir=options.host_directory)
+            while not image.download_slice(image_slice_object.slice_sum, counter, num_slices, 
+                                           jigdo_config, template_slices, file_name,
+                                           local_dir=options.host_directory):
+                # Cheap hack to make it run until ^ works
+                pass
         else:
             print "[%s/%s] %s not found via selected server id(s), not downloading..." % (counter, num_slices, image_slice_object.file_name)
     print "\nAll found files downloaded to %s." % options.host_directory
-
-print "\nThanks for using the alpha version of pyjigdo.\n"
-
-
-
-
-
 
 
 

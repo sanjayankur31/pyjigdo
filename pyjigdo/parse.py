@@ -32,6 +32,8 @@ from interfaces import options
 from urlgrabber import urlread
 from urlgrabber.grabber import URLGrabError
 
+import rhpl.translate as translate
+from rhpl.translate import _, N_
 
 class CustomParser(ConfigParser):
     """ Custom class to make sure we preserve case. """
@@ -57,7 +59,7 @@ class jigdoDefinition:
         self.jigdo_url = ""
         self.scan_dirs = []
         self.scan_isos = []
-        print "Reading jigdo configuration..."
+        print _("Reading jigdo configuration...")
         self.parse()
         
     def parse(self):
@@ -69,7 +71,7 @@ class jigdoDefinition:
         toSearch = re.compile('(\n\[Image\].*\[)', re.DOTALL)
         content = self.definition_file.read()
         if not content:
-            print 'You have supplied an emtpy file, valid jigsaw definition required.'
+            print _('You have supplied an emtpy file, valid jigsaw definition required.')
             return False
         matches = re.search(toSearch, content)
         matchedString = matches.string[matches.span()[0]+1:matches.span()[1]-1]
