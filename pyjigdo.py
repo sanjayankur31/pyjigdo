@@ -168,6 +168,7 @@ class SimpleTestJobDesign:
 
 building_images = False
 hosting_images = False
+generating_images = False
 
 ## FIXME: Here we want to check if we are given enough information by the user,
 ## or if we are going to need to go interactive to answer more questions.
@@ -196,6 +197,57 @@ if options.download_image_numbers or options.download_all:
 if options.host_image_numbers or options.host_all:
     hosting_images = True
 
+if options.iso_image_locations:
+    generating_images = True
+
+if generating_images and (building_images or hosting_images):
+    print "\n\tYou can not generate images at the same time as hosting or building yet. Sorry.\n"
+    sys.exit(1)
+
+if generating_images:
+    # FIXME: This requires both repos be specified. This also goes back to having a better way
+    # to get this data from the user
+    for mirror_location in (options.base_local_mirror, options.updates_local_mirror):
+        if not os.access(mirror_location, os.R_OK):
+            if mirror_location == "":
+                print "\n\tLocal mirrors must be specified. Use --local-mirror-base and --local-mirror-updates\n"
+            else:
+                print "\n\tMirror location %s is not accessible. Exiting.\n" % mirror_location
+            sys.exit(1)
+    # FIXME: Most likely, we would want a dict we can remove elements from if not accessible and
+    # just warn the user, not exit.
+    for iso_image_file in options.iso_image_locations:
+        if not os.access(iso_image_file, os.R_OK):
+            print "\n\tISO % is not accessible. Exiting.\n" % iso_image_file
+            sys.exit(1)
+    if options.generation_directory != "":
+        misc.check_directory(options.generation_directory)
+    else:
+        print "\n\tGeneration directory required. Use --generation-dir\n"
+        sys.exit(1)
+
+    # FIXME: This is a total hack. (The hack being just sticking this here and then
+    # exiting after done.
+
+    # FIXME: This needs better juju
+    jigdo_file_name = os.path.join(options.generation_directory, options.jigdo_name + '.jigdo')
+    for iso_image_file in options.iso_image_locations:
+        init_jigdo_location_command = "/bin/touch %s" % jigdo_file_name
+        misc.run_command(init_jigdo_location_command)
+        generation_command = "/usr/bin/jigdo-file make-template --image=%s %s/ %s/ --label %s=%s --label %s=%s --jigdo=%s --template=%s --no-servers-section --force --merge=%s"
+        misc.run_command(generation_command % (iso_image_file,
+                        options.base_local_mirror,
+                        options.updates_local_mirror,
+                        options.base_local_label,
+                        options.base_local_mirror,
+                        options.updates_local_label,
+                        options.updates_local_mirror,
+                        jigdo_file_name,
+                        os.path.join(options.generation_directory, iso_image_file + '.template'),
+                        jigdo_file_name
+                        ))
+    print "All done. Jigdo data is in %s" % options.generation_directory
+    sys.exit(1)
 
 
 # Make download_workdir absolute
@@ -520,6 +572,4 @@ if hosting_images:
         else:
             print "[%s/%s] %s not found via selected server id(s), not downloading..." % (counter, num_slices, image_slice_object.file_name)
     print "\nAll found files downloaded to %s." % options.host_directory
-
-
 

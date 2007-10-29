@@ -144,6 +144,7 @@ def run_command(command, rundir=None, inshell=False, env=None, stdout=subprocess
         rundir = options.download_workdir
 
     check_directory(rundir)
+    if options.debug: print "Running command '%s'" % command
 
     ret = []
     p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False)
@@ -178,7 +179,7 @@ def check_directory(directory):
     if not os.access(directory, os.R_OK):
         try:
             os.makedirs(directory)
-        except:
+        except OSError:
             print _("Directory %s could not be created. Aborting" % directory)
             sys.exit(1)
 
