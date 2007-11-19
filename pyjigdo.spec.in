@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc README NEWS AUTHORS COPYING TODO
+%doc %{_mandir}/man5/*
+%doc %{_mandir}/man8/*
 %dir %{python_sitelib}/pyjigdo
 %{python_sitelib}/pyjigdo/*.py
 %{python_sitelib}/pyjigdo/*.pyc

@@ -19,6 +19,7 @@ DISTCLEANFILES =           \
 
 SUBDIRS =                  \
     conf                   \
+    doc                    \
     pyjigdo                \
     po
 
