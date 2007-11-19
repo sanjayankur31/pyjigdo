@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 # Copyright 2007 Fedora Unity
 #
@@ -6,7 +5,6 @@
 # Jeroen van Meeuwen <kanarip a fedoraunity.org>
 # Ignacio Vazquez-Abrams <ivazqueznet+pyjigdo a gmail.com>
 # Stewart Adam <s.adam a diffingo.com>
-
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
