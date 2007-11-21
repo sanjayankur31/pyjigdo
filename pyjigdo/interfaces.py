@@ -98,7 +98,7 @@ hosting_group.add_option("--host-all", dest="host_all", action="store_true", def
                  help="Host all images defined in jigdo.")
 hosting_group.add_option("--host-data-dir", dest="host_data_directory", action="store", default="",
                  help="Directory to download data to.", metavar="[directory]")
-hosting_group.add_option("--host-templates-dir", dest="host_template_directory", action="store", default="",
+hosting_group.add_option("--host-templates-dir", dest="host_templates_directory", action="store", default="",
                  help="Directory to download templates to.", metavar="[directory]")
 
 
