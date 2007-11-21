@@ -184,11 +184,11 @@ if options.host_image_numbers:
     sys.exit(1)
 
 if options.host_all and (options.host_data_directory == ""):
-    print "\n\tYou must select a location to host the data defined in this jigdo. Use --host-dir\n"
+    print "\n\tYou must select a location to host the data defined in this jigdo. Use --host-data-dir\n"
     sys.exit(1)
 
 if options.host_all and (options.host_templates_directory == ""):
-    print "\n\tYou must select a location to host the data defined in this jigdo. Use --host-dir\n"
+    print "\n\tYou must select a location to host the data defined in this jigdo. Use --host-templates-dir\n"
     sys.exit(1)
 
 if (options.host_image_numbers or options.host_all or (options.host_data_directory != "") or (options.host_templates_directory != "")) and (options.download_image_numbers or options.download_all):
