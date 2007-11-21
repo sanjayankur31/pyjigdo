@@ -27,8 +27,15 @@ here.
 import rhpl.translate as translate
 from rhpl.translate import _, N_
 
+epilog = """pyJigdo is a Fedora Unity product. For more information about pyJigdo, visit
+        http://pyjigdo.org/"""
+
 from optparse import OptionParser
-parser = OptionParser()
+try:
+    parser = OptionParser(epilog=epilog)
+except:
+    parser = OptionParser()
+
 
 #
 ## Information Options
@@ -70,7 +77,7 @@ download_group.add_option("--download-mirror-updates", dest="updates_download_mi
 #                 help="Force caching of files off. This might cause the same file to be downloaded more then once but will use less HDD space while running.")
 
 download_group.add_option("--threads", dest="download_threads", action="store", default="2",
-                 help="Number of threads to use when downloading.", metavar="[number]")
+                 help="Number of threads to use when downloading. (Not in use yet)", metavar="[number]")
 download_group.add_option("--workdir", dest="download_workdir", action="store", default="/var/tmp/pyjigdo",
                  help="Directory to do work in.", metavar="[directory]")
 
@@ -105,24 +112,24 @@ hosting_group.add_option("--host-templates-dir", dest="host_templates_directory"
 #
 ## Generation Options
 ## Purpose: Allow a user to generate jigdo configs and templates.
-generation_group = parser.add_option_group(_("Generation Options"))
-generation_group.add_option("--iso-image", dest="iso_image_locations", default=[], action="append", type="str",
-                 help="Build jigdo for given ISO image.", metavar="[image location]")
+#generation_group = parser.add_option_group(_("Generation Options"))
+#generation_group.add_option("--iso-image", dest="iso_image_locations", default=[], action="append", type="str",
+#                 help="Build jigdo for given ISO image.", metavar="[image location]")
 # FIXME: Any creative ways to take this data and not limit to just two repos?
 # We need a way to be able to say "ISO 1 needs repo 1 and repo 2 found here and there with labels 1 and 2"
 # What I've done here will require a command to pyjigdo per arch, kinda clunky
-generation_group.add_option("--local-mirror-base", dest="base_local_mirror", action="store", default="",
-                 help="Find base files from given local mirror.", metavar="[local location for base files]")
-generation_group.add_option("--local-mirror-updates", dest="updates_local_mirror", action="store", default="",
-                 help="Find updates files from given local mirror.", metavar="[local location for updates files]")
-generation_group.add_option("--mirror-base-label", dest="base_local_label", action="store", default="Base",
-                 help="Label for local mirror source 'base'. Default 'Base'", metavar="[label]")
-generation_group.add_option("--mirror-updates-label", dest="updates_local_label", action="store", default="Updates",
-                 help="Label for local mirror source 'updates'. Default 'Updates'", metavar="[label]")
-generation_group.add_option("--generation-dir", dest="generation_directory", action="store", default="",
-                 help="Directory to dump generated jigdo(s) into.", metavar="[directory]")
-generation_group.add_option("--jigdo-name", dest="jigdo_name", action="store", default="pyjigdo-generated",
-                 help="Name to give this jigdo. Result will be 'name'.jigdo", metavar="[name]")
+#generation_group.add_option("--local-mirror-base", dest="base_local_mirror", action="store", default="",
+#                 help="Find base files from given local mirror.", metavar="[local location for base files]")
+#generation_group.add_option("--local-mirror-updates", dest="updates_local_mirror", action="store", default="",
+#                 help="Find updates files from given local mirror.", metavar="[local location for updates files]")
+#generation_group.add_option("--mirror-base-label", dest="base_local_label", action="store", default="Base",
+#                 help="Label for local mirror source 'base'. Default 'Base'", metavar="[label]")
+#generation_group.add_option("--mirror-updates-label", dest="updates_local_label", action="store", default="Updates",
+#                 help="Label for local mirror source 'updates'. Default 'Updates'", metavar="[label]")
+#generation_group.add_option("--generation-dir", dest="generation_directory", action="store", default="",
+#                 help="Directory to dump generated jigdo(s) into.", metavar="[directory]")
+#generation_group.add_option("--jigdo-name", dest="jigdo_name", action="store", default="pyjigdo-generated",
+#                 help="Name to give this jigdo. Result will be 'name'.jigdo", metavar="[name]")
 
 
 # Parse Options
