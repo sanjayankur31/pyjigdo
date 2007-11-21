@@ -361,7 +361,7 @@ if not user_specified_images and not options.download_all and not options.host_a
         image_choice_filter = image_choice.replace(',', ' ')
         image_choices = image_choice_filter.split(' ')
         for choice in image_choices:
-            if choice == ' ': continue
+            if choice == '': continue
             try:
                 if int(choice) > num_images:
                     print "Image number %s not found." % choice
@@ -417,7 +417,7 @@ if hosting_images:
         server_choice_filter = server_choice.replace(',', ' ')
         server_choices = server_choice_filter.split(' ')
         for choice in server_choices:
-            if choice == ' ': continue
+            if choice == '': continue
             try:
                 if int(choice) > num_servers:
                     print "Source number %s not found." % choice
@@ -471,7 +471,7 @@ else:
             mirror_choice_filter = mirror_choice.replace(',', ' ')
             mirror_choices = mirror_choice_filter.split(' ')
             for choice in mirror_choices:
-                if choice == ' ': continue
+                if choice == '': continue
                 try:
                     if int(choice) > jigdo_config.mirror_num:
                         print "Mirror number %s not found." % choice

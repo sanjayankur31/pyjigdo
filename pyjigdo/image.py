@@ -96,7 +96,12 @@ class SliceSource:
             # Set the url status to 0. The key value will be updated with the
             # HTTP Status code.
             for url in mirrorlist[list_type]:
+                urldata = urlsplit(url)
                 url = urljoin(url, file_name)
+                if urldata.query:
+                    query = urldata.query
+                    while query.endswith('/'): query = query.rstrip('/')
+                    url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file_name)
                 already_added = False
                 if list_type == "geo":
                     self.geo_urls[url] = "0"
@@ -235,7 +240,9 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
         urldata = urlsplit(mirror_data[1])
         url = urljoin(mirror_data[1], file_name)
         if urldata.query:
-            url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, urldata.query, file_name)
+            query = urldata.query
+            while query.endswith('/'): query = query.rstrip('/')
+            url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file_name)
         try:
             print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
             urlgrab(url, filename=local_location, progress_obj=TextMeter())
