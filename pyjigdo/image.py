@@ -235,7 +235,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
         urldata = urlsplit(mirror_data[1])
         url = urljoin(mirror_data[1], file_name)
         if urldata.query:
-            url = %s://%s%s?%s/%s % (urldata.scheme, urldata.netloc, urldata.path, urldata.query, file_name)
+            url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, urldata.query, file_name)
         try:
             print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
             urlgrab(url, filename=local_location, progress_obj=TextMeter())
