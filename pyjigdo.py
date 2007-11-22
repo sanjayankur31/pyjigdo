@@ -116,9 +116,13 @@ class SimpleTestJobDesign:
             template_url = template
         try:
             local_template = os.path.join(options.download_workdir, "images", "%s.template" % file_name)
+            if hosting_images:
+                local_template = os.path.join(options.host_template_directory, "%s.template" % file_name)
             iso_location = os.path.join(options.download_workdir, "images", file_name)
             misc.check_directory(os.path.dirname(local_template))
-            misc.check_directory(os.path.dirname(iso_location))
+            # FIXME: Just a note: If we enable hosting and downloading at the same time,
+            # this will b0rk building the image.
+            if not hosting_images: misc.check_directory(os.path.dirname(iso_location))
             template_local = False
             if os.path.isfile(local_template):
                 print "Template %s exists, checking if complete..." % local_template
@@ -568,6 +572,12 @@ if hosting_images:
 
     # FIXME: Support only hosting specific images (based on templates)
     # This just downloads what matches the selected server ids.
+
+    for selected_image in jigdo_config.Images.keys():
+        if str(selected_image) in active_images:
+            iso = jigdo_config.Images[selected_image]
+            test_jobs.initISO(iso["Template-MD5Sum"], iso["Template"], iso["Filename"])
+
     num_slices = len(template_slices.slices)
     counter = 0
     for image_slice_sum in template_slices.slices:

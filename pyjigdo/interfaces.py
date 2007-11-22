@@ -102,7 +102,7 @@ scan_group.add_option("--scan-iso", dest="scan_isos", action="append", type="str
 #
 hosting_group = parser.add_option_group(_("Hosting Options"))
 hosting_group.add_option("--host-image", dest="host_image_numbers", default=[], action="append", type="str",
-                 help="Host given image number.", metavar="[image number]")
+                 help="Host given image number. (Not supported yet)", metavar="[image number]")
 hosting_group.add_option("--host-all", dest="host_all", action="store_true", default=False,
                  help="Host all images defined in jigdo.")
 hosting_group.add_option("--host-data-dir", dest="host_data_directory", action="store", default="",
