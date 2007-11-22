@@ -581,7 +581,6 @@ if hosting_images:
 
     for selected_image in jigdo_config.Images.keys():
         if str(selected_image) in active_images:
-            print "matched"
             iso = jigdo_config.Images[selected_image]
             test_jobs.initISO(iso["Template-MD5Sum"], iso["Template"], iso["Filename"])
 
