@@ -116,12 +116,10 @@ class SimpleTestJobDesign:
         try:
             local_template = os.path.join(options.download_workdir, "images", "%s.template" % file_name)
             if hosting_images:
-                local_template = os.path.join(options.host_template_directory, "%s.template" % file_name)
+                local_template = os.path.join(options.host_templates_directory, "%s.template" % file_name)
             iso_location = os.path.join(options.download_workdir, "images", file_name)
             misc.check_directory(os.path.dirname(local_template))
-            # FIXME: Just a note: If we enable hosting and downloading at the same time,
-            # this will b0rk building the image.
-            if not hosting_images: misc.check_directory(os.path.dirname(iso_location))
+            misc.check_directory(os.path.dirname(iso_location))
             template_local = False
             if os.path.isfile(local_template):
                 print "Template %s exists, checking if complete..." % local_template
@@ -204,8 +202,9 @@ if options.download_image_numbers or options.download_all:
 if options.host_image_numbers or options.host_all:
     hosting_images = True
 
-if options.iso_image_locations:
-    generating_images = True
+# FIXME: Workaround, hacktackular, mess
+#if options.iso_image_locations:
+#    generating_images = True
 
 if generating_images and (building_images or hosting_images):
     print "\n\tYou can not generate images at the same time as hosting or building yet. Sorry.\n"
@@ -263,6 +262,14 @@ if generating_images:
 download_workdir = os.path.abspath(options.download_workdir)
 misc.check_directory(download_workdir)
 options.download_workdir = download_workdir
+
+#Make hosting dirs absolute
+host_data_directory = os.path.abspath(options.host_data_directory)
+host_templates_directory = os.path.abspath(options.host_templates_directory)
+misc.check_directory(host_data_directory)
+misc.check_directory(host_templates_directory)
+options.host_data_directory = host_data_directory
+options.host_templates_directory = host_templates_directory
 
 user_specified_images = False
 jigdo_file = ""
@@ -384,7 +391,7 @@ if not user_specified_images and not options.download_all and not options.host_a
 elif options.download_all or options.host_all:
     print "Downloading/Hosting all images selected, adding all images..."
     for image_id in jigdo_config.Images:
-        active_images.append(image_id)
+        active_images.append(str(image_id))
 elif user_specified_images:
     print "Adding selected images to download..."
     for image_selection in (options.download_image_numbers + options.host_image_numbers):
@@ -574,6 +581,7 @@ if hosting_images:
 
     for selected_image in jigdo_config.Images.keys():
         if str(selected_image) in active_images:
+            print "matched"
             iso = jigdo_config.Images[selected_image]
             test_jobs.initISO(iso["Template-MD5Sum"], iso["Template"], iso["Filename"])
 
