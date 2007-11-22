@@ -12,7 +12,7 @@ BuildRoot: 	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: 	jigdo
 # this is because we use /var/tmp/jigdo
 BuildArch: 	noarch
-BuildRequires: 	intltool, gettext, python, diffutils
+BuildRequires: intltool, gettext, python, diffutils
 
 %description
 PyJigdo is a Python rewrite of the popular Jigdo distribution framework. It has
@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc README NEWS AUTHORS COPYING TODO
+%doc %{_mandir}/man5/*
+%doc %{_mandir}/man8/*
 %dir %{python_sitelib}/pyjigdo
 %{python_sitelib}/pyjigdo/*.py
 %{python_sitelib}/pyjigdo/*.pyc

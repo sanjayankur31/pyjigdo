@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 # Copyright 2007 Fedora Unity
 #
@@ -71,7 +70,7 @@ class jigdoDefinition:
         toSearch = re.compile('(\n\[Image\].*\[)', re.DOTALL)
         content = self.definition_file.read()
         if not content:
-            print _('You have supplied an emtpy file, valid jigsaw definition required.')
+            print _('You have supplied an empty file, valid jigsaw definition required.')
             return False
         matches = re.search(toSearch, content)
         matchedString = matches.string[matches.span()[0]+1:matches.span()[1]-1]

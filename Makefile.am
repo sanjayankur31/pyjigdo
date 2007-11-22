@@ -19,6 +19,7 @@ DISTCLEANFILES =           \
 
 SUBDIRS =                  \
     conf                   \
+    doc                    \
     pyjigdo                \
     po
 
@@ -61,3 +62,33 @@ CVS_PKGVERSION=`echo $(PACKAGE_VERSION) | sed -e 's/\./_/g'`
 CVSTAG=$(PACKAGE_NAME)-$(CVS_PACKAGEVERSION)
 tag:
 	@cvs tag -F $(CVSTAG)
+
+RELEASE=`rpm -q --qf="%{RELEASE}\n" --specfile $(PACKAGE).spec | head -n 1`
+
+F-7: srpm
+	@(mock -r fedora-7-i386 rebuild ~/rpmbuild/SRPMS/$(PACKAGE)-$(PACKAGE_VERSION)-$(RELEASE).src.rpm)
+
+F-8: srpm
+	@(mock -r fedora-8-i386 rebuild ~/rpmbuild/SRPMS/$(PACKAGE)-$(PACKAGE_VERSION)-$(RELEASE).src.rpm)
+
+devel: srpm
+	@(mock -r fedora-devel-i386 rebuild ~/rpmbuild/SRPMS/$(PACKAGE)-$(PACKAGE_VERSION)-$(RELEASE).src.rpm)
+
+EL-5: srpm
+	@(mock -r fedora-5-i386-epel rebuild ~/rpmbuild/SRPMS/$(PACKAGE)-$(PACKAGE_VERSION)-$(RELEASE).src.rpm)
+
+mock: srpm F-7 F-8 devel EL-5
+
+RELEASE_NUM=`rpm -q --qf="%{RELEASE}\n" --specfile $(PACKAGE).spec | head -n 1 | cut -d'.' -f 1`
+
+fpeople: mock
+	rm -rf public_html
+	mkdir -p public_html/$(PACKAGE)/$(PACKAGE_VERSION)-$(RELEASE_NUM)/{el5,fc7,fc8,fc9}
+	cp $(PACKAGE)-$(PACKAGE_VERSION).tar.gz public_html/$(PACKAGE)/$(PACKAGE_VERSION)-$(RELEASE_NUM)/.
+	cp $(PACKAGE).spec public_html/$(PACKAGE)/$(PACKAGE_VERSION)-$(RELEASE_NUM)/.
+	cp /var/lib/mock/epel-5-i386/result/* public_html/$(PACKAGE)/$(PACKAGE_VERSION)-$(RELEASE_NUM)/el5/.
+	cp /var/lib/mock/fedora-7-i386/result/* public_html/$(PACKAGE)/$(PACKAGE_VERSION)-$(RELEASE_NUM)/fc7/.
+	cp /var/lib/mock/fedora-8-i386/result/* public_html/$(PACKAGE)/$(PACKAGE_VERSION)-$(RELEASE_NUM)/fc8/.
+	cp /var/lib/mock/fedora-development-i386/result/* public_html/$(PACKAGE)/$(PACKAGE_VERSION)-$(RELEASE_NUM)/fc9/.
+	scp -r public_html fedorapeople.org:.
+

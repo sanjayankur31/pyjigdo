@@ -18,6 +18,7 @@ AM_PATH_PYTHON
 
 AC_CONFIG_FILES([
 conf/Makefile
+doc/Makefile
 po/Makefile.in
 Makefile
 pyjigdo.spec

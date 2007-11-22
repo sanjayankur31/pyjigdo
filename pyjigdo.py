@@ -6,7 +6,6 @@
 # Jeroen van Meeuwen <kanarip a fedoraunity.org>
 # Ignacio Vazquez-Abrams <ivazqueznet+pyjigdo a gmail.com>
 # Stewart Adam <s.adam a diffingo.com>
-
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,7 +63,7 @@ class SimpleTestJobDesign:
         self.clearCache()
 
     def clearCache(self):
-        """ Delete any files needing to be cleared from any previous run. """
+        """ Delete any files needing to be cleared from any previous run."""
         #if os.path.isfile(self.jigdo_config.cache_db):
         #    os.remove(self.jigdo_config.cache_db)
         pass
