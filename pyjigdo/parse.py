@@ -136,8 +136,9 @@ class jigdoDefinition:
         """ Fetch full URLS from our mirror list and populate. """
         mirror_id = 1
         for server_id in self.Servers.keys():
-            self.mirror_fallback[mirror_id] = [server_id, self.Servers[server_id]]
-            mirror_id += 1
+            for server_url in self.Servers[server_id]:
+                self.mirror_fallback[mirror_id] = [server_id, server_url]
+                mirror_id += 1
         try:
             global_mirrorlist_urls = []
             for server_id in self.Mirrorlists.keys():
