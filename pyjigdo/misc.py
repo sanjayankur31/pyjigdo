@@ -137,8 +137,12 @@ class MountError(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
 
-def run_command(command, rundir=None, inshell=False, env=None, stdout=subprocess.PIPE, show=False):
-    """ Run a command and return output. """
+## We need to set a default path in env= so that if shell=False, we don't bail out
+## os.getenv so that $PATH is respected...
+# ^ Turns out this wasn't the problem, but it's nice to have.
+temp_env = {'PATH': os.getenv('PATH')}
+def run_command(command, rundir=None, inshell=False, env=temp_env, stdout=subprocess.PIPE, show=False):
+    """ Run a command and return output. Remember command must be ['command', 'arg1', 'arg2'] """
     if rundir == None:
         rundir = options.download_workdir
 
@@ -146,7 +150,7 @@ def run_command(command, rundir=None, inshell=False, env=None, stdout=subprocess
     if options.debug: print "Running command '%s'" % command
 
     ret = []
-    p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False)
+    p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False, env=env)
     while p.poll() == None:
         for item in p.stdout.read().split('\n'):
             ret.append(item)

@@ -238,20 +238,22 @@ if generating_images:
     # FIXME: This needs better juju
     jigdo_file_name = os.path.join(options.generation_directory, options.jigdo_name + '.jigdo')
     for iso_image_file in options.iso_image_locations:
-        init_jigdo_location_command = "/bin/touch %s" % jigdo_file_name
+        init_jigdo_location_command = ["/bin/touch", "%s" % jigdo_file_name]
         misc.run_command(init_jigdo_location_command)
-        generation_command = "/usr/bin/jigdo-file make-template --image=%s %s/ %s/ --label %s=%s --label %s=%s --jigdo=%s --template=%s --no-servers-section --force --merge=%s"
-        misc.run_command(generation_command % (iso_image_file,
-                        options.base_local_mirror,
-                        options.updates_local_mirror,
-                        options.base_local_label,
-                        options.base_local_mirror,
-                        options.updates_local_label,
-                        options.updates_local_mirror,
-                        jigdo_file_name,
-                        os.path.join(options.generation_directory, iso_image_file + '.template'),
-                        jigdo_file_name
-                        ))
+        generation_command = [
+            "/usr/bin/jigdo-file",
+            "make-template",
+            "--image=%s" % iso_image_file,
+            "%s/" % options.base_local_mirror,
+            "%s/" % options.updates_local_mirror,
+            "--label %s=%s" % (options.base_local_label, options.base_local_mirror),
+            "--label %s=%s" % (options.updates_local_label, options.updates_local_mirror),
+            "--jigdo=%s" % jigdo_file_name,
+            "--template=%s" % os.path.join(options.generation_directory, iso_image_file + '.template'),
+            "--no-servers-section",
+            "--force",
+            "--merge=%s" % jigdo_file_name]
+        misc.run_command(generation_command)
     print "All done. Jigdo data is in %s" % options.generation_directory
     sys.exit(1)
 
@@ -567,6 +569,7 @@ if building_images:
             isoimage.finished = True
         else:
             print "Sums don't match. Image %s is not complete." % isoimage.location
+            # FIXME: Return values?
             isoimage.finished = False
 
 if hosting_images:

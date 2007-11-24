@@ -98,7 +98,7 @@ scan_group.add_option("--scan-iso", dest="scan_isos", action="append", type="str
 ##          data defined in the jigdo. Preserve/create directory structure based
 ##          on defined [servers] path data.
 #
-hosting_group = parser.add_option_group(_("Hosting Options"))
+hosting_group = parser.add_option_group(_("Hosting Options (EXPERIMENTAL)"))
 hosting_group.add_option("--host-image", dest="host_image_numbers", default=[], action="append", type="str",
                  help="Host given image number. (Not supported yet)", metavar="[image number]")
 hosting_group.add_option("--host-all", dest="host_all", action="store_true", default=False,
@@ -112,24 +112,24 @@ hosting_group.add_option("--host-templates-dir", dest="host_templates_directory"
 #
 ## Generation Options
 ## Purpose: Allow a user to generate jigdo configs and templates.
-#generation_group = parser.add_option_group(_("Generation Options"))
-#generation_group.add_option("--iso-image", dest="iso_image_locations", default=[], action="append", type="str",
-#                 help="Build jigdo for given ISO image.", metavar="[image location]")
+generation_group = parser.add_option_group(_("Generation Options (EXPERIMENTAL)"))
+generation_group.add_option("--iso-image", dest="iso_image_locations", default=[], action="append", type="str",
+                 help="Build jigdo for given ISO image.", metavar="[image location]")
 # FIXME: Any creative ways to take this data and not limit to just two repos?
 # We need a way to be able to say "ISO 1 needs repo 1 and repo 2 found here and there with labels 1 and 2"
 # What I've done here will require a command to pyjigdo per arch, kinda clunky
-#generation_group.add_option("--local-mirror-base", dest="base_local_mirror", action="store", default="",
-#                 help="Find base files from given local mirror.", metavar="[local location for base files]")
-#generation_group.add_option("--local-mirror-updates", dest="updates_local_mirror", action="store", default="",
-#                 help="Find updates files from given local mirror.", metavar="[local location for updates files]")
-#generation_group.add_option("--mirror-base-label", dest="base_local_label", action="store", default="Base",
-#                 help="Label for local mirror source 'base'. Default 'Base'", metavar="[label]")
-#generation_group.add_option("--mirror-updates-label", dest="updates_local_label", action="store", default="Updates",
-#                 help="Label for local mirror source 'updates'. Default 'Updates'", metavar="[label]")
-#generation_group.add_option("--generation-dir", dest="generation_directory", action="store", default="",
-#                 help="Directory to dump generated jigdo(s) into.", metavar="[directory]")
-#generation_group.add_option("--jigdo-name", dest="jigdo_name", action="store", default="pyjigdo-generated",
-#                 help="Name to give this jigdo. Result will be 'name'.jigdo", metavar="[name]")
+generation_group.add_option("--local-mirror-base", dest="base_local_mirror", action="store", default="",
+                 help="Find base files from given local mirror.", metavar="[local location for base files]")
+generation_group.add_option("--local-mirror-updates", dest="updates_local_mirror", action="store", default="",
+                 help="Find updates files from given local mirror.", metavar="[local location for updates files]")
+generation_group.add_option("--mirror-base-label", dest="base_local_label", action="store", default="Base",
+                 help="Label for local mirror source 'base'. Default 'Base'", metavar="[label]")
+generation_group.add_option("--mirror-updates-label", dest="updates_local_label", action="store", default="Updates",
+                 help="Label for local mirror source 'updates'. Default 'Updates'", metavar="[label]")
+generation_group.add_option("--generation-dir", dest="generation_directory", action="store", default="",
+                 help="Directory to dump generated jigdo(s) into.", metavar="[directory]")
+generation_group.add_option("--jigdo-name", dest="jigdo_name", action="store", default="pyjigdo-generated",
+                 help="Name to give this jigdo. Result will be 'name'.jigdo", metavar="[name]")
 
 
 # Parse Options

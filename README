@@ -1,6 +1,18 @@
-Not much to read about yet.
 
-Checkout the source and ask the help:
+== 1. Checkout the source ==
 
 git-clone git://git.fedoraproject.org/git/hosted/pyjigdo.git && cd pyjigdo
+
+
+
+== 2. Building pyjigdo ==
+
+autoreconf
+./configure
+make
+
+
+
+== 3. Run pyjigdo ==
+
 ./pyjigdo.py --help

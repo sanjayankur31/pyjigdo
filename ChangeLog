@@ -1,3 +1,9 @@
+2007-11-23 Stewart Adam <s.adam@diffingo.com>
+     * Fix the OSError exceptions when calling run_command
+     * Display Generation options on --help and parse them too
+     * We have env in run_command, but let's pass it to subprocess.Popen too
+     * Update README and other minor things
+
 2007-10-10 Stewart Adam <s.adam@diffingo.com>
      * Split up files
      * Relicense to GPLv2+
