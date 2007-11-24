@@ -81,6 +81,7 @@ class jigdoDefinition:
         for match in matchedString.split('[Image]'): # for each image section
             image = {}
             for line in match.strip('\n').split('\n'): # for each line in it
+                # This will break if there are any query options
                 if len(line.split('=')) == 2:
                       key, value = line.split('=')
                       image[key] = value
@@ -101,16 +102,10 @@ class jigdoDefinition:
             # FIXME: Check all valid sections exist in sections()
             setattr(self, section, {})
             for option in self.parser.options(section):
-                #if section in ("Servers", "Mirrorlists"):
-                    # FIXME: This just creates a one item list. Blah. We need all the
-                    #        items but I needed the list data type. For now, this forces
-                    #        the data type we need.
-                    #s = getattr(self, section)
-                    #if option not in s:
-                    #	s[option] = []
-                    #s[option].append(self.parser.get(section, option))
-                    #getattr(self, section)[option] = list(self.parser.get(section, option))
-                #else:
+                if section in ("Servers"):
+                    # We'll do this one later:
+                    pass
+                else:
                     # this makes a dict of {'Key', 'Value} from the parser
                     getattr(self, section)[option] = self.parser.get(section, option)
             self.__allSections.append([section, getattr(self, section)])
@@ -119,6 +114,18 @@ class jigdoDefinition:
         servers_search = re.compile('(\n\[Servers\].*?\[)', re.DOTALL | re.I)
         servers_section = re.search(servers_search, content)
         servers_section_str = servers_section.string[servers_section.span()[0]+1:servers_section.span()[1]-1]
+        server_dict = {}
+        for line in servers_section_str.split('\n'):
+            if len(line.split('=')) > 1:
+                key, value = line.split('=', 1)
+                try:
+                    server_dict[key].append(value)
+                except KeyError:
+                    server_dict[key] = [value]
+            else:
+                continue
+        for item in server_dict.keys():
+            self.Servers[item] = server_dict[item]
         return True
         
     def getSections(self):
