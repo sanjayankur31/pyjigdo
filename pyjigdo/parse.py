@@ -24,7 +24,7 @@
 Parsing the configuration file(s)
 """
 import os, os.path
-import re
+import re, sys
 
 from ConfigParser import ConfigParser
 from interfaces import options
@@ -67,7 +67,7 @@ class jigdoDefinition:
         self.parser.readfp(self.definition_file)
         # readfp seeks to end - Reset file
         self.definition_file.seek(0)
-        toSearch = re.compile('(\n\[Image\].*\[)', re.DOTALL)
+        toSearch = re.compile('(\n\[Image\].*\[)', re.DOTALL | re.I)
         content = self.definition_file.read()
         if not content:
             print _('You have supplied an empty file, valid jigsaw definition required.')
@@ -115,6 +115,10 @@ class jigdoDefinition:
                     getattr(self, section)[option] = self.parser.get(section, option)
             self.__allSections.append([section, getattr(self, section)])
         self.definition_file.close()
+        # Read all the contents of the jigdo definition and extract the full [Servers] seciton
+        servers_search = re.compile('(\n\[Servers\].*?\[)', re.DOTALL | re.I)
+        servers_section = re.search(servers_search, content)
+        servers_section_str = servers_section.string[servers_section.span()[0]+1:servers_section.span()[1]-1]
         return True
         
     def getSections(self):
