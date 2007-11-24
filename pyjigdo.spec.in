@@ -1,18 +1,20 @@
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
-Summary: 	Python version of Jigdo, Modified
-Name: 		pyjigdo
-Version: 	@VERSION@
-Release: 	1.alpha%{?dist}
-License: 	GPLv2+
-Group: 		Applications/System
-URL: 		https://hosted.fedoraproject.org/projects/pyjigdo
-Source0: 	http://files.pyjigdo.fedoraunity.org/%{name}-%{version}.tar.gz
-BuildRoot: 	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Requires: 	jigdo
+%define gitdate %(date +%Y%m%d)
+
+Summary: 	      Python version of Jigdo, slightly modified
+Name: 		      pyjigdo
+Version: 	      0.2
+Release: 	      2.%{gitdate}git%{?dist}
+License: 	      GPLv2+
+Group: 		      Applications/System
+URL: 		        https://hosted.fedoraproject.org/projects/pyjigdo
+Source0:    	  http://files.pyjigdo.fedoraunity.org/%{name}-%{version}.tar.gz
+BuildRoot: 	    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires: 	    jigdo
 # this is because we use /var/tmp/jigdo
-BuildArch: 	noarch
-BuildRequires: intltool, gettext, python, diffutils
+BuildArch:      noarch
+BuildRequires:  intltool, gettext, python, diffutils
 
 %description
 PyJigdo is a Python rewrite of the popular Jigdo distribution framework. It has
@@ -37,15 +39,15 @@ rm -rf $RPM_BUILD_ROOT
 %doc README NEWS AUTHORS COPYING TODO
 %doc %{_mandir}/man5/*
 %doc %{_mandir}/man8/*
-%dir %{python_sitelib}/pyjigdo
-%{python_sitelib}/pyjigdo/*.py
-%{python_sitelib}/pyjigdo/*.pyc
-%{python_sitelib}/pyjigdo/*.pyo
+%{python_sitelib}/pyjigdo/
 %{_bindir}/*
 %dir %{_sysconfdir}/pyjigdo
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Fri Nov 23 2007 Stewart Adam <s.adam a diffingo.com> 0.2-2
+- Use gitdate
+
 * Wed Oct 10 2007 Stewart Adam <s.adam a diffingo.com> 0.2-1
 - Split up py files
 - License change from GPLv2 to GPLv2+
