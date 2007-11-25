@@ -130,7 +130,7 @@ class SimpleTestJobDesign:
                     print "Template is not complete..."
             if not template_local:
                 print "Fetching template %s" % template_url
-                urlgrab(template_url, filename=local_template, progress_obj=TextMeter())
+                urlgrab(template_url, filename=local_template, progress_obj=TextMeter(), timeout=options.urlgrab_timeout)
             if template_local or misc.compare_sum(local_template, template_md5):
                 isoimage = image.ISOImage(local_template, template_md5, iso_location)
                 isoimage.download = True

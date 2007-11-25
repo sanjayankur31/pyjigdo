@@ -243,7 +243,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
             url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file_name)
         try:
             print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
-            urlgrab(url, filename=local_location, progress_obj=TextMeter())
+            urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
             # FIXME: Why do we compare the sum to determine a 404 error?
             # The sum needs to be compared due to 302s redirecting to incorrect data.
             if compare_sum(local_location, slice_object.slice_sum):
@@ -271,7 +271,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                 if source.geo_urls[url] != "404" and not download_found and remaining_tries > 0:
                     try:
                         print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
-                        urlgrab(url, filename=local_location, progress_obj=TextMeter())
+                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
                         if compare_sum(local_location, slice_object.slice_sum):
                             download_found = True
                             break
@@ -285,7 +285,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                 if source.global_urls[url] != "404" and not download_found and remaining_tries > 0:
                     try:
                         print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
-                        urlgrab(url, filename=local_location, progress_obj=TextMeter())
+                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
                         if compare_sum(local_location, slice_object.slice_sum):
                             download_found = True
                             break
@@ -299,7 +299,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                 if source.fallback_urls[url] != "404" and not download_found:
                     try:
                         print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
-                        urlgrab(url, filename=local_location, progress_obj=TextMeter())
+                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
                         if compare_sum(local_location, slice_object.slice_sum):
                             download_found = True
                             break

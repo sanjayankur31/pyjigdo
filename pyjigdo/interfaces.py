@@ -51,6 +51,8 @@ general_group.add_option("--debug", dest="debug", action="store_true", default=F
                  help="Enable debug printing.")
 general_group.add_option("--fallback", dest="fallback_number", action="store", default=5,
                  help="Number of public mirrors to try before using a fallback mirror. (Default: 5)", metavar="[number of tries]")
+general_group.add_option("--timeout", dest="urlgrab_timeout", action="store", default=20,
+                 help="Number of seconds to wait before switching to different slice source. (Default: 20)", metavar="[number of seconds]")
 
 #
 ## Downloading Options
