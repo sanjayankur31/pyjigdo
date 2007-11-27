@@ -11,6 +11,9 @@ autoreconf
 ./configure
 make
 
+OR
+
+./reconfigure
 
 
 == 3. Run pyjigdo ==
