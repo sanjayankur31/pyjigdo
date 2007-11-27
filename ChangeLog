@@ -1,3 +1,7 @@
+2007-11-27 Stewart Adam <s.adam@diffingo.com>
+     * Update spec file
+     * Fix rpmlint warnings/errors
+
 2007-11-23 Stewart Adam <s.adam@diffingo.com>
      * Update spec file (use %{gitdate})
 
