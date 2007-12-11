@@ -1,6 +1,6 @@
 %{!?python_sitelib: %define python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
-%define gitdate %(date +20071127)
+%define gitdate %(date +20071211)
 
 Summary:        Python version of Jigdo, slightly modified
 Name:           pyjigdo
@@ -45,6 +45,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Tue Dec 11 2007 Jonathan Steffan <jon a fedoraunity.org> 02-2.20071211git
+- Rebuild for review ticket
+
 * Tue Nov 27 2007 Stewart Adam <s.adam a diffingo.com> 0.2-2.20071127git
 - Fix %%changelog date, drop automatic gitdate
 
