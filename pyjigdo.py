@@ -575,7 +575,7 @@ if building_images:
 if hosting_images:
     # FIXME: Make it so this will actually scan stuff.
     for directory in jigdo_config.scan_dirs:
-        print "Not able to scan % yet. Sorry." % directory
+        print "Not able to scan %s yet. Sorry." % directory
     for iso_image_file in jigdo_config.scan_isos:
         print "Not able to scan % yet. Sorry." % iso_image_file.location
 
@@ -600,5 +600,5 @@ if hosting_images:
                 pass
         else:
             print "[%s/%s] %s not found via selected server id(s), not downloading..." % (counter, num_slices, image_slice_object.file_name)
-    print "\nAll found files downloaded to %s." % options.host_directory
+    print "\nAll found files downloaded to %s." % options.host_data_directory
 
