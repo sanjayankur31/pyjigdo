@@ -96,10 +96,13 @@ class SliceSource:
             for url in mirrorlist[list_type]:
                 urldata = urlsplit(url)
                 url = urljoin(url, file_name)
-                if urldata.query:
-                    query = urldata.query
-                    while query.endswith('/'): query = query.rstrip('/')
-                    url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file_name)
+                try:
+                    if urldata.query:
+                        query = urldata.query
+                        while query.endswith('/'): query = query.rstrip('/')
+                        url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file_name)
+                except AttributeError:
+                        pass
                 already_added = False
                 if list_type == "geo":
                     self.geo_urls[url] = "0"
