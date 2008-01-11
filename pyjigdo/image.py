@@ -245,10 +245,9 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
             while query.endswith('/'): query = query.rstrip('/')
             url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file_name)
         try:
-            print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
+            print _("[%s/%s] %s\n" % (current_num, num_download, url))
+            if options.debug: print _("--> %s\n" % (local_location))
             urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
-            # FIXME: Why do we compare the sum to determine a 404 error?
-            # The sum needs to be compared due to 302s redirecting to incorrect data.
             if compare_sum(local_location, slice_object.slice_sum):
                 if iso_image:
                     iso_image.image_slices[slice_md5] = True
