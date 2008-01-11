@@ -98,10 +98,10 @@ class SimpleTestJobDesign:
         # for ourselves. The md5 infrastructure is here for when we start moving away from
         # jigdo-file for actually putting things back together.
         # 20071018: Checking MD5 is now done (part of download_slice itself)
-        
+
         # Have jigdo-file start stuffing data where it needs to go.
         self.scan_dir(self.jigdo_config.cache_dir)
-        
+
         # FIXME: We need to check that everything got put together and mark it as finished.
         # Maybe some other cool logic also. Examples: offer cleanup, cleanup mounts (if any)
         # offer to sum the iso image against a signed sha1sum, etc.
@@ -460,8 +460,13 @@ if options.base_download_mirror or options.updates_download_mirror:
     pass
 else:
     if len(jigdo_config.mirror_fallback.keys()) > 0: print "\nJigdo Provided Mirror Sources:\n"
+    if len(jigdo_config.mirror_fallback.keys()) > 20: print "\nMore then 20 Sources, truncating list:\n"
+
+    i = 0
     for mirror in jigdo_config.mirror_fallback.keys():
+        i += 1
         print "\t%s: '%s' - %s" % (mirror, jigdo_config.mirror_fallback[mirror][0], jigdo_config.mirror_fallback[mirror][1])
+        if i > 19: break
 
     if len(jigdo_config.mirror_geo.keys()) > 0: print "\nGeoIP Based Mirrors (from mirror list):\n"
     for mirror in jigdo_config.mirror_geo.keys():
@@ -593,7 +598,7 @@ if hosting_images:
         counter += 1
         image_slice_object = template_slices.slices[image_slice_sum]
         if image_slice_object.server_id in mirror_server_ids:
-            while not image.download_slice(image_slice_object.slice_sum, counter, num_slices, 
+            while not image.download_slice(image_slice_object.slice_sum, counter, num_slices,
                                            jigdo_config, template_slices, file_name,
                                            local_dir=options.host_data_directory):
                 # Cheap hack to make it run until ^ works
