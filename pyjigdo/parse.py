@@ -40,14 +40,14 @@ class CustomParser(ConfigParser):
 
 class jigdoDefinition:
     """ The Jigsaw definition file """
-    def __init__(self, definition_file_loc, mirror_file_loc):
+    def __init__(self, definition_file_loc, mirror_file_loc, download_workdir):
         """ Let's init the configuration.
             @param definition_file_loc: Definition file location
             @param mirror_file_loc: Mirror file location"""
         self.definition_file_loc = definition_file_loc
         self.parser = CustomParser()
         self.__allSections = []
-        self.cache_dir = os.path.join(options.download_workdir, "cache")
+        self.cache_dir = os.path.join(download_workdir, "cache")
         self.cache_db = os.path.join(self.cache_dir, "jigdo-cache.db")
         self.mirror_geo = {}
         self.mirror_global = {}

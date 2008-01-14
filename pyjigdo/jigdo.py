@@ -24,6 +24,12 @@ Code dealing with interactions with Jigdo commands
 """
 
 import os
+from urlgrabber import urlgrab
+from urlgrabber.grabber import URLGrabError
+from urlgrabber.progress import TextMeter
+from urlparse import urlparse
+from urlparse import urljoin
+from urlgrabber import urlread
 
 class JigdoJobPool:
     """ This is just a test class for building our objects and looping them. """
@@ -160,7 +166,7 @@ def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file,
             #raise JigdoError, "Can not write to proposed jigdo file %s" % jigdo_file_name
             pass
     else:
-        #FIXME: Don't shell out to touch and implement this in python
+        #FIXME: Don't shell out to touch, implement this in python
         init_jigdo_location_command = ["/bin/touch", "%s" % jigdo_file_name]
         misc.run_command(init_jigdo_location_command)
 
