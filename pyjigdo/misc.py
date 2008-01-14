@@ -1,5 +1,5 @@
 #
-# Copyright 2007 Fedora Unity
+# Copyright 2007, 2008 Fedora Unity
 #
 # Jonathan Steffan <jon a fedoraunity.org>
 # Jeroen van Meeuwen <kanarip a fedoraunity.org>

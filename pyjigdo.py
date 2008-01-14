@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2007 Fedora Unity
+# Copyright 2007, 2008 Fedora Unity
 #
 # Jonathan Steffan <jon a fedoraunity.org>
 # Jeroen van Meeuwen <kanarip a fedoraunity.org>
@@ -165,7 +165,7 @@ class SimpleTestJobDesign:
                         directory],
                         inshell=True)
 #
-# Copyright 2007 Fedora Unity
+# Copyright 2007, 2008 Fedora Unity
 #
 # Jonathan Steffan <jon a fedoraunity.org>
 # Jeroen van Meeuwen <kanarip a fedoraunity.org>
