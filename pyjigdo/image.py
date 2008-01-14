@@ -31,7 +31,6 @@ from urlgrabber.progress import TextMeter
 from urlparse import urljoin
 from urlparse import urlsplit
 
-from interfaces import options
 from misc import run_command, compare_sum, check_directory
 
 import rhpl.translate as translate

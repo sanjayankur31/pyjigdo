@@ -27,7 +27,6 @@ import os, os.path
 import re, sys
 
 from ConfigParser import ConfigParser
-from interfaces import options
 from urlgrabber import urlread
 from urlgrabber.grabber import URLGrabError
 

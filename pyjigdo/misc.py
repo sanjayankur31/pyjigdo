@@ -37,8 +37,6 @@ from urlgrabber.progress import TextMeter
 import rhpl.translate as translate
 from rhpl.translate import _, N_
 
-from interfaces import options
-
 try:
     # new versions of python. Use hashlib	
     import hashlib as md5_hashlib
