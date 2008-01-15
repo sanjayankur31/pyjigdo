@@ -1,7 +1,7 @@
 PYTHON_FILES = \
     __init__.py \
     image.py \
-    interfaces.py \
+    jigdo.py \
     parse.py \
     misc.py
 
