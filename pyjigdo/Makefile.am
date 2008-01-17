@@ -1,9 +1,15 @@
 PYTHON_FILES = \
-    __init__.py \
+    base.py \
+    cli.py \
+    constants.py \
+    gui.py \
     image.py \
+    __init__.py \
     jigdo.py \
+    logger.py \
+    misc.py \
     parse.py \
-    misc.py
+    translate.py
 
 EXTRA_DIST = \
     $(PYTHON_FILES) \
