@@ -20,16 +20,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+from optparse import OptionParser
 import os
 import sys
 
 import rhpl.translate as translate
 from rhpl.translate import _, N_
 
-from pyjigdo import parse
-from pyjigdo import image
-from pyjigdo import misc
-from pyjigdo import jigdo
+import pyjigdo
+import pyjigdo.image
+import pyjigdo.jigdo
+import pyjigdo.misc
+import pyjigdo.parse
 
 
 # not needed *yet*
@@ -49,111 +51,233 @@ pyjigdo command line interface
 import rhpl.translate as translate
 from rhpl.translate import _, N_
 
-epilog = """pyJigdo is a Fedora Unity product. For more information about pyJigdo, visit
-        http://pyjigdo.org/"""
+class PyJigdo(object):
+    def __init__(self):
+        # Create the command line options
+        self.create_options()
 
-from optparse import OptionParser
-try:
-    parser = OptionParser(epilog=epilog)
-except:
-    parser = OptionParser()
+        # Parse the command line options
+        self.parse_options()
 
+        # Answer questions (Not Yet Implemented)
+        self.answer_questions()
 
-#
-## Information Options
-## Purpose: We should allow a user to query a jigdo and get lots-o-info from just
-##          downloading the jigdo file.
-#
-general_group = parser.add_option_group(_("General Options"))
-general_group.add_option("--jigdo", dest="jigdo_source", action="store", default="",
-                 help="Location of jigdo file.", metavar="[url to jigdo file]")
-general_group.add_option("--info", dest="show_info_exit", action="store_true", default=False,
-                 help="Print information about the jigdo image and exit.")
-general_group.add_option("--debug", dest="debug", action="store_true", default=False,
-                 help="Enable debug printing.")
-general_group.add_option("--fallback", dest="fallback_number", action="store", default=5,
-                 help="Number of public mirrors to try before using a fallback mirror. (Default: 5)", metavar="[number of tries]")
-general_group.add_option("--timeout", dest="urlgrab_timeout", action="store", default=20,
-                 help="Number of seconds to wait before switching to different slice source. (Default: 20)", metavar="[number of seconds]")
+        # Detect mode (Not Yet Implemented)
+        self.detect_mode()
 
-#
-## Downloading Options
-## Purpose: Allow a user to non-interactively download a defined image or images.
-##          This should include being able to download all images with one command.
-##          This is also for download options, like how many threads to use, to cache or not, etc.
-#
-download_group = parser.add_option_group(_("Download Options"))
-download_group.add_option("--download-image", dest="download_image_numbers", default=[], action="append", type="str",
-                 help="Download given image number.", metavar="[image number]")
-download_group.add_option("--download-all", dest="download_all", action="store_true", default=False,
-                 help="Download all images defined in jigdo.")
-# FIXME: Any creative ways to take this data and not limit to just two repos?
-download_group.add_option("--download-mirror-base", dest="base_download_mirror", action="store", default="",
-                 help="Download base files from given mirror.", metavar="[mirror url to file root]")
-download_group.add_option("--download-mirror-updates", dest="updates_download_mirror", action="store", default="",
-                 help="Download updates files from given mirror.", metavar="[mirror url to file root]")
-
-# FIXME: We might make it not a choice to cache. It *will* use more space, but much less bandwidth
-#        ate least when building more then one image/set.
-#download_group.add_option("--cache", dest="cache_files", action="store", default=True,
-#                 help="Force caching files to be reused for multiple images. The max space used will be double the resulting image(s) size(s).")
-#download_group.add_option("--nocache", dest="nocache_files", action="store", default=False,
-#                 help="Force caching of files off. This might cause the same file to be downloaded more then once but will use less HDD space while running.")
-
-download_group.add_option("--threads", dest="download_threads", action="store", default="2",
-                 help="Number of threads to use when downloading. (Not in use yet)", metavar="[number]")
-download_group.add_option("--workdir", dest="download_workdir", action="store", default="/var/tmp/pyjigdo",
-                 help="Directory to do work in.", metavar="[directory]")
-
-#
-## Scan Options
-## Purpose: Allow a user to specify directories to scan for files, including pointing
-## to existing ISO image(s)
-#
-scan_group = parser.add_option_group(_("Scan Options"))
-scan_group.add_option("--scan-dir", dest="scan_dirs", action="append", type="str",
-                 help="Scan given directory for files needed by selected image(s).", metavar="[directory]")
-scan_group.add_option("--scan-iso", dest="scan_isos", action="append", type="str",
-                 help="Mount and then scan existing ISO images for files needed by selected image(s).", metavar="[iso image]")
-
-#
-## Hosting Options
-## Purpose: Allow a user to easily setup a location that contains all the needed
-##          data defined in the jigdo. Preserve/create directory structure based
-##          on defined [servers] path data.
-#
-hosting_group = parser.add_option_group(_("Hosting Options (EXPERIMENTAL)"))
-hosting_group.add_option("--host-image", dest="host_image_numbers", default=[], action="append", type="str",
-                 help="Host given image number. (Not supported yet)", metavar="[image number]")
-hosting_group.add_option("--host-all", dest="host_all", action="store_true", default=False,
-                 help="Host all images defined in jigdo.")
-hosting_group.add_option("--host-data-dir", dest="host_data_directory", action="store", default="",
-                 help="Directory to download data to.", metavar="[directory]")
-hosting_group.add_option("--host-templates-dir", dest="host_templates_directory", action="store", default="",
-                 help="Directory to download templates to.", metavar="[directory]")
+        # Run
+        self.run()
 
 
-#
-## Generation Options
-## Purpose: Allow a user to generate jigdo configs and templates.
-generation_group = parser.add_option_group(_("Generation Options (EXPERIMENTAL)"))
-generation_group.add_option("--iso-image", dest="iso_image_locations", default=[], action="append", type="str",
-                 help="Build jigdo for given ISO image.", metavar="[image location]")
-# FIXME: Any creative ways to take this data and not limit to just two repos?
-# We need a way to be able to say "ISO 1 needs repo 1 and repo 2 found here and there with labels 1 and 2"
-# What I've done here will require a command to pyjigdo per arch, kinda clunky
-generation_group.add_option("--local-mirror-base", dest="base_local_mirror", action="store", default="",
-                 help="Find base files from given local mirror.", metavar="[local location for base files]")
-generation_group.add_option("--local-mirror-updates", dest="updates_local_mirror", action="store", default="",
-                 help="Find updates files from given local mirror.", metavar="[local location for updates files]")
-generation_group.add_option("--mirror-base-label", dest="base_local_label", action="store", default="Base",
-                 help="Label for local mirror source 'base'. Default 'Base'", metavar="[label]")
-generation_group.add_option("--mirror-updates-label", dest="updates_local_label", action="store", default="Updates",
-                 help="Label for local mirror source 'updates'. Default 'Updates'", metavar="[label]")
-generation_group.add_option("--generation-dir", dest="generation_directory", action="store", default="",
-                 help="Directory to dump generated jigdo(s) into.", metavar="[directory]")
-generation_group.add_option("--jigdo-name", dest="jigdo_name", action="store", default="pyjigdo-generated",
-                 help="Name to give this jigdo. Result will be 'name'.jigdo", metavar="[name]")
+    def create_options(self):
+        epilog = """pyJigdo is a Fedora Unity product. For more information about pyJigdo, visit
+                http://pyjigdo.org/"""
+
+        try:
+            self.parser = OptionParser(epilog=epilog)
+        except:
+            self.parser = OptionParser()
+
+        ## Information Options
+        ## Purpose: We should allow a user to query a jigdo and get lots-o-info from just
+        ##          downloading the jigdo file.
+        general_group = parser.add_option_group(_("General Options"))
+        general_group.add_option(   "--jigdo",
+                                    dest    = "jigdo_source",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Location of jigdo file.",
+                                    metavar = "[url to jigdo file]")
+        general_group.add_option(   "--info",
+                                    dest    = "show_info_exit",
+                                    action  = "store_true",
+                                    default = False,
+                                    help    = "Print information about the jigdo image and exit.")
+        general_group.add_option(   "--debug",
+                                    dest    = "debug",
+                                    action  = "store_true",
+                                    default = False,
+                                    help    = "Enable debug printing.")
+        general_group.add_option(   "--fallback",
+                                    dest    = "fallback_number",
+                                    action  = "store",
+                                    default = 5,
+                                    help    = "Number of public mirrors to try before using a fallback mirror. (Default: 5)",
+                                    metavar = "[number of tries]")
+        general_group.add_option(   "--timeout",
+                                    dest    = "urlgrab_timeout",
+                                    action  = "store",
+                                    default = 20,
+                                    help    = "Number of seconds to wait before switching to different slice source. (Default: 20)",
+                                    metavar = "[number of seconds]")
+
+        ## Downloading Options
+        ## Purpose: Allow a user to non-interactively download a defined image or images.
+        ##          This should include being able to download all images with one command.
+        ##          This is also for download options, like how many threads to use, to cache or not, etc.
+        download_group = parser.add_option_group(_("Download Options"))
+        download_group.add_option(  "--download-image",
+                                    dest    = "download_image_numbers",
+                                    default = [],
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = "Download given image number.",
+                                    metavar = "[image number]")
+        download_group.add_option(  "--download-all",
+                                    dest    = "download_all",
+                                    action  = "store_true",
+                                    default = False,
+                                    help    = "Download all images defined in jigdo.")
+        # FIXME: Any creative ways to take this data and not limit to just two repos?
+        download_group.add_option(  "--download-mirror-base",
+                                    dest    = "base_download_mirror",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Download base files from given mirror.",
+                                    metavar = "[mirror url to file root]")
+        download_group.add_option(  "--download-mirror-updates",
+                                    dest    = "updates_download_mirror",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Download updates files from given mirror.",
+                                    metavar = "[mirror url to file root]")
+
+        # FIXME: We might make it not a choice to cache. It *will* use more space, but much less bandwidth
+        #        ate least when building more then one image/set.
+        #download_group.add_option("--cache", dest="cache_files", action="store", default=True,
+        #                 help="Force caching files to be reused for multiple images. The max space used will be double the resulting image(s) size(s).")
+        #download_group.add_option("--nocache", dest="nocache_files", action="store", default=False,
+        #                 help="Force caching of files off. This might cause the same file to be downloaded more then once but will use less HDD space while running.")
+
+        download_group.add_option(  "--threads",
+                                    dest    = "download_threads",
+                                    action  = "store",
+                                    default = "2",
+                                    help    = "Number of threads to use when downloading. (Not in use yet)",
+                                    metavar = "[number]")
+        download_group.add_option(  "--workdir",
+                                    dest    = "download_workdir",
+                                    action  = "store",
+                                    default = "/var/tmp/pyjigdo",
+                                    help    = "Directory to do work in.",
+                                    metavar = "[directory]")
+
+        #
+        ## Scan Options
+        ## Purpose: Allow a user to specify directories to scan for files, including pointing
+        ## to existing ISO image(s)
+        #
+        scan_group = parser.add_option_group(_("Scan Options"))
+        scan_group.add_option(      "--scan-dir",
+                                    dest    = "scan_dirs",
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = "Scan given directory for files needed by selected image(s).",
+                                    metavar = "[directory]")
+        scan_group.add_option(      "--scan-iso",
+                                    dest    = "scan_isos",
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = "Mount and then scan existing ISO images for files needed by selected image(s).",
+                                    metavar = "[iso image]")
+
+        #
+        ## Hosting Options
+        ## Purpose: Allow a user to easily setup a location that contains all the needed
+        ##          data defined in the jigdo. Preserve/create directory structure based
+        ##          on defined [servers] path data.
+        #
+        hosting_group = parser.add_option_group(_("Hosting Options (EXPERIMENTAL)"))
+        hosting_group.add_option(   "--host-image",
+                                    dest    = "host_image_numbers",
+                                    default = [],
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = "Host given image number. (Not supported yet)",
+                                    metavar = "[image number]")
+        hosting_group.add_option(   "--host-all",
+                                    dest    = "host_all",
+                                    action  = "store_true",
+                                    default = False,
+                                    help    = "Host all images defined in jigdo.")
+        hosting_group.add_option(   "--host-data-dir",
+                                    dest    = "host_data_directory",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Directory to download data to.",
+                                    metavar = "[directory]")
+        hosting_group.add_option(   "--host-templates-dir",
+                                    dest    = "host_templates_directory",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Directory to download templates to.",
+                                    metavar = "[directory]")
+
+        #
+        ## Generation Options
+        ## Purpose: Allow a user to generate jigdo configs and templates.
+        generation_group = parser.add_option_group(_("Generation Options (EXPERIMENTAL)"))
+        generation_group.add_option("--iso-image",
+                                    dest    = "iso_image_locations",
+                                    default = [],
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = "Build jigdo for given ISO image.",
+                                    metavar = "[image location]")
+        # FIXME: Any creative ways to take this data and not limit to just two repos?
+        # We need a way to be able to say "ISO 1 needs repo 1 and repo 2 found here and there with labels 1 and 2"
+        # What I've done here will require a command to pyjigdo per arch, kinda clunky
+        generation_group.add_option("--local-mirror-base",
+                                    dest    = "base_local_mirror",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Find base files from given local mirror.",
+                                    metavar = "[local location for base files]")
+        generation_group.add_option("--local-mirror-updates",
+                                    dest    = "updates_local_mirror",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Find updates files from given local mirror.",
+                                    metavar = "[local location for updates files]")
+        generation_group.add_option("--mirror-base-label",
+                                    dest    = "base_local_label",
+                                    action  = "store",
+                                    default = "Base",
+                                    help    = "Label for local mirror source 'base'. Default 'Base'",
+                                    metavar = "[label]")
+        generation_group.add_option("--mirror-updates-label",
+                                    dest    = "updates_local_label",
+                                    action  = "store",
+                                    default = "Updates",
+                                    help    = "Label for local mirror source 'updates'. Default 'Updates'",
+                                    metavar = "[label]")
+        generation_group.add_option("--generation-dir",
+                                    dest    = "generation_directory",
+                                    action  = "store",
+                                    default = "",
+                                    help    = "Directory to dump generated jigdo(s) into.",
+                                    metavar = "[directory]")
+        generation_group.add_option("--jigdo-name",
+                                    dest    = "jigdo_name",
+                                    action  = "store",
+                                    default = "pyjigdo-generated",
+                                    help    = "Name to give this jigdo. Result will be 'name'.jigdo",
+                                    metavar = "[name]")
+
+    def parse_options(self):
+        """Parses the options created in self.create_options and checks them"""
+        (self.cli_options, self.args) = self.parser.parse_args()
+
+
+    def answer_questions(self):
+        pass
+
+    def detect_mode(self):
+        pass
+
+    def run(self):
+        pass
+
 
 
 # Parse Options
@@ -208,8 +332,8 @@ if generating_images and (building_images or hosting_images):
 if generating_images:
     # FIXME: This requires both repos be specified. This also goes back to having a better way
     # to get this data from the user
-    
-    # FIXME: This really needs to be generic, allowing any number of repos to be speicified. 
+
+    # FIXME: This really needs to be generic, allowing any number of repos to be speicified.
     for mirror_location in (options.base_local_mirror, options.updates_local_mirror):
         if not os.access(mirror_location, os.R_OK):
             if mirror_location == "":
@@ -589,4 +713,8 @@ if hosting_images:
         else:
             print "[%s/%s] %s not found via selected server id(s), not downloading..." % (counter, num_slices, image_slice_object.file_name)
     print "\nAll found files downloaded to %s." % options.host_data_directory
+
+# This is where the fun begins
+if __name__ == "__main__":
+    pyjigdo = PyJigdo()
 
