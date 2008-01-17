@@ -43,7 +43,7 @@ class ProgressCLI:
         """All we want is a widget. It's new, so it's set to fraction 0.0"""
         self.title = title
         self.fract = 0.0
-        self.columns = os.getenv("COLUMNS", 80)
+        self.columns = os.getenv("$COLUMNS", 80)
         print "Columns: %s" % self.columns
         self.space_left = 0
         self.space_right = 3

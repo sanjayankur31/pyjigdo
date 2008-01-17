@@ -20,6 +20,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import os
+import urlparse
+
+import pyjigdo
+import pyjigdo.image
+
+import pyjigdo.translate as translate
+from pyjigdo.translate import _, N_
+
 class PyJigdoCLI:
     def __init__(self, base):
         # Remember base
@@ -37,6 +46,8 @@ class PyJigdoCLI:
         # Select the images as per the command line
         if not self.base.select_images():
             self.select_images_interaction()
+
+        self.download_images()
 
     def select_images_interaction(self):
         choosing_images = True
@@ -77,6 +88,12 @@ class PyJigdoCLI:
             # Finally
             image_choices = image_choice.split(' ')
             for choice in image_choices:
+                try:
+                    choice = int(choice)
+                except ValueError, e:
+                    self.log.error(_("NAN!"), recoverable = True)
+                    continue
+
                 self.base.select_image(choice)
 
             print "Currently going to download image(s): %s" % ", ".join(self.base.selected_images())
@@ -87,3 +104,10 @@ class PyJigdoCLI:
             # FIXME: Don't be so brutal, let the user try again from this point.
             print "You must select an image to download. Exiting."
             sys.exit(1)
+
+    def download_images(self):
+        for image in self.base.jigdo_definition.images['index']:
+            this_image = self.base.jigdo_definition.images['index'][image]
+            if this_image.selected:
+                print this_image.__dict__
+                selected_image = pyjigdo.image.ISOImage(this_image, self.cfg)

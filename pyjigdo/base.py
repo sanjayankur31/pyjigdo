@@ -22,6 +22,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import logging
+import sys
 
 import pyjigdo.cfg
 import pyjigdo.jigdo
@@ -78,13 +79,23 @@ class PyJigdoBase:
             import pyjigdo.cli
             self.log.debug(_("Running PyJigdo in CLI mode..."), level = 1)
             self.cli = pyjigdo.cli.PyJigdoCLI(self)
-            self.cli.run()
+            try:
+                self.cli.run()
+            except KeyboardInterrupt:
+                print ""
+                print ""
+                sys.exit(1)
 
         elif self.cfg.gui_mode:
             import pyjigdo.gui
             self.log.debug(_("Running PyJigdo in GUI mode..."), level = 1)
             self.gui = pyjigdo.gui.PyJigdoGUI(self)
-            self.gui.run()
+            try:
+                self.gui.run()
+            except KeyboardInterrupt:
+                print ""
+                print ""
+                sys.exit(1)
 
     def create_logger(self):
         """Create a logger instance using cli_options.debuglevel"""

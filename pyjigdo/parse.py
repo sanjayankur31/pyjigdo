@@ -30,8 +30,8 @@ from ConfigParser import ConfigParser
 from urlgrabber import urlread
 from urlgrabber.grabber import URLGrabError
 
-import rhpl.translate as translate
-from rhpl.translate import _, N_
+import pyjigdo.translate as translate
+from pyjigdo.translate import _, N_
 
 class CustomParser(ConfigParser):
     """ Custom class to make sure we preserve case. """
@@ -59,7 +59,7 @@ class jigdoDefinition:
         self.scan_isos = []
         print _("Reading jigdo configuration...")
         self.parse()
-        
+
     def parse(self):
         """ Do the actual parsing """
         self.definition_file = open(self.definition_file_loc, 'r')
@@ -126,11 +126,11 @@ class jigdoDefinition:
         for item in server_dict.keys():
             self.Servers[item] = server_dict[item]
         return True
-        
+
     def getSections(self):
         """ Return all sections used from the config """
         return self.__allSections
-        
+
     def buildMirrors(self):
         """ Fetch full URLS from our mirror list and populate. """
         mirror_id = 1

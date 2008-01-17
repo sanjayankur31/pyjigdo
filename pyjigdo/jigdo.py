@@ -25,13 +25,15 @@ Code dealing with interactions with Jigdo commands
 
 import os
 from ConfigParser import RawConfigParser
+import urlparse
 
 from urlgrabber import urlgrab
 from urlgrabber.grabber import URLGrabError
 from urlgrabber.progress import TextMeter
-from urlparse import urlparse
-from urlparse import urljoin
 from urlgrabber import urlread
+
+import pyjigdo.translate as translate
+from pyjigdo.translate import _, N_
 
 class JigdoDefinitionSection:
     def __init__(self, name, image_unique_id = 0):
@@ -44,7 +46,10 @@ class JigdoDefinitionSection:
 #            self.image = pyjigdo.image.ISOImage()
 
     def add_option(self,name, val = None, section = None):
-        setattr(self,name,val)
+        if name == "template-md5sum":
+            setattr(self,name.replace('-','_'),val)
+        else:
+            setattr(self,name.replace('-','_'),val)
 
 class JigdoDefinition:
     def __init__(self, file_name):

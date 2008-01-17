@@ -63,6 +63,9 @@ def jigdo_info(url):
         #print section[1]
     sys.exit(1)
 
+def urlparse_basename(url):
+    return os.path.basename(urlparse.urlparse(url).path)
+
 def get_file(url, working_directory = "/var/tmp"):
     """Gets a file from url and returns the file name (full path)"""
     file_basename = os.path.basename(urlparse.urlparse(url).path)
@@ -78,9 +81,11 @@ def get_file(url, working_directory = "/var/tmp"):
     return file_name
 
 def download_file(url, file_name, title=None):
+    print "downloading %s to %s" % (url,file_name)
     pbar = pyjigdo.progress.ProgressCLI("Downloading")
     dlcb = pyjigdo.progress.dlcb(pbar)
     urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=dlcb)
+    pbar.destroy()
 
 def check_file(file_name, checksum = None, destroy = False):
     """
@@ -214,10 +219,10 @@ temp_env = {'PATH': os.getenv('PATH')}
 def run_command(command, rundir=None, inshell=False, env=temp_env, stdout=subprocess.PIPE, show=False):
     """ Run a command and return output. Remember command must be ['command', 'arg1', 'arg2'] """
     if rundir == None:
-        rundir = options.download_workdir
+        rundir = "/var/tmp/"
 
     check_directory(rundir)
-    if options.debug: print "Running command '%s'" % command
+    print "Running command '%s'" % command
 
     ret = []
     p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False, env=env)
@@ -284,8 +289,7 @@ def compare_sum(target, base64_sum):
     base64_calc = base64.urlsafe_b64encode(calc)
     eq = re.compile('=')
     base64_strip = eq.sub('', base64_calc)
-    if options.debug:
-        print _("Checking %s against %s..." % (base64_strip, base64_sum))
+    print _("Checking %s against %s..." % (base64_strip, base64_sum))
     if base64_strip == base64_sum:
         return True
     else:
@@ -312,19 +316,3 @@ def printOut(dictionary, loop):
             printOut(value, loop+1)
         else:
             print '%s%s:\t%s' % (fullLoopStr, key, value)
-
-def getFileName(options_instance):
-    """ Returns the propery filename. options is interfaces.options """
-    try:
-        file_name = os.path.basename(urlparse.urlparse(options_instance.jigdo_source).path)
-    except AttributeError:
-        file_name = options.jigdo_source
-    jigdo_local_file = os.path.join(options_instance.download_workdir, file_name)
-    try:
-        jigdo_source = urlgrabber.urlgrab(options_instance.jigdo_source, filename=jigdo_local_file,
-        	progress_obj=TextMeter())
-    except urlgrabber.urlgrabError:
-        print _("Unable to fetch %s" % options_instance.jigdo_source)
-        sys.exit(1)
-    return file_name, jigdo_local_file, jigdo_source
-

@@ -28,10 +28,10 @@ import os, os.path
 from urlgrabber import urlgrab
 from urlgrabber.grabber import URLGrabError
 from urlgrabber.progress import TextMeter
-from urlparse import urljoin
-from urlparse import urlsplit
+import urlparse
 
-from misc import run_command, compare_sum, check_directory
+import pyjigdo
+import pyjigdo.misc
 
 import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
@@ -112,23 +112,38 @@ class SliceSource:
                     self.fallback_urls[url] = "0"
 
 class ISOImage:
-    """ An ISO image we are going to attempt to assemble. """
-    def __init__(self, template, template_sum, location):
+    """ An ISO image we are going to attempt to assemble."""
+    def __init__(self, image, cfg = None):
+        self.image = image
+        self.cfg = cfg
+        self.log = cfg.log
+
         self.image_slices = {}
-        self.template = template
-        self.template_sum = template_sum
-        self.image_sum = ""
         self.finished = False
-        self.location = location
         self.download = False
-        self.getImageSum()
-        if os.path.isfile(self.location):
-            print _("Image %s is already present, checking if complete..." % self.location)
-            if self.checkImage():
-                print _("Image %s is complete, wont download." % self.location)
+
+        self.iso_basename = self.image.filename
+        self.iso_name = os.path.join(self.cfg.working_directory,self.iso_basename)
+
+        self.template_basename = pyjigdo.misc.urlparse_basename(self.image.template)
+        self.template_name = os.path.join(self.cfg.working_directory,self.template_basename)
+        self.template_url = image.template
+        self.template_md5sum = image.template_md5sum
+
+        self.loopmount = os.path.join(self.cfg.working_directory,"%s.tmpdir" % self.template_basename)
+        pyjigdo.misc.check_directory(self.loopmount)
+
+    def somethingelse(self):
+        if os.path.isfile(self.template_name):
+            self.log.info(_("Image %s is already present, checking if complete..." % self.template_name))
+            if pyjigdo.misc.check_template_md5sum(self.template_name, self.template_md5sum):
+                self.log.info(_("Image %s is complete, wont download." % self.template_basename))
                 self.finished = True
             else:
-                print _("Image %s is not complete, will download." % self.location)
+                self.log.info(_("Image %s is not complete, will download from %s") % (self.template_basename, self.template_name))
+                self.log.debug(_("Image %s downloaded to %s") % (self.template_name, pyjigdo.misc.get_file(self.template_url)))
+        else:
+            self.log.debug(_("Image %s downloaded to %s") % (self.template_url, pyjigdo.misc.get_file(self.template_url)))
 
     def addSlices(self, slice_list):
         """ Add the given md5 sums to the list of files needed by this ISO image. """
@@ -141,8 +156,7 @@ class ISOImage:
 
     def checkImage(self):
         """ Check to see if image is built. """
-        if options.debug:
-            print _("Checking Image %s against sum %s" % (self.location, self.image_sum))
+        print _("Checking Image %s against sum %s" % (self.location, self.image_sum))
         if not compare_sum(self.location, self.image_sum):
             return False
         return True
@@ -153,15 +167,15 @@ class ISOImage:
         template_data = run_command(["jigdo-file", "ls", "--template", self.template], inshell=True)
         slices = [line.split()[3] for line in template_data
             if line.startswith('need-file')]
-        if options.debug: print _("Getting slices for %s... got %s slices" % (self.template, len(slices)))
+        print _("Getting slices for %s... got %s slices" % (self.template, len(slices)))
         self.addSlices(slices)
 
     def getImageSum(self):
         """ Read image template, get the image sum. """
-        template_data = run_command(["jigdo-file", "ls", "--template", self.template], inshell=True)
+        template_data = run_command(["jigdo-file", "ls", "--template", self.image], inshell=True)
         md5_sum = [line.split()[2] for line in template_data
             if line.startswith('image-info')]
-        if options.debug: print _("Image %s's sum is reported as %s..." % (self.location, md5_sum[0]))
+        print _("Image %s's sum is reported as %s..." % (self.location, md5_sum[0]))
         self.image_sum = md5_sum[0]
 
     def checkSlices(self, template_slices):
@@ -180,7 +194,7 @@ class ISOImage:
             #else:
             #    return True
             # This should only happen if our iso was sucessfully completed with the pre-download scans.
-            if options.debug: print _("\n%s is not a file!? Does that mean %s is done?!\n" % (template_tmp_file, self.location))
+            print _("\n%s is not a file!? Does that mean %s is done?!\n" % (template_tmp_file, self.location))
         template_data = run_command(["jigdo-file", "ls", "--template", template_tmp_file], inshell=True)
         # This is supposed to filter us a list of files that the template is reporting as merged.
         # The "template" is template_tmp_file which is basically the iso in the making. It will report
@@ -194,10 +208,10 @@ class ISOImage:
             # are reported by the tmp iso image where the slice is in the state "have-file". This used to be template_data.splitlines()
             # and then regex match for lines that are "have-file", this seems more pythonfooish.. maybe it doesn't work as expected?
             if line.startswith('have-file')]
-        if options.debug: print _("\n%s slices reported as downloaded: %s" % (len(slices), ", ".join(slices)) )
+        print _("\n%s slices reported as downloaded: %s" % (len(slices), ", ".join(slices)) )
         slices_needed = [line.split()[3] for line in template_data
             if line.startswith('need-file')]
-        if options.debug: print _("\n%s slices still needed: %s" % (len(slices_needed), ", ".join(slices_needed)) )
+        print _("\n%s slices still needed: %s" % (len(slices_needed), ", ".join(slices_needed)) )
         for slice_md5 in slices:
             # Make sure we are not working on something that doesn't exist:
             if slice_md5 in template_slices.slices:
@@ -213,7 +227,7 @@ class ISOImage:
 
 def download_slice(slice_md5, current_num, num_download, jigdo_config, template_slices, file_name, iso_image=None, local_dir=None):
     """ Download the given slice. """
-    remaining_tries = options.fallback_number
+    remaining_tries = 3
     slice_object = template_slices.slices[slice_md5]
     local_location = os.path.join(jigdo_config.cache_dir, slice_object.file_name)
     if local_dir:
@@ -245,8 +259,8 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
             url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file_name)
         try:
             print _("[%s/%s] %s\n" % (current_num, num_download, url))
-            if options.debug: print _("--> %s\n" % (local_location))
-            urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
+            print _("--> %s\n" % (local_location))
+            urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=10)
             if compare_sum(local_location, slice_object.slice_sum):
                 if iso_image:
                     iso_image.image_slices[slice_md5] = True
@@ -272,7 +286,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                 if source.geo_urls[url] != "404" and not download_found and remaining_tries > 0:
                     try:
                         print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
-                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
+                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=10)
                         if compare_sum(local_location, slice_object.slice_sum):
                             download_found = True
                             break
@@ -286,7 +300,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                 if source.global_urls[url] != "404" and not download_found and remaining_tries > 0:
                     try:
                         print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
-                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
+                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=10)
                         if compare_sum(local_location, slice_object.slice_sum):
                             download_found = True
                             break
@@ -300,7 +314,7 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
                 if source.fallback_urls[url] != "404" and not download_found:
                     try:
                         print _("[%s/%s] Trying to download %s: \n\t --> %s" % (current_num, num_download, url, local_location))
-                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=options.urlgrab_timeout)
+                        urlgrab(url, filename=local_location, progress_obj=TextMeter(), text=slice_object.file_name, timeout=10)
                         if compare_sum(local_location, slice_object.slice_sum):
                             download_found = True
                             break
@@ -316,10 +330,10 @@ def download_slice(slice_md5, current_num, num_download, jigdo_config, template_
             slice_object.location = local_location
             break
     if compare_sum(slice_object.location, slice_md5):
-        if options.debug: print _('\t --> Checksum valid.')
+        print _('\t --> Checksum valid.')
         return True
     else:
-        if options.debug: print _('\t --> Checksum INVALID!')
+        print _('\t --> Checksum INVALID!')
         # FIXME: Any calls to download_slice must be modified to restart a
         #        given slice when returning false
         if iso_image:

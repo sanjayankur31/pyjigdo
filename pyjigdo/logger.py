@@ -21,9 +21,8 @@ import logging
 import logging.handlers
 import sys
 
-# Translation
-from rhpl.translate import _, N_, getDefaultLangs
-import rhpl.translate as translate
+import pyjigdo.translate as translate
+from pyjigdo.translate import _, N_
 
 class Logger:
     def __init__(self, loglevel = logging.INFO, debuglevel = 0):
