@@ -32,7 +32,7 @@ import pyjigdo.base
 import pyjigdo.misc
 from pyjigdo.constants import *
 
-# not needed *yet*
+#not needed *yet*
 #from rhpl.translate import _, N_
 #import distutils, distutils.sysconfig
 #import threading
@@ -329,12 +329,6 @@ class PyJigdo(object):
 
     def run(self):
         self.base.run()
-
-
-
-## Parse Options
-#(options, args) = parser.parse_args()
-
 
 ## Check options
 

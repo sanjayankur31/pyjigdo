@@ -29,11 +29,13 @@ import subprocess
 import sys
 import types
 import time
+import urlgrabber
+import urlgrabber.grabber
+import urlgrabber.progress
+import urlparse
 
-from urlgrabber import urlgrab
-from urlparse import urlparse
-from urlgrabber.grabber import URLGrabError
-from urlgrabber.progress import TextMeter
+import pyjigdo
+import pyjigdo.progress
 
 import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
@@ -50,7 +52,7 @@ def jigdo_info(url):
 
     # This should use a function to grab the file with, parse it, display the info and destroy all the temp data
     try:
-        urlgrab(url, "/var/tmp/jigdo.jigdo", copy_local=1)
+        urlgrabber.urlgrab(url, "/var/tmp/jigdo.jigdo", copy_local=1)
     except Exception, e:
         print >> sys.stderr, "%r" % e.__class__
         print >> sys.stderr, "Exception raised"
@@ -63,7 +65,7 @@ def jigdo_info(url):
 
 def get_file(url, working_directory = "/var/tmp"):
     """Gets a file from url and returns the file name (full path)"""
-    file_basename = os.path.basename(urlparse(url).path)
+    file_basename = os.path.basename(urlparse.urlparse(url).path)
     file_name = os.path.join(working_directory, file_basename)
 
     if not check_file(file_name, destroy = True):
@@ -75,8 +77,10 @@ def get_file(url, working_directory = "/var/tmp"):
 
     return file_name
 
-def download_file(url, file_name):
-    urlgrab(url, file_name, copy_local=1)
+def download_file(url, file_name, title=None):
+    pbar = pyjigdo.progress.ProgressCLI("Downloading")
+    dlcb = pyjigdo.progress.dlcb(pbar)
+    urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=dlcb)
 
 def check_file(file_name, checksum = None, destroy = False):
     """
@@ -312,14 +316,14 @@ def printOut(dictionary, loop):
 def getFileName(options_instance):
     """ Returns the propery filename. options is interfaces.options """
     try:
-        file_name = os.path.basename(urlparse(options_instance.jigdo_source).path)
+        file_name = os.path.basename(urlparse.urlparse(options_instance.jigdo_source).path)
     except AttributeError:
         file_name = options.jigdo_source
     jigdo_local_file = os.path.join(options_instance.download_workdir, file_name)
     try:
-        jigdo_source = urlgrab(options_instance.jigdo_source, filename=jigdo_local_file,
+        jigdo_source = urlgrabber.urlgrab(options_instance.jigdo_source, filename=jigdo_local_file,
         	progress_obj=TextMeter())
-    except URLGrabError:
+    except urlgrabber.urlgrabError:
         print _("Unable to fetch %s" % options_instance.jigdo_source)
         sys.exit(1)
     return file_name, jigdo_local_file, jigdo_source
