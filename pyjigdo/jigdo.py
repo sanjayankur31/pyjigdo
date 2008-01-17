@@ -24,12 +24,108 @@ Code dealing with interactions with Jigdo commands
 """
 
 import os
+from ConfigParser import RawConfigParser
+
 from urlgrabber import urlgrab
 from urlgrabber.grabber import URLGrabError
 from urlgrabber.progress import TextMeter
 from urlparse import urlparse
 from urlparse import urljoin
 from urlgrabber import urlread
+
+class JigdoDefinitionSection:
+    def __init__(self, name, image_unique_id = 0):
+        self._section_name = name
+
+        if name == "Image":
+            self.selected = False
+            self.image_unique_id = image_unique_id
+# FIXME
+#            self.image = pyjigdo.image.ISOImage()
+
+    def add_option(self,name, val = None, section = None):
+        setattr(self,name,val)
+
+class JigdoDefinition:
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.image_unique_id = 0
+        self.images = { 'index': {} }
+        self.parse()
+
+    def parse(self):
+        """This parses the JigdoDefinition.file_name"""
+        cursect = None                            # None, or a dictionary
+        optname = None
+        lineno = 0
+        e = None                                  # None, or an exception
+        self._sections = []
+
+        fp = open(self.file_name, "r")
+        while True:
+            line = fp.readline()
+            if not line:
+                break
+            # comment or blank line?
+            if line.strip() == '' or line[0] in '#;':
+                continue
+            if line.split(None, 1)[0].lower() == 'rem' and line[0] in "rR":
+                continue
+
+            # no leading whitespace
+            # continuation line?
+            if line[0].isspace() and cursect is not None and optname:
+                value = line.strip()
+                if value:
+                    cursect[optname] = "%s\n%s" % (cursect[optname], value)
+            # a section header or option header?
+            else:
+                # is it a section header?
+                mo = RawConfigParser.SECTCRE.match(line)
+                if mo:
+                    sectname = mo.group('header')
+                    if sectname == "Image":
+                        self.image_unique_id += 1
+                        section = JigdoDefinitionSection(sectname, self.image_unique_id)
+                        self.images['index'][self.image_unique_id] = section
+                    else:
+                        section = JigdoDefinitionSection(sectname)
+                    cursect = section
+                    self._sections.append(section)
+#                    print "Found section with name %s" % sectname
+                    # So sections can't start with a continuation line
+                    optname = None
+                # no section header in the file?
+                elif cursect is None:
+                    raise MissingSectionHeaderError(fpname, lineno, line)
+                # an option line?
+                else:
+                    mo = RawConfigParser.OPTCRE.match(line)
+                    if mo:
+                        optname, vi, optval = mo.group('option', 'vi', 'value')
+                        if vi in ('=', ':') and ';' in optval:
+                            # ';' is a comment delimiter only if it follows
+                            # a spacing character
+                            pos = optval.find(';')
+                            if pos != -1 and optval[pos-1].isspace():
+                                optval = optval[:pos]
+                        optval = optval.strip()
+                        # allow empty values
+                        if optval == '""':
+                            optval = ''
+                        optname = optname.rstrip().lower()
+                        cursect.add_option(optname,optval,section)
+                    else:
+                        # a non-fatal parsing error occurred.  set up the
+                        # exception but keep going. the exception will be
+                        # raised at the end of the file and will contain a
+                        # list of all bogus lines
+                        if not e:
+                            e = ParsingError(fpname)
+                        e.append(lineno, repr(line))
+        # if any parsing errors occurred, raise an exception
+        if e:
+            raise e
 
 class JigdoJobPool:
     """ This is just a test class for building our objects and looping them. """
@@ -156,10 +252,10 @@ class JigdoRepoDefinition:
 
 def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file, repos, merge=False):
     """ Generate a .jigdo and .template """
-    
-    for repo in repos: 
+
+    for repo in repos:
         if not isinstance(repo, JigdoRepoDefinition): raise JigdoError, "Was given flawed repo data."
-    
+
     if merge:
         if not os.access(jigdo_file_name, os.RW_OK):
             #FIXME: Design JigdoError
@@ -175,7 +271,7 @@ def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file,
         generation_command_data_sources.extend(
         "%s/" % repo.data_source,
         "--label %s=%s" % (repo.label, repo.data_source))
-    
+
     generation_command = [
         "/usr/bin/jigdo-file",
         "make-template",
@@ -186,5 +282,5 @@ def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file,
         "--force"]
     if merge: generation_command.append("--merge=%s" % jigdo_file_name)
     generation_command.extend(generation_command_data_sources)
-    
+
     misc.run_command(generation_command)

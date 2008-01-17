@@ -21,29 +21,97 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import os, os.path
-import sys
-import subprocess
 import base64
+import os
+import re
+import shutil
+import subprocess
+import sys
 import types
 import time
-import re
 
 from urlgrabber import urlgrab
 from urlparse import urlparse
 from urlgrabber.grabber import URLGrabError
 from urlgrabber.progress import TextMeter
 
-import rhpl.translate as translate
-from rhpl.translate import _, N_
+import pyjigdo.translate as translate
+from pyjigdo.translate import _, N_
 
 try:
-    # new versions of python. Use hashlib	
+    # new versions of python. Use hashlib
     import hashlib as md5_hashlib
 except ImportError:
     # old versions of python. Use now deprecrated md5
     import md5 as md5_hashlib
 
+def jigdo_info(url):
+    """Prints out information about a .jigdo file located at the given URL"""
+
+    # This should use a function to grab the file with, parse it, display the info and destroy all the temp data
+    try:
+        urlgrab(url, "/var/tmp/jigdo.jigdo", copy_local=1)
+    except Exception, e:
+        print >> sys.stderr, "%r" % e.__class__
+        print >> sys.stderr, "Exception raised"
+
+    for section in jigdo_config.getSections():
+        print '** %s:' % section[0]
+        misc.printOut(section[1], 0)
+        #print section[1]
+    sys.exit(1)
+
+def get_file(url, working_directory = "/var/tmp"):
+    """Gets a file from url and returns the file name (full path)"""
+    file_basename = os.path.basename(urlparse(url).path)
+    file_name = os.path.join(working_directory, file_basename)
+
+    if not check_file(file_name, destroy = True):
+        # File does not exist or wasn't valid. Download the file.
+        download_file(url, file_name)
+    else:
+        # There should be no else to this one
+        pass
+
+    return file_name
+
+def download_file(url, file_name):
+    urlgrab(url, file_name, copy_local=1)
+
+def check_file(file_name, checksum = None, destroy = False):
+    """
+    Checks if a file exists. Basically returns True if the file exists, unless the
+    checksum doesn't check out or destroy has been set to True.
+
+    If the file exists:
+        Checksum:
+            If specified, run the checksum and return:
+                - True if the checksum checks out.
+                - False if it doesn't and destroy the file.
+            If not specified:
+                - Continue
+        Destroy:
+            If True:
+                - Destroy the file and return False
+            else:
+                - Return True
+    else:
+        - return False
+
+    """
+    if os.access(file_name, os.R_OK):
+        if not checksum == None:
+            if file_checksum(file_name, checksum):
+                return True
+            else:
+                return False
+        elif destroy:
+            os.remove(file_name)
+            return False
+        else:
+            return True
+    else:
+        return False
 
 class LoopbackMount:
     def __init__(self, lofile, mountdir, fstype = None):
@@ -175,7 +243,7 @@ def run_command(command, rundir=None, inshell=False, env=temp_env, stdout=subpro
 #    p.stdout.close()
 #    return ret
 
-def check_directory(directory):
+def check_directory(directory, destroy=False):
     """ Check if directory exists. If not, create it or fail. """
     if not os.access(directory, os.R_OK):
         try:
@@ -183,6 +251,10 @@ def check_directory(directory):
         except OSError:
             print _("Directory %s could not be created. Aborting" % directory)
             sys.exit(1)
+    #elif destroy:
+        # Ask for confirmation?
+        #shutil.rmtree(directory)
+        #os.makedirs(directory)
 
 def compare_sum(target, base64_sum):
     """ Compares a file's sum to given sum. """

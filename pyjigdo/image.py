@@ -33,8 +33,8 @@ from urlparse import urlsplit
 
 from misc import run_command, compare_sum, check_directory
 
-import rhpl.translate as translate
-from rhpl.translate import _, N_
+import pyjigdo.translate as translate
+from pyjigdo.translate import _, N_
 
 class ImageSlice:
     """ A file needing to be downloaded for an image. """
@@ -110,7 +110,7 @@ class SliceSource:
                 elif (list_type == "fallback" and url not in self.geo_urls
                 and url not in self.global_urls):
                     self.fallback_urls[url] = "0"
-                        
+
 class ISOImage:
     """ An ISO image we are going to attempt to assemble. """
     def __init__(self, template, template_sum, location):
