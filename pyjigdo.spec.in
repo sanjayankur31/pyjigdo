@@ -2,16 +2,16 @@
 
 Summary:        Python version of Jigdo, slightly modified
 Name:           pyjigdo
-Version:        0.2
-Release:        3%{?dist}
+Version:        0.3
+Release:        1%{?dist}
 License:        GPLv2+
 Group:          Applications/System
 URL:            https://hosted.fedoraproject.org/projects/pyjigdo
 Source0:        http://files.pyjigdo.fedoraunity.org/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Requires:       jigdo
 BuildArch:      noarch
-BuildRequires:  intltool, gettext, python, diffutils
+BuildRequires:  intltool, gettext, python
+Requires:	python, rhpl, python-urlgrabber, jigdo
 
 %description
 PyJigdo is a Python rewrite of the popular Jigdo distribution framework. It has
@@ -42,6 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Tue Feb 5 2007 Jonathan Steffan <jon a fedoraunity.org> 0.3-1
+- Update Requires
+
 * Wed Dec 19 2007 Jonathan Steffan <jon a fedoraunity.org> 0.2-3
 - Remove gitdate
 
