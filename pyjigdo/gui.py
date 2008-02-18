@@ -20,7 +20,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-class PyJigdoGUI:
+import pyjigdo
+import pyjigdo.base
+
+class PyJigdoGUI(pyjigdo.base.PyJigdoBase):
     def __init__(self, base):
         print "Launching GUI"
 

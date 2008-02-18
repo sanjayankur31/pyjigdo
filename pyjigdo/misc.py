@@ -63,11 +63,20 @@ def jigdo_info(url):
         #print section[1]
     sys.exit(1)
 
+def list_images(url):
+    file_name = get_file(url)
+    jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name)
+    for image in jigdo_definition.images['index']:
+        print "#%d: %s" % (image,jigdo_definition.images['index'][image].filename)
+
 def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)
 
-def get_file(url, working_directory = "/var/tmp"):
-    """Gets a file from url and returns the file name (full path)"""
+def get_file(url, working_directory = "/var/tmp", pbar = None):
+    """Gets a file (from url) and returns the file name (full path)"""
+    if os.access(url, os.R_OK):
+        return url
+
     file_basename = os.path.basename(urlparse.urlparse(url).path)
     file_name = os.path.join(working_directory, file_basename)
 
@@ -80,11 +89,10 @@ def get_file(url, working_directory = "/var/tmp"):
 
     return file_name
 
-def download_file(url, file_name, title=None):
+def download_file(url, file_name, pbar = None, title=None):
     print "downloading %s to %s" % (url,file_name)
-    pbar = pyjigdo.progress.ProgressCLI("Downloading")
-    dlcb = pyjigdo.progress.dlcb(pbar)
-    urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=dlcb)
+    urlgrab_cb = pyjigdo.progress.FileDownloadProgress(pbar)
+    urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=urlgrab_cb)
     pbar.destroy()
 
 def check_file(file_name, checksum = None, destroy = False):
@@ -121,6 +129,43 @@ def check_file(file_name, checksum = None, destroy = False):
             return True
     else:
         return False
+
+def file_checksum(file, checksum):
+    """ Compares a file's sum to given sum. """
+    B, K, M, G = 1, 1024, 1024*1024, 1024*1024*1024
+    # now that our sizes are defined let's do some multiplication
+    bufsize = 8*K*B
+    mode = 'rb'
+    if not os.path.isfile(file): return False
+    f = open(file, mode)
+    md5 = md5_hashlib.md5()
+    try:
+        while True: # this just reads to the end and updates the hash
+            temp_data = f.read(bufsize)
+            if not temp_data:
+                f.close()
+                break
+            md5.update(temp_data)
+    except Exception, error_description:
+        # eventually let's actually do something here when it fails
+        print 'An error occurred while running checksum: %s' % error_description
+        return False
+    calc = md5.digest()
+    base64_calc = base64.urlsafe_b64encode(calc)
+    eq = re.compile('=')
+    base64_strip = eq.sub('', base64_calc)
+    print _("Checking %s against %s..." % (base64_strip, checksum))
+    if base64_strip == checksum:
+        return True
+    else:
+        return False
+
+
+def url_to_file_name(url, working_directory = "/var/tmp"):
+    file_basename = os.path.basename(urlparse.urlparse(url).path)
+    file_name = os.path.join(working_directory, file_basename)
+
+    return file_name
 
 class LoopbackMount:
     def __init__(self, lofile, mountdir, fstype = None):

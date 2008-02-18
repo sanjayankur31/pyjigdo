@@ -24,6 +24,8 @@ Code dealing with interactions with Jigdo commands
 """
 
 import os
+import pyjigdo
+import pyjigdo.misc
 from ConfigParser import RawConfigParser
 import urlparse
 
@@ -42,10 +44,8 @@ class JigdoDefinitionSection:
         if name == "Image":
             self.selected = False
             self.image_unique_id = image_unique_id
-# FIXME
-#            self.image = pyjigdo.image.ISOImage()
 
-    def add_option(self,name, val = None, section = None):
+    def add_option(self, name, val = None, section = None):
         if name == "template-md5sum":
             setattr(self,name.replace('-','_'),val)
         else:
@@ -131,6 +131,20 @@ class JigdoDefinition:
         # if any parsing errors occurred, raise an exception
         if e:
             raise e
+
+class JigdoTemplate:
+    def __init__(self, md5sum, url, cfg):
+        self.md5sum = md5sum
+        self.url = url
+        self.cfg = cfg
+
+        self.file_name = pyjigdo.misc.url_to_file_name(self.url, working_directory = self.cfg.working_directory)
+
+        if pyjigdo.misc.check_file(self.file_name, checksum = self.md5sum):
+            print "Checks out"
+        else:
+            pbar = self.cfg.base.progress_bar(_("Downloading %s") % os.path.basename(self.file_name))
+            self.file_name = pyjigdo.misc.get_file(self.url, working_directory = self.cfg.working_directory, pbar = pbar)
 
 class JigdoJobPool:
     """ This is just a test class for building our objects and looping them. """

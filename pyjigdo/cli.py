@@ -110,4 +110,4 @@ class PyJigdoCLI:
             this_image = self.base.jigdo_definition.images['index'][image]
             if this_image.selected:
                 print this_image.__dict__
-                selected_image = pyjigdo.image.ISOImage(this_image, self.cfg)
+                selected_image = pyjigdo.jigdo.JigdoTemplate(this_image.template_md5sum, this_image.template, self.cfg)
