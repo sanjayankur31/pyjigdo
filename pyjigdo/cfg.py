@@ -29,6 +29,7 @@ from pyjigdo.translate import _, N_
 
 class ConfigStore:
     def __init__(self, base):
+        self.base = base
         self.log = base.log
         self.cli_options = base.cli_options
         self.parser = base.parser
@@ -61,7 +62,10 @@ class ConfigStore:
     def check_options(self):
         """Check the CLI options specified"""
 
-        if self.cli_options.jigdo_info and self.cli_options.jigdo_url == self.defaults.jigdo_url:
+        if self.cli_options.jigdo_url == "" and self.cli_mode:
+            self.log.error(_("Running from CLI but no .jigdo file specified"), recoverable = False)
+
+        if ( self.cli_options.jigdo_info and self.cli_options.jigdo_url == self.defaults.jigdo_url ):
             self.log.error(_("Info requested from a .jigdo file but no .jigdo file specified"), recoverable = False)
 
     def options_set_from_config(self):

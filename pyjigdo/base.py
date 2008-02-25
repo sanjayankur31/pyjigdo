@@ -154,6 +154,40 @@ class PyJigdoBase:
         else:
             return False
 
+    def progress_bar(self, title = "", parent = None, xml = None, callback = False):
+        """This function should be used to determine the type of progress bar we need.
+        There's three types:
+            - GUI Dialog Progress Bar (separate dialog, window pops up)
+            - GUI Nested Progress Bar (no separate dialog, progress bar is in gui.frame_xml)
+            - CLI Progress Bar
+
+        This function also determines whether we should have a Callback Progress Bar"""
+
+        self.log.debug(_("Initting progress bar for ") + title, level = 9)
+
+        if self.cfg.gui_mode:
+            if callback:
+                if not self.gui.frame_xml.get_widget("part_progress") == None:
+                    return pyjigdo.progress.ProgressCallbackGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
+                elif not self.gui.main_window == None:
+                    return pyjigdo.progress.ProgressCallbackGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
+                else:
+                    return pyjigdo.progress.ProgressCallbackGUI(title = title, parent = parent, xml = xml)
+            else:
+                if not self.gui.frame_xml.get_widget("part_progress") == None:
+                    return revisor.progress.ProgressGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
+                elif not self.gui.main_window == None:
+                    return pyjigdo.progress.ProgressGUI(title = title, parent = self.gui, xml = xml)
+                else:
+                    return pyjigdo.progress.ProgressGUI(title = title, parent = parent, xml = xml)
+        else:
+            if callback:
+                return pyjigdo.progress.ProgressCallbackCLI(title = title)
+            else:
+                return pyjigdo.progress.ProgressCLI(title = title)
+
+
+
     def select_image(self, image_unique_id):
         image_unique_id = int(image_unique_id)
         self.log.debug(_("Selecting Image %d") % image_unique_id, level = 4)
