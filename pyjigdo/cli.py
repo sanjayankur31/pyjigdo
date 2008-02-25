@@ -21,6 +21,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import os
+import sys
 import urlparse
 
 import pyjigdo
@@ -54,10 +55,10 @@ class PyJigdoCLI:
         # Require Raw Input
         while choosing_images:
             print "Please select one or more of the available Images:"
-            for image in self.base.jigdo_definition.images['index']:
-                print "#%d: %s" % (image,self.base.jigdo_definition.images['index'][image].filename)
+            for image in self.base.jigdo_definition.images:
+                print "#%d: %s" % (image,self.base.jigdo_definition.images[image].filename)
 
-            num_images = len(self.base.jigdo_definition.images['index'])
+            num_images = len(self.base.jigdo_definition.images)
             image_choice = raw_input("What image(s) would you like to download? [1-%s] " % num_images )
             if image_choice == "":
                 print "Choose the number(s) of the image file(s), seperated by commas or spaces, or specify a range (1-5)"
@@ -106,8 +107,8 @@ class PyJigdoCLI:
             sys.exit(1)
 
     def download_images(self):
-        for image in self.base.jigdo_definition.images['index']:
-            this_image = self.base.jigdo_definition.images['index'][image]
+        for image in self.base.jigdo_definition.images.keys():
+            this_image = self.base.jigdo_definition.images[image]
             if this_image.selected:
-                print this_image.__dict__
-                selected_image = pyjigdo.image.ISOImage(this_image, self.cfg)
+                self.base.add_recompose(this_image)
+        self.base.run_recompose()

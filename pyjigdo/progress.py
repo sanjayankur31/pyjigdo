@@ -42,14 +42,17 @@ class ProgressCLI:
     def __init__(self, title = ""):
         """All we want is a widget. It's new, so it's set to fraction 0.0"""
         self.title = title
+        self.txt = ''
         self.fract = 0.0
         self.columns = os.getenv("$COLUMNS", 80)
-        print "Columns: %s" % self.columns
         self.space_left = 0
         self.space_right = 3
         self.reserved_left = 31
         self.reserved_right = 6
         self.set_fraction(self.fract)
+        #if len(self.title) > 29:
+            #print self.title
+            #self.title = ' ' * 29
 
     def show(self):
         pass
@@ -69,14 +72,14 @@ class ProgressCLI:
             show = int(room*perc/100)
             not_show = room - show
             sys.stdout.write('\r' + self.title + ': ' + str(' ' * (self.columns - len(self.title))) + ' ')
-            sys.stdout.write('\r' + self.title + ': ' + str(' ' * (self.reserved_left - len(self.title))) + str('#' * show) + str(' ' * not_show) + str(' ' * (self.reserved_right-len(str(perc)))) + str(perc) + '% ')
+            sys.stdout.write('\r' + self.title + ': ' + str(' ' * (self.reserved_left - len(self.title))) + str('#' * show) + str(' ' * not_show) + str(' ' * (self.reserved_right-len(str(perc)))) + str(perc) + '% ' + str(self.txt))
             sys.stdout.flush()
 
     def get_fraction(self):
         return self.fract
 
     def set_markup(self, txt):
-        pass
+        self.txt = txt
 
     def set_pbar_text(self, txt):
         pass
@@ -98,9 +101,31 @@ class dlcb(urlgrabber.progress.BaseMeter):
     def _do_update(self, amount_read, now=None):
         if self.size is None:
             return
-        pct = float(amount_read) / self.size
-        curval = self.pbar.get_fraction()
-        newval = (pct * 1/self.size) + (curval / self.size)
-        if newval > curval + 0.001 or time.time() > self.last + 0.1:
-            self.pbar.set_fraction(newval)
-            self.last = time.time()
+        pct = float(amount_read) / float(self.size)
+        self.re.update(amount_read, now)
+        self.pbar.set_markup(self.re.remaining_time() + ' ETA')
+        self.pbar.set_fraction(pct)
+        self.last = time.time()
+
+class dlcb(urlgrabber.progress.TextMeter):
+    def __init__(self, pbar, log = None, cfg = None):
+        urlgrabber.progress.BaseMeter.__init__(self)
+        self.log = log
+        self.cfg = cfg
+        self.pbar = pbar
+        self.last = time.time()
+
+    def _do_start(self, now):
+        self.pbar.set_fraction(0.0)
+
+    def _do_end(self, amount_read, now=None):
+        self.pbar.set_fraction(amount_read / self.size)
+
+    def _do_update(self, amount_read, now=None):
+        if self.size is None:
+            return
+        pct = float(amount_read) / float(self.size)
+        self.re.update(amount_read, now)
+        self.pbar.set_markup(self.re.remaining_time() + ' ETA')
+        self.pbar.set_fraction(pct)
+        self.last = time.time()

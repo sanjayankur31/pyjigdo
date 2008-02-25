@@ -71,7 +71,7 @@ def get_file(url, working_directory = "/var/tmp"):
     file_basename = os.path.basename(urlparse.urlparse(url).path)
     file_name = os.path.join(working_directory, file_basename)
 
-    if not check_file(file_name, destroy = True):
+    if not check_file(file_name, destroy = False):
         # File does not exist or wasn't valid. Download the file.
         download_file(url, file_name)
     else:
@@ -81,11 +81,8 @@ def get_file(url, working_directory = "/var/tmp"):
     return file_name
 
 def download_file(url, file_name, title=None):
-    print "downloading %s to %s" % (url,file_name)
-    pbar = pyjigdo.progress.ProgressCLI("Downloading")
-    dlcb = pyjigdo.progress.dlcb(pbar)
-    urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=dlcb)
-    pbar.destroy()
+#    print "downloading %s to %s" % (url,file_name)
+    urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=urlgrabber.progress.TextMeter())
 
 def check_file(file_name, checksum = None, destroy = False):
     """

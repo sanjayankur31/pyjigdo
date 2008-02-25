@@ -138,7 +138,7 @@ class PyJigdoBase:
         self.log.debug(_("Selecting Images"), level = 4)
         success = False
         if self.cfg.image_all:
-            for image in self.jigdo_definition.images['index']:
+            for image in self.jigdo_definition.images:
                 # Select Image
                 self.select_image(image)
 
@@ -159,15 +159,26 @@ class PyJigdoBase:
         self.log.debug(_("Selecting Image %d") % image_unique_id, level = 4)
         success = True
         # Find the image with unique_id
-        if self.jigdo_definition.images['index'].has_key(image_unique_id):
-            self.jigdo_definition.images['index'][image_unique_id].selected = True
+        if self.jigdo_definition.images.has_key(image_unique_id):
+            self.jigdo_definition.images[image_unique_id].select()
         else:
             self.log.warning(_("Could not select image %s") % image_unique_id)
             success = False
 
     def selected_images(self):
         images = []
-        for image in self.jigdo_definition.images['index']:
-            if self.jigdo_definition.images['index'][image].selected:
+        for image in self.jigdo_definition.images:
+            if self.jigdo_definition.images[image].selected:
                 images.append(str(image))
         return images
+
+    def add_recompose(self, image):
+        """Generate the slices"""
+        print image.__dict__
+        image.template_name = pyjigdo.misc.get_file(image.template, working_directory = self.cfg.working_directory)
+        image.collect_slices()
+#        image.
+#        print image.template_filename
+
+    #def run_recompose(self):
+        #for job in self.jobs:

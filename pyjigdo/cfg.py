@@ -98,8 +98,8 @@ class ConfigStore:
         except:
             self.log.warning(_("Invalid configuration file %s") % config_file)
 
-        if not config.has_section("pyjigdo"):
-            self.log.warning(_("No master configuration section [pyjigdo] in configuration file %s") % config_file)
+        #if not config.has_section("pyjigdo"):
+            #self.log.warning(_("No master configuration section [pyjigdo] in configuration file %s") % config_file)
 
         return config
 

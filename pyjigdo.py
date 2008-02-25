@@ -128,7 +128,7 @@ class PyJigdo(object):
         config_group.add_option(    "--working-directory",
                                     dest    = "working_directory",
                                     action  = "store",
-                                    default = "/var/tmp/",
+                                    default = "/var/tmp/pyjigdo/",
                                     help    = _("Working directory"),
                                     metavar = "[directory]")
 

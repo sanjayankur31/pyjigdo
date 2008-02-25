@@ -74,7 +74,6 @@ class TemplateSlices:
                     if m[0] == server]
             self.slices[template_slice] = ImageSlice(template_slice, mirrors, file_name, server)
 
-
 class SliceSource:
     """ A list of full urls for a source. This is compiled from taking the mirror list or
     mirror selection and building valid urls for the given file."""
@@ -133,7 +132,6 @@ class ISOImage:
         self.loopmount = os.path.join(self.cfg.working_directory,"%s.tmpdir" % self.template_basename)
         pyjigdo.misc.check_directory(self.loopmount)
 
-    def somethingelse(self):
         if os.path.isfile(self.template_name):
             self.log.info(_("Image %s is already present, checking if complete..." % self.template_name))
             if pyjigdo.misc.check_template_md5sum(self.template_name, self.template_md5sum):
