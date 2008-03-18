@@ -43,7 +43,7 @@ class JigdoDefinition:
     def __init__(self, file_name):
         self.file_name = file_name
         self.image_unique_id = 0
-        self.images = { }
+        self.images = {}
         self.parse()
 
     def parse(self):
@@ -60,7 +60,7 @@ class JigdoDefinition:
             if not line:
                 break
             # comment or blank line?
-            if line.strip() == '' or line[0] in '#;':
+            if line.strip() in ('','\n') or line[0] in ('#', ';'):
                 continue
             if line.split(None, 1)[0].lower() == 'rem' and line[0] in "rR":
                 continue
@@ -124,6 +124,9 @@ class JigdoDefinitionSection:
     """A Section in the Jigdo Definition File"""
     def __init__(self, name, image_unique_id = 0):
         self._section_name = name
+
+    def add_option(self,name, val = None):
+        setattr(self,name,val)
 
 class JigdoTemplate:
     def __init__(self, md5sum, url, cfg):
@@ -264,7 +267,6 @@ class JigdoRepoDefinition:
 
 def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file, repos, merge=False):
     """ Generate a .jigdo and .template """
->>>>>>> c9480920f1b63960374f397e154ae8b163271c47:pyjigdo/jigdo.py
 
     def add_option(self,name, val = None):
         setattr(self,name,val)

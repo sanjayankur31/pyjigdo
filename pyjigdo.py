@@ -21,29 +21,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 from optparse import OptionParser
-import os
-import sys
-
-import rhpl.translate as translate
-from rhpl.translate import _, N_
-
+import os, sys
 import pyjigdo
 import pyjigdo.base
 import pyjigdo.misc
 from pyjigdo.constants import *
 
-#not needed *yet*
-#from rhpl.translate import _, N_
-#import distutils, distutils.sysconfig
-#import threading
-#import thread
-#import Queue
-#import subprocess
-#import select
-
 
 """
-pyjigdo command line interface
+pyjigdo interface - Jigdo at its finest
 """
 
 import pyjigdo.translate as translate
@@ -119,13 +105,13 @@ class PyJigdo(object):
                                     default = os.path.join(BASE_CONF_DIR,"pyjigdo.conf"),
                                     help    = _("PyJigdo configuration file to use"),
                                     metavar = "[config file]")
-        config_group.add_option(    "--destination-directory",
+        config_group.add_option(    "--dest-dir", "--destination-directory",
                                     dest    = "destination_directory",
                                     action  = "store",
                                     default = "/srv/jigdo/",
                                     help    = _("Destination directory for products"),
                                     metavar = "[directory]")
-        config_group.add_option(    "--working-directory",
+        config_group.add_option(    "--work-dir", "--working-directory",
                                     dest    = "working_directory",
                                     action  = "store",
                                     default = "/var/tmp/pyjigdo/",
@@ -136,7 +122,7 @@ class PyJigdo(object):
         ## Purpose: We should allow a user to query a jigdo and get lots-o-info from just
         ##          downloading the jigdo file.
         general_group = parser.add_option_group(_("General Options"))
-        general_group.add_option(   "--jigdo",
+        general_group.add_option(   "-j", "--jigdo",
                                     dest    = "jigdo_url",
                                     action  = "store",
                                     default = "",
@@ -325,11 +311,6 @@ class PyJigdo(object):
 
         if self.cli_options.list_images:
             sys.exit(pyjigdo.misc.list_images(self.cli_options.jigdo_url))
-
-        pass
-
-    def detect_mode(self):
-        pass
 
     def run(self):
         self.base.run()

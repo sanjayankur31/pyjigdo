@@ -55,6 +55,9 @@ class ConfigStore:
 
         # Then override those with the command line specified options
         self.options_set_from_commandline()
+        
+        # Make any directory arguments absolute
+        self.options_make_absolute()
 
         # Now that we know about any of the options, it's about time we check them!
         self.check_options()
@@ -164,6 +167,11 @@ class ConfigStore:
                     self.log.debug(_("Setting %s to %r (from command line)") % (option,self.cli_options.__dict__[option]), level = 8)
             else:
                 self.log.debug(_("Setting %s to %r (from command line)") % (option,self.cli_options.__dict__[option]), level = 8)
+    
+    def options_make_absolute(self):
+        """ Check options that are known to be directory definitions and make them absolute. """
+        setattr(self, 'working_directory', os.path.abspath(getattr(self, 'working_directory')))
+        setattr(self, 'destination_directory', os.path.abspath(getattr(self, 'destination_directory')))
 
     def _set_gui_mode(self):
         self.gui_mode = True

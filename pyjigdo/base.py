@@ -21,8 +21,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import logging
-import sys
+import logging, sys
 
 import pyjigdo.cfg
 import pyjigdo.jigdo
@@ -131,7 +130,7 @@ class PyJigdoBase:
     def load_jigdo(self, url):
         """Load a jigdo from a given URL using pyjigdo.misc.get_file"""
         self.log.debug(_("Loading Jigdo file %s") % url, level=2)
-        file_name = pyjigdo.misc.get_file(url, self.cfg.working_directory)
+        file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.working_directory, log = self.log)
         self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name)
 
     def select_images(self):
