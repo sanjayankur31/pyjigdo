@@ -1,11 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2007, 2008 Fedora Unity
-#
-# Jonathan Steffan <jon a fedoraunity.org>
-# Jeroen van Meeuwen <kanarip a fedoraunity.org>
-# Ignacio Vazquez-Abrams <ivazqueznet+pyjigdo a gmail.com>
-# Stewart Adam <s.adam a diffingo.com>
+# Copyright 2007, 2008 Fedora Unity Project (http://fedoraunity.org)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,11 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
 from optparse import OptionParser
 import os, sys
-import pyjigdo
 import pyjigdo.base
-import pyjigdo.misc
 from pyjigdo.constants import *
 
 

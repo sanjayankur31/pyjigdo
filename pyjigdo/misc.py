@@ -1,11 +1,5 @@
 #
-# Copyright 2007, 2008 Fedora Unity
-#
-# Jonathan Steffan <jon a fedoraunity.org>
-# Jeroen van Meeuwen <kanarip a fedoraunity.org>
-# Ignacio Vazquez-Abrams <ivazqueznet+pyjigdo a gmail.com>
-# Stewart Adam <s.adam a diffingo.com>
-
+# Copyright 2007, 2008 Fedora Unity Project (http://fedoraunity.org)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,15 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import base64, os, re, shutil, subprocess, sys, types, time
-import urlgrabber
-import urlgrabber.grabber
+import base64, os, re, shutil, subprocess, sys, types, time, urlparse
+import pyjigdo.progress, pyjigdo.jigdo
+import urlgrabber.grabber, urlgrabber.progress
 from urlgrabber.grabber import URLGrabError
-import urlgrabber.progress
-import urlparse
-
-import pyjigdo
-import pyjigdo.progress
 from pyjigdo.constants import URLGRABBER_USER_AGENT
 
 import pyjigdo.translate as translate

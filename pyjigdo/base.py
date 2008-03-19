@@ -1,11 +1,5 @@
 #
-# Copyright 2007, 2008 Fedora Unity
-#
-# Jonathan Steffan <jon a fedoraunity.org>
-# Jeroen van Meeuwen <kanarip a fedoraunity.org>
-# Ignacio Vazquez-Abrams <ivazqueznet+pyjigdo a gmail.com>
-# Stewart Adam <s.adam a diffingo.com>
-
+# Copyright 2007, 2008 Fedora Unity Project (http://fedoraunity.org)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,7 +94,7 @@ class PyJigdoBase:
                 sys.exit(1)
 
     def create_logger(self):
-        """Create a logger instance using cli_options.debuglevel"""
+        """ Create a logger instance using cli_options.debuglevel """
         if not self.cli_options.debuglevel == None:
             loglevel = logging.DEBUG
         else:
@@ -111,11 +105,11 @@ class PyJigdoBase:
         self.log = pyjigdo.logger.Logger(loglevel = loglevel, debuglevel = self.cli_options.debuglevel)
 
     def create_configstore(self):
-        """Initialize Configuration Store"""
+        """ Initialize Configuration Store. """
         self.cfg = pyjigdo.cfg.ConfigStore(self)
 
     def detect_mode(self):
-        """Detect whether we run in CLI or in GUI mode. (GUI is default)"""
+        """ Detect whether we run in CLI or in GUI mode. (GUI is default) """
         if self.cli_options.gui_mode:
             self.cfg._set_gui_mode()
         elif self.cli_options.cli_mode:
@@ -131,7 +125,7 @@ class PyJigdoBase:
                 self.cfg._set_cli_mode()
 
     def load_jigdo(self, url):
-        """Load a jigdo from a given URL using pyjigdo.misc.get_file"""
+        """ Load a jigdo from a given URL using pyjigdo.misc.get_file. """
         self.log.debug(_("Loading Jigdo file %s") % url, level=2)
         file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.working_directory, log = self.log)
         self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name)
@@ -225,11 +219,8 @@ class PyJigdoBase:
 
     def run_tasks(self):
         """ Actually start dealing with selected images. It's go time. """
-        count = 0
         while self.queue.jobs['download']:
             self.queue.do_download()
-            #print "doing download call %s..." % count
-            count += 1
         
         exit(1)
             
