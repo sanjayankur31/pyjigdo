@@ -24,11 +24,13 @@
 import base64, os, re, shutil, subprocess, sys, types, time
 import urlgrabber
 import urlgrabber.grabber
+from urlgrabber.grabber import URLGrabError
 import urlgrabber.progress
 import urlparse
 
 import pyjigdo
 import pyjigdo.progress
+from pyjigdo.constants import URLGRABBER_USER_AGENT
 
 import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
@@ -65,7 +67,7 @@ def list_images(url):
 def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)
 
-def get_file(url, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None):
+def get_file(url, file_basename = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None):
     """ Gets a file from an URL and returns the file's full path, or None if unable to download. """
     
     if not url: 
@@ -73,20 +75,35 @@ def get_file(url, working_directory = "/var/tmp/pyjigdo", pbar = None, log = Non
     elif os.access(url, os.R_OK):
         return url
 
-    file_basename = os.path.basename(urlparse.urlparse(url).path)
+    if not file_basename:
+        file_basename = os.path.basename(urlparse.urlparse(url).path)
+    else:
+        file_basename = os.path.basename(file_basename)
     file_name = os.path.join(working_directory, file_basename)
+    
+    #print "Trying to get file %s to %s ..." % (url, file_name)
     
     if not check_file(file_name, destroy = False):
         # Make sure working directory exists.
         check_directory(working_directory)
         # File does not exist or wasn't valid. Download the file.
-        download_file(url, file_name)
+        file_name = download_file(url, file_name)
 
     return file_name
 
 def download_file(url, file_name, title=None):
     try:
-        urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=urlgrabber.progress.TextMeter())
+        if not title: title = os.path.basename(file_name)
+        try:
+            urlgrabber.urlgrab(url,
+                               file_name,
+                               copy_local=1,
+                               progress_obj = urlgrabber.progress.TextMeter(),
+                               user_agent = URLGRABBER_USER_AGENT,
+                               text = title)
+            return file_name
+        except URLGrabError:
+            return None
     except OSError:
         print _("Unable to write to %s, aborting." % file_name)
         exit(1)

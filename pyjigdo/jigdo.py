@@ -284,7 +284,7 @@ class JigdoImageSlice:
         while not self.finished:
             url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
-            local_file = pyjigdo.misc.get_file(url, working_directory = self.target_location)
+            local_file = pyjigdo.misc.get_file(url, file_basename=self.file_name, working_directory = self.target_location)
             if pyjigdo.misc.check_file(local_file, self.slice_sum):
                 self.location = local_file
                 self.finished = True
