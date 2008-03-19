@@ -27,8 +27,8 @@ import os
 import pyjigdo
 import pyjigdo.misc
 from ConfigParser import RawConfigParser
-import pyjigdo
 import urlparse
+
 
 from urlgrabber import urlgrab
 from urlgrabber.grabber import URLGrabError
@@ -45,7 +45,10 @@ class JigdoDefinition:
         self.image_unique_id = 0
         self.images = {}
         self.parts = None
+        self.servers = None
+        self.mirrors = None
         self.parse()
+        self.create_objects()
 
     def parse(self):
         """This parses the JigdoDefinition.file_name"""
@@ -85,6 +88,9 @@ class JigdoDefinition:
                     elif sectname == "Parts":
                         section = JigdoPartsDefinition(sectname)
                         self.parts = section
+                    elif sectname == "Servers":
+                        section = JigdoServersDefinition(sectname)
+                        self.servers = section
                     else:
                         section = JigdoDefinitionSection(sectname)
                     cursect = section
@@ -111,7 +117,8 @@ class JigdoDefinition:
                         if optval == '""':
                             optval = ''
                         # XXX: So, isinstance() is useful here, but should we use it?!
-                        if not isinstance(cursect, JigdoPartsDefinition):
+                        if not (isinstance(cursect, JigdoPartsDefinition) or \
+                                isinstance(cursect, JigdoServersDefinition)):
                             optname = optname.rstrip().lower().replace("-","_")
                         cursect.add_option(optname,optval)
                     else:
@@ -125,14 +132,38 @@ class JigdoDefinition:
         # if any parsing errors occurred, raise an exception
         if e:
             raise e
+    
+    def create_objects(self):
+        """ All data has been parsed into storage, create any remaining needed objects. """
+        self.servers.create_objects()
+        #self.mirrors.create_objects()
 
 class JigdoDefinitionSection:
-    """A Section in the Jigdo Definition File"""
+    """ A Section in the Jigdo Definition File """
     def __init__(self, name, image_unique_id = 0):
         self._section_name = name
 
     def add_option(self,name, val = None):
         setattr(self,name,val)
+
+class JigdoServersDefinition:
+    """ The [servers] section of a jigdo configuration file. """
+    def __init__(self, name):
+        self._section_name = name
+        self.i = {}
+        self.objects = {}
+
+    def add_option(self,name, val = None):
+        try:
+            if self.i[name]: pass
+        except KeyError:
+            self.i[name] = []    
+        self.i[name].append(val)
+    
+    def create_objects(self):
+        print self.i
+        for (server_id, server_url_list) in self.i.iteritems():
+            self.objects[server_id] = JigdoRepoDefinition(server_id, server_url_list)
 
 class JigdoPartsDefinition:
     """ The [parts] section of a jigdo configuration file. """
@@ -146,6 +177,49 @@ class JigdoPartsDefinition:
 
     def add_option(self,name, val = None):
         self.i[name] = val
+
+class JigdoRepoDefinition:
+    """ A repo definition that can return an url for a given label.
+        Baseurls and mirrorlist need to be lists. """
+    def __init__(self, label, baseurls, mirrorlist=[], data_source=None):
+        self.label = label
+        self.baseurls = baseurls
+        self.mirrorlist = mirrorlist
+        self.data_source = data_source
+        
+    def get_url(self, file, priority=0):
+        """ Get a resolved url from this repo, given a file name and resolution priority.
+            The higher the priority, the more direct a response will be given. """
+        
+        base_url = None    
+        if not priority:
+            # Just be dumb about it and return an url as high up in the resolution stack as possible
+            # Order: top mirror list down, top server listing down; meaning, try the first listed match unless
+            # there is a priority given
+            if self.mirrorlist:
+                base_url = self.mirrorlist[0]
+            else:
+                base_url = self.baseurls[0]
+        else:
+            # Find the closest match to the priority requested.
+            while not base_url and (priority > -1):
+                try:
+                    base_url = self.mirrorlist[priority]
+                except IndexError:
+                    base_url = self.baseurls[priority]
+                priority -= 1
+        
+        urldata = urlparse.urlsplit(base_url)
+        url = urlparse.urljoin(base_url, file)
+        try:
+            if urldata.query:
+                query = urldata.query
+                while query.endswith('/'): query = query.rstrip('/')
+                url = "%s://%s%s?%s/%s" % (urldata.scheme, urldata.netloc, urldata.path, query, file)
+        except AttributeError:
+            pass
+        return url
+
 
 class JigdoJobPool:
     """ This is just a test class for building our objects and looping them. """
@@ -261,21 +335,6 @@ class JigdoJobPool:
                         directory],
                         inshell=True)
 
-class JigdoRepoDefinition:
-    """ A repo definition that has a mapping to all needed bits for a label to be defined. """
-    def ___init___(self, data_source, label, baseurl=None, mirrorlist=None):
-        self.data_source = data_source
-        self.label = label
-        self.baseurl = baseurl
-        self.mirrorlist = mirrorlist
-
-
-def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file, repos, merge=False):
-    """ Generate a .jigdo and .template """
-
-    def add_option(self,name, val = None):
-        setattr(self,name,val)
-
 class JigdoImage:
     """ An Image in the Jigdo Definition File, defining JigdoTemplate and JigdoImageSlices. """
     def __init__(self, unique_id = 0):
@@ -298,10 +357,8 @@ class JigdoImage:
         for line in template_data:
             if line.startswith('need-file'):
                 slice_hash = line.split()[3]
-                (slice_file_name, slice_server_id) = jigdo_definition.parts[slice_hash].split(':')
+                (slice_server_id, slice_file_name) = jigdo_definition.parts[slice_hash].split(':')
                 self.slices[slice_hash] = JigdoImageSlice(slice_hash, slice_file_name, slice_server_id)
-        
-        exit(1)
 
     def select(self):
         self.selected = True
@@ -334,6 +391,12 @@ class JigdoImageSlice:
         source_list = []
         source_list.append(SliceSource(file_name, mirrors))
         return source_list
+
+def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file, repos, merge=False):
+    """ Generate a .jigdo and .template """
+
+    def add_option(self,name, val = None):
+        setattr(self,name,val)
 
 class JigdoJob:
     def __init__(self):
