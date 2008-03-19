@@ -26,6 +26,7 @@ import logging, sys
 import pyjigdo.cfg
 import pyjigdo.jigdo
 import pyjigdo.logger
+from pyjigdo.jigdo import JigdoJobPool
 
 import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
@@ -70,6 +71,9 @@ class PyJigdoBase:
 
         # Then really setup the ConfigStore (because that needs a logger!)
         self.cfg.setup_cfg()
+        
+        # Initialize the job pool
+        self.queue = JigdoJobPool()
 
     def run(self):
         """Split into either running CLI, or GUI"""
@@ -198,22 +202,39 @@ class PyJigdoBase:
             self.log.warning(_("Could not select image %s") % image_unique_id)
             success = False
 
-    def selected_images(self):
+    def selected_images(self, fullObjects=False):
         images = []
         for image in self.jigdo_definition.images:
             if self.jigdo_definition.images[image].selected:
-                images.append(str(image))
+                if fullObjects:
+                    images.append(self.jigdo_definition.images[image])
+                else:
+                    images.append(str(image))
         return images
 
     def add_recompose(self, image):
         """ Add the template to be assembled. Generate the needed slice objects. """
         self.log.debug(_("Adding image %s to our queue.") % image.template, level = 4)
         image.get_template(self.cfg.working_directory, self.log)
-        image.collect_slices(self.jigdo_definition)
+        image.collect_slices(self.jigdo_definition, self.cfg.working_directory)
+    
+    def add_download_jobs(self, image):
+        """ Add the download jobs that need to be done for the given image. """
+        self.log.debug(_("Creating download tasks for %s") % image.filename)
+        for (slice_hash, slice_object) in image.slices.iteritems():
+            self.queue.add_job('download', slice_object)
 
-    def run_recompose(self):
-        """ Actually start downloading and stuffing data into the ISO. """
+    def run_tasks(self):
+        """ Actually start dealing with selected images. It's go time. """
+        count = 0
+        while self.queue.jobs['download']:
+            self.queue.do_download()
+            #print "doing download call %s..." % count
+            count += 1
+        
         exit(1)
+            
+                
         
         
         

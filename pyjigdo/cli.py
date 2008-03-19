@@ -48,7 +48,8 @@ class PyJigdoCLI:
         if not self.base.select_images():
             self.select_images_interaction()
 
-        self.download_images()
+        self.build_jobs()
+        self.base.run_tasks()
 
     def select_images_interaction(self):
         choosing_images = True
@@ -106,9 +107,9 @@ class PyJigdoCLI:
             print "You must select an image to download. Exiting."
             sys.exit(1)
 
-    def download_images(self):
+    def build_jobs(self):
         for image in self.base.jigdo_definition.images.keys():
             this_image = self.base.jigdo_definition.images[image]
             if this_image.selected:
                 self.base.add_recompose(this_image)
-        self.base.run_recompose()
+                self.base.add_download_jobs(this_image)

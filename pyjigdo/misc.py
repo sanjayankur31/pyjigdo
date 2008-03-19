@@ -21,14 +21,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import base64
-import os
-import re
-import shutil
-import subprocess
-import sys
-import types
-import time
+import base64, os, re, shutil, subprocess, sys, types, time
 import urlgrabber
 import urlgrabber.grabber
 import urlgrabber.progress
@@ -73,7 +66,10 @@ def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)
 
 def get_file(url, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None):
-    """Gets a file (from url) and returns the file name (full path)"""
+    """ Gets a file from an URL and returns the file's full path, or None if unable to download. """
+    
+    if not url: return None
+    
     if os.access(url, os.R_OK):
         return url
 
@@ -116,6 +112,7 @@ def check_file(file_name, checksum = None, destroy = False):
         - return False
 
     """
+    if not file_name: return False
     if os.access(file_name, os.R_OK):
         if not checksum == None:
             if file_checksum(file_name, checksum):
@@ -154,7 +151,7 @@ def file_checksum(file, checksum):
     base64_calc = base64.urlsafe_b64encode(calc)
     eq = re.compile('=')
     base64_strip = eq.sub('', base64_calc)
-    print _("DEBUG: Checking %s against %s..." % (base64_strip, checksum))
+    #print _("DEBUG: Checking %s against %s..." % (base64_strip, checksum))
     if base64_strip == checksum:
         return True
     else:
@@ -267,7 +264,7 @@ def run_command(command, rundir=None, inshell=False, env=temp_env, stdout=subpro
         rundir = "/var/tmp/"
 
     check_directory(rundir)
-    print "Running command '%s'" % command
+    #print "Running command '%s'" % command
 
     ret = []
     p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False, env=env)
@@ -334,7 +331,7 @@ def compare_sum(target, base64_sum):
     base64_calc = base64.urlsafe_b64encode(calc)
     eq = re.compile('=')
     base64_strip = eq.sub('', base64_calc)
-    print _("DEBUG: Checking %s against %s..." % (base64_strip, base64_sum))
+    #print _("DEBUG: Checking %s against %s..." % (base64_strip, base64_sum))
     if base64_strip == base64_sum:
         return True
     else:
