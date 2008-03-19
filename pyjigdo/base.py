@@ -206,10 +206,10 @@ class PyJigdoBase:
         return images
 
     def add_recompose(self, image):
-        """Generate the slices"""
-        print image.__dict__
-        image.template_name = pyjigdo.misc.get_file(image.template, working_directory = self.cfg.working_directory)
-        image.collect_slices()
+        """ Add the template to be assembled. Generate the needed slice objects. """
+        self.log.debug(_("Adding image %s to our queue.") % image.template, level = 4)
+        image.get_template(self.cfg.working_directory, self.log)
+        image.collect_slices(self.jigdo_definition)
 #        image.
 #        print image.template_filename
 

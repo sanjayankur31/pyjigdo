@@ -154,14 +154,14 @@ def file_checksum(file, checksum):
     base64_calc = base64.urlsafe_b64encode(calc)
     eq = re.compile('=')
     base64_strip = eq.sub('', base64_calc)
-    print _("Checking %s against %s..." % (base64_strip, checksum))
+    print _("DEBUG: Checking %s against %s..." % (base64_strip, checksum))
     if base64_strip == checksum:
         return True
     else:
         return False
 
 
-def url_to_file_name(url, working_directory = "/var/tmp"):
+def url_to_file_name(url, working_directory = "/var/tmp/pyjigdo"):
     file_basename = os.path.basename(urlparse.urlparse(url).path)
     file_name = os.path.join(working_directory, file_basename)
 
@@ -334,7 +334,7 @@ def compare_sum(target, base64_sum):
     base64_calc = base64.urlsafe_b64encode(calc)
     eq = re.compile('=')
     base64_strip = eq.sub('', base64_calc)
-    print _("Checking %s against %s..." % (base64_strip, base64_sum))
+    print _("DEBUG: Checking %s against %s..." % (base64_strip, base64_sum))
     if base64_strip == base64_sum:
         return True
     else:

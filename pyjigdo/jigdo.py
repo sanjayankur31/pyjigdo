@@ -44,6 +44,7 @@ class JigdoDefinition:
         self.file_name = file_name
         self.image_unique_id = 0
         self.images = {}
+        self.parts = None
         self.parse()
 
     def parse(self):
@@ -81,6 +82,9 @@ class JigdoDefinition:
                         self.image_unique_id += 1
                         section = JigdoImage(self.image_unique_id)
                         self.images[self.image_unique_id] = section
+                    elif sectname == "Parts":
+                        section = JigdoPartsDefinition(sectname)
+                        self.parts = section
                     else:
                         section = JigdoDefinitionSection(sectname)
                     cursect = section
@@ -106,7 +110,9 @@ class JigdoDefinition:
                         # allow empty values
                         if optval == '""':
                             optval = ''
-                        optname = optname.rstrip().lower().replace("-","_")
+                        # XXX: So, isinstance() is useful here, but should we use it?!
+                        if not isinstance(cursect, JigdoPartsDefinition):
+                            optname = optname.rstrip().lower().replace("-","_")
                         cursect.add_option(optname,optval)
                     else:
                         # a non-fatal parsing error occurred.  set up the
@@ -128,19 +134,18 @@ class JigdoDefinitionSection:
     def add_option(self,name, val = None):
         setattr(self,name,val)
 
-class JigdoTemplate:
-    def __init__(self, md5sum, url, cfg):
-        self.md5sum = md5sum
-        self.url = url
-        self.cfg = cfg
+class JigdoPartsDefinition:
+    """ The [parts] section of a jigdo configuration file. """
+    def __init__(self, name):
+        self._section_name = name
+        self.i = {}
+    
+    def __getitem__(self, item):
+        # Return the part data
+        return self.i[item]
 
-        self.file_name = pyjigdo.misc.url_to_file_name(self.url, working_directory = self.cfg.working_directory)
-
-        if pyjigdo.misc.check_file(self.file_name, checksum = self.md5sum):
-            print "Checks out"
-        else:
-            pbar = self.cfg.base.progress_bar(_("Downloading %s") % os.path.basename(self.file_name))
-            self.file_name = pyjigdo.misc.get_file(self.url, working_directory = self.cfg.working_directory, pbar = pbar)
+    def add_option(self,name, val = None):
+        self.i[name] = val
 
 class JigdoJobPool:
     """ This is just a test class for building our objects and looping them. """
@@ -272,19 +277,31 @@ def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file,
         setattr(self,name,val)
 
 class JigdoImage:
-    """An Image in the Jigdo Definition File. Collection of JigdoImageSlices"""
+    """ An Image in the Jigdo Definition File, defining JigdoTemplate and JigdoImageSlices. """
     def __init__(self, unique_id = 0):
         self.selected = False
         self.unique_id = unique_id
-        self.slices = { }
+        self.slices = {}
+        # These are filled in when parsing the .jigdo definition
+        self.filename = ''
+        self.template = ''
+        self.template_md5sum = ''
+        self.template_file = ''
 
     def add_option(self,name, val = None):
         setattr(self,name,val)
 
-    def collect_slices(self):
+    def collect_slices(self, jigdo_definition):
         """Collects the slices needed for this template"""
-        print self.__dict__
-        template_data = pyjigdo.misc.run_command(["jigdo-file", "ls", "--template", self.template_name], inshell=True)
+        #print self.__dict__
+        template_data = pyjigdo.misc.run_command(["jigdo-file", "ls", "--template", self.template_file], inshell=True)
+        for line in template_data:
+            if line.startswith('need-file'):
+                slice_hash = line.split()[3]
+                (slice_file_name, slice_server_id) = jigdo_definition.parts[slice_hash].split(':')
+                self.slices[slice_hash] = JigdoImageSlice(slice_hash, slice_file_name, slice_server_id)
+        
+        exit(1)
 
     def select(self):
         self.selected = True
@@ -292,16 +309,25 @@ class JigdoImage:
     def unselect(self):
         self.selected = False
 
+    def get_template(self, work_dir, log):
+        """ Make sure we have the template and it checks out, or fetch it again. """
+        self.template_file = pyjigdo.misc.url_to_file_name(self.template, work_dir)
+        if pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
+            log.info("Template %s exists and checksum matches. Not downloading." % self.template)
+        else:
+            self.template_file = pyjigdo.misc.get_file(self.template, working_directory = work_dir)
+
 class JigdoImageSlice:
-    """A file needing to be downloaded for an image."""
-    def __init__(self, md5_sum, mirrors, file_name, server_id):
+    """ A file needing to be downloaded for an image. """
+    def __init__(self, md5_sum, file_name, server_id):
         """ Initialize the ImageSlice """
         self.location = ""
         self.finished = False
         self.slice_sum = md5_sum
         self.file_name = file_name
         self.server_id = server_id
-        self.sources = self.getSources(file_name, mirrors)
+        self.sources = [] 
+        #self.getSources(file_name, mirrors)
 
     def getSources(self, file_name, mirrors):
         """ Return a list of SliceSource objects. """
