@@ -148,7 +148,6 @@ class JigdoServersDefinition:
         self.i[name].append(val)
     
     def create_objects(self):
-        print self.i
         for (server_id, server_url_list) in self.i.iteritems():
             self.objects[server_id] = JigdoRepoDefinition(server_id, server_url_list)
 
