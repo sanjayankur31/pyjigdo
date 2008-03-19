@@ -75,6 +75,10 @@ def get_file(url, working_directory = "/var/tmp/pyjigdo", pbar = None, log = Non
 
     file_basename = os.path.basename(urlparse.urlparse(url).path)
     file_name = os.path.join(working_directory, file_basename)
+    
+    if not os.access(file_name, os.W_OK):
+        print _("Failure to write to %s, aborting." % working_directory)
+        exit(1)
 
     if not check_file(file_name, destroy = False):
         # Make sure working directory exists.

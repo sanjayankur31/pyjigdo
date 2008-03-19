@@ -76,8 +76,7 @@ class PyJigdoBase:
         self.queue = JigdoJobPool()
 
     def run(self):
-        """Split into either running CLI, or GUI"""
-        print "Running!!!"
+        """ Split into either running CLI, or GUI. """
         if self.cfg.cli_mode:
             import pyjigdo.cli
             self.log.debug(_("Running PyJigdo in CLI mode..."), level = 1)
