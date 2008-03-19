@@ -21,7 +21,6 @@ import os, sys
 import pyjigdo.base
 from pyjigdo.constants import *
 
-
 """
 pyjigdo interface - Jigdo at its finest
 """

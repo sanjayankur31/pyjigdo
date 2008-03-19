@@ -221,7 +221,9 @@ class PyJigdoBase:
         """ Actually start dealing with selected images. It's go time. """
         while self.queue.jobs['download']:
             self.queue.do_download()
-        
+        # Report on what fails to download:
+        self.queue.download_failure_report()
+        # FIXME: Don't exit, do something.
         exit(1)
             
                 

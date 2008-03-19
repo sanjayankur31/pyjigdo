@@ -276,6 +276,9 @@ class JigdoImageSlice:
                 self.finished = True
             attempt += 1
         return self.finished
+    
+    def __str__(self):
+        return self.file_name
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs. """
@@ -301,6 +304,15 @@ class JigdoJobPool:
             task = self.jobs['download'].pop(0)
             if not task.run_download(): self.jobs['download_failures'].append(task)
             number -= 1
+    
+    def download_failure_report(self, requeue=False):
+        """ Report what files failed to download that had been added to the queue. """
+        print _("The following tasks failed:")
+        for task in self.jobs['download_failures']:
+            print _("Download of %s failed." % task)
+            if requeue: self.jobs['download'].append(task)
+        if requeue: self.jobs['download_failures'] = []
+        
 
 # FIXME: None of this is in use, yet ######################################
 def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file, repos, merge=False):
