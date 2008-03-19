@@ -68,32 +68,28 @@ def urlparse_basename(url):
 def get_file(url, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None):
     """ Gets a file from an URL and returns the file's full path, or None if unable to download. """
     
-    if not url: return None
-    
-    if os.access(url, os.R_OK):
+    if not url: 
+        return None
+    elif os.access(url, os.R_OK):
         return url
 
     file_basename = os.path.basename(urlparse.urlparse(url).path)
     file_name = os.path.join(working_directory, file_basename)
     
-    if not os.access(file_name, os.W_OK):
-        print _("Failure to write to %s, aborting." % working_directory)
-        exit(1)
-
     if not check_file(file_name, destroy = False):
         # Make sure working directory exists.
         check_directory(working_directory)
         # File does not exist or wasn't valid. Download the file.
         download_file(url, file_name)
-    else:
-        # There should be no else to this one
-        pass
 
     return file_name
 
 def download_file(url, file_name, title=None):
-#    print "downloading %s to %s" % (url,file_name)
-    urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=urlgrabber.progress.TextMeter())
+    try:
+        urlgrabber.urlgrab(url, file_name, copy_local=1, progress_obj=urlgrabber.progress.TextMeter())
+    except OSError:
+        print _("Unable to write to %s, aborting." % file_name)
+        exit(1)
 
 def check_file(file_name, checksum = None, destroy = False):
     """
