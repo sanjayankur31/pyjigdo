@@ -26,8 +26,9 @@ import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
 
 class JigdoDefinition:
-    """A Jigdo Definition File"""
-    def __init__(self, file_name):
+    """ A Jigdo Definition File. 
+        just_print is used to suppress the creation of objects. """
+    def __init__(self, file_name, just_print = False):
         self.file_name = file_name
         self.image_unique_id = 0
         self.images = {}
@@ -35,7 +36,20 @@ class JigdoDefinition:
         self.servers = None
         self.mirrors = None
         self.parse()
-        self.create_objects()
+        if not just_print: self.create_objects()
+        
+    def print_information(self):
+        """ Print the contents of the definition. """
+        print _("==== Servers listed in Jigdo ====")
+        print self.servers
+        print _("==== Mirrors listed in Jigdo ====")
+        print self.mirrors
+        print _("==== Images defined in Jigdo ====")
+        for (image_id, image) in self.images.iteritems():
+            print "Number %s: %s" % (image_id, image)
+        print _("==== Parts defined in Jigdo ====")
+        print self.parts
+        
 
     def parse(self):
         """This parses the JigdoDefinition.file_name"""
@@ -68,16 +82,30 @@ class JigdoDefinition:
                 mo = RawConfigParser.SECTCRE.match(line)
                 if mo:
                     sectname = mo.group('header')
+                    # This is where we have found an [Image] section
+                    # and now need to create our object to stuff data into.
                     if sectname == "Image":
                         self.image_unique_id += 1
                         section = JigdoImage(self.image_unique_id)
                         self.images[self.image_unique_id] = section
+                    # Here we have found the [Parts] section and need to create
+                    # the object to stuff data into.
                     elif sectname == "Parts":
                         section = JigdoPartsDefinition(sectname)
                         self.parts = section
+                    # Here we have found the [Servers] section and need to create
+                    # the definition object to be able to add the options.
                     elif sectname == "Servers":
                         section = JigdoServersDefinition(sectname)
                         self.servers = section
+                    # Here we have found our (pyjigdo's) new [Mirrorlists] section.
+                    # This allows users to define a source to 'ping' for the most
+                    # recent url lists for a give part. The part file name is appended to the
+                    # request and we expect a list of valid (or thought to be valid) URLs
+                    # for which we can iterate to find a server with the given file.
+                    elif sectname == "Mirrorlists":
+                        section = JigdoMirrorlistsDefinition(sectname)
+                        self.mirrors = section
                     else:
                         section = JigdoDefinitionSection(sectname)
                     cursect = section
@@ -122,8 +150,10 @@ class JigdoDefinition:
     
     def create_objects(self):
         """ All data has been parsed into storage, create any remaining needed objects. """
+        # This will create the JigdoRepoDefinitions
         self.servers.create_objects()
-        #self.mirrors.create_objects()
+        # This will stuff the mirror information into the correct JigdoRepoDefinition
+        self.mirrors.create_objects()
 
 class JigdoDefinitionSection:
     """ A Section in the Jigdo Definition File """
@@ -139,8 +169,15 @@ class JigdoServersDefinition:
         self._section_name = name
         self.i = {}
         self.objects = {}
+    
+    def __str__(self):
+        """ Print the contents of the definition. """
+        server_data = []
+        for (server_id, server_url_list) in self.i.iteritems():
+            server_data.append("ID: %s URL(s): %s" % (server_id, " ".join(server_url_list)))
+        return "\n".join(server_data)
 
-    def add_option(self,name, val = None):
+    def add_option(self, name, val = None):
         try:
             if self.i[name]: pass
         except KeyError:
@@ -148,8 +185,44 @@ class JigdoServersDefinition:
         self.i[name].append(val)
     
     def create_objects(self):
+        """ Create the JigdoRepoDefinition objects based on what information we have
+            in self.i (index). """
         for (server_id, server_url_list) in self.i.iteritems():
             self.objects[server_id] = JigdoRepoDefinition(server_id, server_url_list)
+
+class JigdoMirrorlistsDefinition:
+    """ The [mirrorlists] section of a jigdo configuration file.
+        This is just a storage location for the data for which create_objects()
+        is called upon to inject the mirrorlists into the JigdoRepoDefinition.
+        To be able to use the [mirrorlists] definition, the backwards-compatable
+        [servers] section must also be used with the same repo id. """
+    def __init__(self, name):
+        self._section_name = name
+        self.i = {}
+    
+    def __str__(self):
+        """ Print the mirrors we know about. """
+        mirror_data = []
+        for (mirror_id, mirror_urls) in self.i:
+            mirror_data.append("ID: %s URL(s): %s" % (mirror_id, " ".join(mirror_urls)))
+        return "\n".join(mirror_data)
+            
+    def add_option(self, name, val = None):
+        try:
+            if self.i[name]: pass
+        except KeyError:
+            self.i[name] = []    
+        self.i[name].append(val)
+
+    def create_objects(self, servers):
+        """ Find the JigdoRepoDefinition and inject the mirrorlists into it. """
+        for (repo_id, repo) in servers.objects.iteritems():
+            try:
+                repo.mirrors.append(self.i[repo_id])
+            except KeyError:
+                # [Servers] section repo_id doesn't have a [Mirrorlist] listing, skip it.
+                pass
+                
 
 class JigdoPartsDefinition:
     """ The [parts] section of a jigdo configuration file. """
@@ -160,8 +233,10 @@ class JigdoPartsDefinition:
     def __getitem__(self, item):
         # Return the part data
         return self.i[item]
+    def __str__(self):
+        return "There are %s files defined." % len(self.i)
 
-    def add_option(self,name, val = None):
+    def add_option(self, name, val = None):
         self.i[name] = val
 
 class JigdoRepoDefinition:
@@ -222,6 +297,12 @@ class JigdoImage:
         self.template = ''
         self.template_md5sum = ''
         self.template_file = ''
+    
+    def __str__(self):
+        """ Print information about the given image. """
+        return "Filename: %s Template: %s Template MD5SUM: %s" % (self.filename,
+                                                                   self.template,
+                                                                   self.template_md5sum)
 
     def add_option(self,name, val = None):
         setattr(self,name,val)
@@ -262,6 +343,12 @@ class JigdoImageSlice:
         self.file_name = file_name
         self.repo = repo
         self.target_location = target_location
+        
+    def __str__(self):
+        """ Print information about this slice. """
+        return "Filename: %s Repo: %s Target Location: %s" % (self.file_name,
+                                                               self.repo,
+                                                               self.target_location)
 
     def run_download(self):
         """ Download and confirm this slice. """
@@ -299,7 +386,9 @@ class JigdoJobPool:
         queue.append(object)
 
     def do_download(self, number=1):
-        """ This is a hack around implementing the threading. """
+        """ This is a hack around implementing the threading.
+            For threaded, we will need to define something thread safe
+            such as the JigdoDownloadJob class. """
         while number > 0 and self.jobs['download']:
             task = self.jobs['download'].pop(0)
             if not task.run_download(): self.jobs['download_failures'].append(task)
@@ -315,11 +404,11 @@ class JigdoJobPool:
         
 
 # FIXME: None of this is in use, yet ######################################
-def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file, repos, merge=False):
-    """ Generate a .jigdo and .template """
+#def generate_jigdo_template(jigdo_file_name, template_file_name, iso_image_file, repos, merge=False):
+#    """ Generate a .jigdo and .template """
 
-    def add_option(self,name, val = None):
-        setattr(self,name,val)
+#    def add_option(self,name, val = None):
+#        setattr(self,name,val)
 
 
 # FIXME: Delete this or merge it where it needs to go.

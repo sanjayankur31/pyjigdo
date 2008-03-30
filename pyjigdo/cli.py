@@ -21,6 +21,7 @@ import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
 
 class PyJigdoCLI:
+    """ The pyJigdo Command Line Interface. """
     def __init__(self, base):
         # Remember base
         self.base = base
@@ -42,6 +43,7 @@ class PyJigdoCLI:
         self.base.run_tasks()
 
     def select_images_interaction(self):
+        """ Interactively work with the user to select what images to download. """
         choosing_images = True
         # Require Raw Input
         while choosing_images:
@@ -98,6 +100,7 @@ class PyJigdoCLI:
             sys.exit(1)
 
     def build_jobs(self):
+        """ Create the jobs that are needed to complete the requested actions. """
         for image in self.base.jigdo_definition.images.keys():
             this_image = self.base.jigdo_definition.images[image]
             if this_image.selected:

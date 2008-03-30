@@ -31,20 +31,12 @@ except ImportError:
     # old versions of python. Use now deprecrated md5
     import md5 as md5_hashlib
 
-def jigdo_info(url):
+def jigdo_info(url, working_directory):
     """Prints out information about a .jigdo file located at the given URL"""
 
-    # This should use a function to grab the file with, parse it, display the info and destroy all the temp data
-    try:
-        urlgrabber.urlgrab(url, "/var/tmp/jigdo.jigdo", copy_local=1)
-    except Exception, e:
-        print >> sys.stderr, "%r" % e.__class__
-        print >> sys.stderr, "Exception raised"
-
-    for section in jigdo_config.getSections():
-        print '** %s:' % section[0]
-        misc.printOut(section[1], 0)
-        #print section[1]
+    file_name = get_file(url, working_directory = working_directory)
+    jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, just_print = True)
+    jigdo_definition.print_information()
     sys.exit(1)
 
 def list_images(url):
