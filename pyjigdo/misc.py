@@ -39,11 +39,11 @@ def jigdo_info(url, working_directory):
     jigdo_definition.print_information()
     sys.exit(1)
 
-def list_images(url):
-    file_name = get_file(url)
-    jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name)
-    for image in jigdo_definition.images['index']:
-        print "#%d: %s" % (image,jigdo_definition.images['index'][image].filename)
+def list_images(url, working_directory):
+    file_name = get_file(url, working_directory = working_directory)
+    jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, just_print = True)
+    jigdo_definition.list_images()
+    sys.exit(1)
 
 def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)

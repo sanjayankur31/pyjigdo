@@ -37,6 +37,12 @@ class JigdoDefinition:
         self.mirrors = None
         self.parse()
         if not just_print: self.create_objects()
+    
+    def list_images(self):
+        """ Print the details about all images. """
+        print _("==== Images defined in Jigdo ====")
+        for (image_id, image) in self.images.iteritems():
+            print "Number %s: %s" % (image_id, image)
         
     def print_information(self):
         """ Print the contents of the definition. """
