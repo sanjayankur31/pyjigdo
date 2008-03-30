@@ -131,24 +131,22 @@ class PyJigdoBase:
         self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name)
 
     def select_images(self):
+        """ Select images based on selections by the user. """
         self.log.debug(_("Selecting Images"), level = 4)
         success = False
         if self.cfg.image_all:
             for image in self.jigdo_definition.images:
-                # Select Image
+                # Select all Images
                 self.select_image(image)
-
-            return True
+            success = True
         elif self.cfg.image_numbers:
-            print "%r" % self.cfg.image_numbers
             for image in self.cfg.image_numbers:
-                if not self.select_image(image):
-                    # Unable to select image
-                    success = False
-                    continue
-            return success
-        else:
-            return False
+                if self.select_image(image):
+                    # At least one image was able to be selected,
+                    # return successfully
+                    success = True
+        print success
+        return success
 
     def progress_bar(self, title = "", parent = None, xml = None, callback = False):
         """This function should be used to determine the type of progress bar we need.
@@ -194,6 +192,7 @@ class PyJigdoBase:
         else:
             self.log.warning(_("Could not select image %s") % image_unique_id)
             success = False
+        return success
 
     def selected_images(self, fullObjects=False):
         images = []

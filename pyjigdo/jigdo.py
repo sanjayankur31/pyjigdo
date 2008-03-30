@@ -157,9 +157,9 @@ class JigdoDefinition:
     def create_objects(self):
         """ All data has been parsed into storage, create any remaining needed objects. """
         # This will create the JigdoRepoDefinitions
-        self.servers.create_objects()
+        if self.servers: self.servers.create_objects()
         # This will stuff the mirror information into the correct JigdoRepoDefinition
-        self.mirrors.create_objects()
+        if self.mirrors: self.mirrors.create_objects()
 
 class JigdoDefinitionSection:
     """ A Section in the Jigdo Definition File """

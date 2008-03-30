@@ -32,14 +32,14 @@ except ImportError:
     import md5 as md5_hashlib
 
 def jigdo_info(url, working_directory):
-    """Prints out information about a .jigdo file located at the given URL"""
-
+    """ Prints out information about a .jigdo file located at the given URL. """
     file_name = get_file(url, working_directory = working_directory)
     jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, just_print = True)
     jigdo_definition.print_information()
     sys.exit(1)
 
 def list_images(url, working_directory):
+    """ Print out information on all the [Images] defined .jigdo file located at given URL. """
     file_name = get_file(url, working_directory = working_directory)
     jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, just_print = True)
     jigdo_definition.list_images()
