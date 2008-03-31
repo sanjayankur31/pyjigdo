@@ -93,7 +93,7 @@ class JigdoDefinition:
                     # and now need to create our object to stuff data into.
                     if sectname == "Image":
                         self.image_unique_id += 1
-                        section = JigdoImage(self.image_unique_id, self.log)
+                        section = JigdoImage(self.log, unique_id = self.image_unique_id, )
                         self.images[self.image_unique_id] = section
                     # Here we have found the [Parts] section and need to create
                     # the object to stuff data into.
@@ -377,7 +377,7 @@ class JigdoImageSlice:
         while not self.finished:
             url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
-            local_file = pyjigdo.misc.get_file(url, file_basename = self.file_name, working_directory = self.target_location)
+            pyjigdo.misc.get_file(url, file_basename = self.file_name, working_directory = self.target_location)
             self.check_self()
             attempt += 1
         return self.finished
@@ -385,10 +385,12 @@ class JigdoImageSlice:
     def check_self(self, announce = False):
         """ Run checks on self to see if we are sane. """
         local_file = os.path.join(self.target_location, self.file_name)
-        if pyjigdo.misc.check_file(local_file, self.slice_sum):
-            if announce: self.log.info(_("File %s exists and checksum matches." % self.target_location)) 
+        if pyjigdo.misc.check_file(local_file, checksum = self.slice_sum):
+            self.log.info(_("File %s exists and checksum matches." % self.target_location))
             self.location = local_file
             self.finished = True
+        else:
+            self.log.debug(_("File %s exists but checksum does not match." % local_file), level = 2)
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs. """
