@@ -367,26 +367,31 @@ class JigdoImageSlice:
                                                                self.repo,
                                                                self.target_location)
 
-    def run_download(self):
+    def run_download(self, total = None, pending = None):
         """ Download and confirm this slice.
             If the target_location exists, check to make sure it's the data we want."""
         if self.finished: return True
-        if self.check_self(announce = True):
-            return self.finished
+        title = self.file_name
+        if total and pending: title = "[%s/%s] %s" % (total-pending, total, self.file_name)
+        self.check_self(announce = True, title = title)
         attempt = 0
         while not self.finished:
             url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
-            pyjigdo.misc.get_file(url, file_target = self.file_name, working_directory = self.target_location)
+            pyjigdo.misc.get_file(url, 
+                                  file_target = self.file_name,
+                                  working_directory = self.target_location,
+                                  title = title)
             self.check_self()
             attempt += 1
         return self.finished
     
-    def check_self(self, announce = False):
+    def check_self(self, announce = False, title = None):
         """ Run checks on self to see if we are sane. """
         local_file = os.path.join(self.target_location, self.file_name)
+        if not title: title = local_file
         if pyjigdo.misc.check_file(local_file, checksum = self.slice_sum):
-            if announce: self.log.info(_("File %s exists and checksum matches." % self.target_location))
+            if announce: self.log.info(_("%s exists and checksum matches." % title))
             self.location = local_file
             self.finished = True
 
@@ -406,11 +411,13 @@ class JigdoJobPool:
                         'compose': [],
                     }
         self.pending_jobs = 0
+        self.total_jobs = 0
 
     def add_job(self, job_type, object):
         queue = self.jobs[job_type]
         queue.append(object)
         self.pending_jobs += 1
+        self.total_jobs += 1
     
     def checkpoint(self):
         """ Check if we need to do checkpointing tasks. """
@@ -425,7 +432,7 @@ class JigdoJobPool:
             such as the JigdoDownloadJob class. """
         while number > 0 and self.jobs['download']:
             task = self.jobs['download'].pop(0)
-            if not task.run_download(): self.jobs['download_failures'].append(task)
+            if not task.run_download(total = self.total_jobs, pending = self.pending_jobs): self.jobs['download_failures'].append(task)
             number -= 1
             self.pending_jobs -= 1
         self.checkpoint()

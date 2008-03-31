@@ -48,7 +48,7 @@ def list_images(url, working_directory, log):
 def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)
 
-def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None):
+def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None):
     """ Gets a file from an URL and returns the file's full path, or None if unable to download. """
     
     if not url:
@@ -70,7 +70,7 @@ def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pb
         # this will include the working_directory
         check_directory(base_directory)
         # File does not exist or wasn't valid. Download the file.
-        file_name = download_file(url, file_name)
+        file_name = download_file(url, file_name, title)
 
     return file_name
 
