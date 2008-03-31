@@ -67,7 +67,7 @@ class PyJigdoBase:
         self.cfg.setup_cfg()
         
         # Initialize the job pool
-        self.queue = JigdoJobPool()
+        self.queue = JigdoJobPool(self.log)
 
     def run(self):
         """ Split into either running CLI, or GUI. """
@@ -128,10 +128,11 @@ class PyJigdoBase:
         """ Load a jigdo from a given URL using pyjigdo.misc.get_file. """
         self.log.debug(_("Loading Jigdo file %s") % url, level=2)
         file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.working_directory, log = self.log)
-        self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name)
+        self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, self.log)
 
     def select_images(self):
-        """ Select images based on selections by the user. """
+        """ Select images based on selections by the user.
+            Return True if actions were successful. """
         self.log.debug(_("Selecting Images"), level = 4)
         success = False
         if self.cfg.image_all:
@@ -143,9 +144,11 @@ class PyJigdoBase:
             for image in self.cfg.image_numbers:
                 if self.select_image(image):
                     # At least one image was able to be selected,
-                    # return successfully
+                    # return successfully. We might want to make it more
+                    # verbose if an image fails to select.
                     success = True
-        print success
+                else:
+                    self.log.warning(_("Could not select image %s") % image)
         return success
 
     def progress_bar(self, title = "", parent = None, xml = None, callback = False):
@@ -180,9 +183,9 @@ class PyJigdoBase:
             else:
                 return pyjigdo.progress.ProgressCLI(title = title)
 
-
-
     def select_image(self, image_unique_id):
+        """ Flip the switch to set an image to download. 
+            Return True if the action was successful. """
         image_unique_id = int(image_unique_id)
         self.log.debug(_("Selecting Image %d") % image_unique_id, level = 4)
         success = True
@@ -195,6 +198,7 @@ class PyJigdoBase:
         return success
 
     def selected_images(self, fullObjects=False):
+        """ Return a list of selected images. """
         images = []
         for image in self.jigdo_definition.images:
             if self.jigdo_definition.images[image].selected:

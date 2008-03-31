@@ -300,10 +300,14 @@ class PyJigdo(object):
     def answer_questions(self):
         """Answers questions such as when --jigdo --info has been specified"""
         if self.cli_options.jigdo_info:
-            sys.exit(pyjigdo.misc.jigdo_info(self.cli_options.jigdo_url, self.cli_options.working_directory))
+            sys.exit(pyjigdo.misc.jigdo_info(self.cli_options.jigdo_url,
+                                             self.cli_options.working_directory,
+                                             self.base.log))
 
         if self.cli_options.list_images:
-            sys.exit(pyjigdo.misc.list_images(self.cli_options.jigdo_url, self.cli_options.working_directory))
+            sys.exit(pyjigdo.misc.list_images(self.cli_options.jigdo_url,
+                                              self.cli_options.working_directory,
+                                              self.base.log))
 
     def run(self):
         self.base.run()

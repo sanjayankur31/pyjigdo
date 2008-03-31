@@ -23,14 +23,14 @@ from pyjigdo.translate import _, N_
 class PyJigdoCLI:
     """ The pyJigdo Command Line Interface. """
     def __init__(self, base):
-        # Remember base
+        # Populate our base CLI object
+        # with information we can make good use of.
         self.base = base
-        # For abbreviatety
         self.cfg = base.cfg
         self.log = base.log
 
     def run(self):
-        """Start the run"""
+        """ Start the CLI and start working with what we have. """
 
         # Load the .jigdo file
         self.base.load_jigdo(self.cfg.jigdo_url)
@@ -39,7 +39,10 @@ class PyJigdoCLI:
         if not self.base.select_images():
             self.select_images_interaction()
 
+        # Add the jobs we know we need to finish
         self.build_jobs()
+        
+        # Run everything
         self.base.run_tasks()
 
     def select_images_interaction(self):

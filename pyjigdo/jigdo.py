@@ -28,8 +28,9 @@ from pyjigdo.translate import _, N_
 class JigdoDefinition:
     """ A Jigdo Definition File. 
         just_print is used to suppress the creation of objects. """
-    def __init__(self, file_name, just_print = False):
+    def __init__(self, file_name, log, just_print = False):
         self.file_name = file_name
+        self.log = log
         self.image_unique_id = 0
         self.images = {}
         self.parts = None
@@ -40,21 +41,21 @@ class JigdoDefinition:
     
     def list_images(self):
         """ Print the details about all images. """
-        print _("==== Images defined in Jigdo ====")
+        self.log.info(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
-            print "Number %s: %s" % (image_id, image)
+            self.log.info(_("Number %s: %s" % (image_id, image)))
         
     def print_information(self):
         """ Print the contents of the definition. """
-        print _("==== Servers listed in Jigdo ====")
-        print self.servers
-        print _("==== Mirrors listed in Jigdo ====")
-        print self.mirrors
-        print _("==== Images defined in Jigdo ====")
+        self.log.info(_("==== Servers listed in Jigdo ===="))
+        self.log.info(self.servers)
+        self.log.info(_("==== Mirrors listed in Jigdo ===="))
+        self.log.info(self.mirrors)
+        self.log.info(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
-            print "Number %s: %s" % (image_id, image)
-        print _("==== Parts defined in Jigdo ====")
-        print self.parts
+            self.log.info(_("Number %s: %s" % (image_id, image)))
+        self.log.info(_("==== Parts defined in Jigdo ===="))
+        self.log.info(self.parts)
         
 
     def parse(self):
@@ -92,17 +93,17 @@ class JigdoDefinition:
                     # and now need to create our object to stuff data into.
                     if sectname == "Image":
                         self.image_unique_id += 1
-                        section = JigdoImage(self.image_unique_id)
+                        section = JigdoImage(self.image_unique_id, self.log)
                         self.images[self.image_unique_id] = section
                     # Here we have found the [Parts] section and need to create
                     # the object to stuff data into.
                     elif sectname == "Parts":
-                        section = JigdoPartsDefinition(sectname)
+                        section = JigdoPartsDefinition(sectname, self.log)
                         self.parts = section
                     # Here we have found the [Servers] section and need to create
                     # the definition object to be able to add the options.
                     elif sectname == "Servers":
-                        section = JigdoServersDefinition(sectname)
+                        section = JigdoServersDefinition(sectname, self.log)
                         self.servers = section
                     # Here we have found our (pyjigdo's) new [Mirrorlists] section.
                     # This allows users to define a source to 'ping' for the most
@@ -110,7 +111,7 @@ class JigdoDefinition:
                     # request and we expect a list of valid (or thought to be valid) URLs
                     # for which we can iterate to find a server with the given file.
                     elif sectname == "Mirrorlists":
-                        section = JigdoMirrorlistsDefinition(sectname)
+                        section = JigdoMirrorlistsDefinition(sectname, self.log)
                         self.mirrors = section
                     else:
                         section = JigdoDefinitionSection(sectname)
@@ -171,8 +172,9 @@ class JigdoDefinitionSection:
 
 class JigdoServersDefinition:
     """ The [servers] section of a jigdo configuration file. """
-    def __init__(self, name):
+    def __init__(self, name, log):
         self._section_name = name
+        self.log = log
         self.i = {}
         self.objects = {}
     
@@ -194,7 +196,7 @@ class JigdoServersDefinition:
         """ Create the JigdoRepoDefinition objects based on what information we have
             in self.i (index). """
         for (server_id, server_url_list) in self.i.iteritems():
-            self.objects[server_id] = JigdoRepoDefinition(server_id, server_url_list)
+            self.objects[server_id] = JigdoRepoDefinition(server_id, server_url_list, self.log)
 
 class JigdoMirrorlistsDefinition:
     """ The [mirrorlists] section of a jigdo configuration file.
@@ -202,8 +204,9 @@ class JigdoMirrorlistsDefinition:
         is called upon to inject the mirrorlists into the JigdoRepoDefinition.
         To be able to use the [mirrorlists] definition, the backwards-compatable
         [servers] section must also be used with the same repo id. """
-    def __init__(self, name):
+    def __init__(self, name, log):
         self._section_name = name
+        self.log = log
         self.i = {}
     
     def __str__(self):
@@ -232,8 +235,9 @@ class JigdoMirrorlistsDefinition:
 
 class JigdoPartsDefinition:
     """ The [parts] section of a jigdo configuration file. """
-    def __init__(self, name):
+    def __init__(self, name, log):
         self._section_name = name
+        self.log = log
         self.i = {}
     
     def __getitem__(self, item):
@@ -248,9 +252,10 @@ class JigdoPartsDefinition:
 class JigdoRepoDefinition:
     """ A repo definition that can return an url for a given label.
         Baseurls and mirrorlist need to be lists. """
-    def __init__(self, label, baseurls, mirrorlist=[], data_source=None):
+    def __init__(self, label, baseurls, log, mirrorlist=[], data_source=None):
         self.label = label
         self.baseurls = baseurls
+        self.log = log
         self.mirrorlist = mirrorlist
         self.data_source = data_source
         
@@ -294,7 +299,8 @@ class JigdoRepoDefinition:
 
 class JigdoImage:
     """ An Image in the Jigdo Definition File, defining JigdoTemplate and JigdoImageSlices. """
-    def __init__(self, unique_id = 0):
+    def __init__(self, log, unique_id = 0):
+        self.log = log
         self.selected = False
         self.unique_id = unique_id
         self.slices = {}
@@ -323,7 +329,8 @@ class JigdoImage:
                 self.slices[slice_hash] = JigdoImageSlice(slice_hash, 
                                                           slice_file_name,
                                                           jigdo_definition.servers.objects[slice_server_id],
-                                                          work_dir)
+                                                          work_dir,
+                                                          self.log)
 
     def select(self):
         self.selected = True
@@ -335,13 +342,16 @@ class JigdoImage:
         """ Make sure we have the template and it checks out, or fetch it again. """
         self.template_file = pyjigdo.misc.url_to_file_name(self.template, work_dir)
         if pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-            log.info("Template %s exists and checksum matches. Not downloading." % self.template)
+            log.info("Template %s exists and checksum matches." % self.template)
         else:
             self.template_file = pyjigdo.misc.get_file(self.template, working_directory = work_dir)
+            if not pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
+                log.error("Template data for %s does not match defined checksum. Disabling image." % self.template)
+                self.unselect()
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
-    def __init__(self, md5_sum, file_name, repo, target_location):
+    def __init__(self, md5_sum, file_name, repo, target_location, log):
         """ Initialize the ImageSlice """
         self.location = ""
         self.finished = False
@@ -349,36 +359,45 @@ class JigdoImageSlice:
         self.file_name = file_name
         self.repo = repo
         self.target_location = target_location
+        self.log = log
         
     def __str__(self):
-        """ Print information about this slice. """
+        """ Return information about this slice. """
         return "Filename: %s Repo: %s Target Location: %s" % (self.file_name,
                                                                self.repo,
                                                                self.target_location)
 
     def run_download(self):
-        """ Download and confirm this slice. """
+        """ Download and confirm this slice.
+            If the target_location exists, check to make sure it's the data we want."""
         if self.finished: return True
+        if self.check_self(announce = True):
+            return self.finished
         attempt = 0
         while not self.finished:
             url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
-            local_file = pyjigdo.misc.get_file(url, file_basename=self.file_name, working_directory = self.target_location)
-            if pyjigdo.misc.check_file(local_file, self.slice_sum):
-                self.location = local_file
-                self.finished = True
+            local_file = pyjigdo.misc.get_file(url, file_basename = self.file_name, working_directory = self.target_location)
+            self.check_self()
             attempt += 1
         return self.finished
     
-    def __str__(self):
-        return self.file_name
+    def check_self(self, announce = False):
+        """ Run checks on self to see if we are sane. """
+        local_file = os.path.join(self.target_location, self.file_name)
+        if pyjigdo.misc.check_file(local_file, self.slice_sum):
+            if announce: self.log.info(_("File %s exists and checksum matches." % self.target_location)) 
+            self.location = local_file
+            self.finished = True
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs. """
-    def __init__(self):
+    def __init__(self, log):
+        self.log = log
         self.threads = 0 # Not really threaded, yet. This is still up for debate.
         self.max_threads = 10 # FIXME: Is actually a configuration option (10 makes a good default to play with though)
         self.checkpoint_frequency = 10
+        self.current_checkpoint = self.checkpoint_frequency
         self.jobs = {
                         'scan': [],
                         'download': [],
@@ -386,10 +405,19 @@ class JigdoJobPool:
                         'loopmount': [],
                         'compose': [],
                     }
+        self.pending_jobs = 0
 
     def add_job(self, job_type, object):
         queue = self.jobs[job_type]
         queue.append(object)
+        self.pending_jobs += 1
+    
+    def checkpoint(self):
+        """ Check if we need to do checkpointing tasks. """
+        self.current_checkpoint -= 1
+        if self.current_checkpoint == 0:
+            self.current_checkpoint = self.checkpoint_frequency
+            # FIXME: Add checkpoint hooks.            
 
     def do_download(self, number=1):
         """ This is a hack around implementing the threading.
@@ -399,6 +427,8 @@ class JigdoJobPool:
             task = self.jobs['download'].pop(0)
             if not task.run_download(): self.jobs['download_failures'].append(task)
             number -= 1
+            self.pending_jobs -= 1
+        self.checkpoint()
     
     def download_failure_report(self, requeue=False):
         """ Report what files failed to download that had been added to the queue. """
