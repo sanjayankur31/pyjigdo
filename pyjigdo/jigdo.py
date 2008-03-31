@@ -377,7 +377,7 @@ class JigdoImageSlice:
         while not self.finished:
             url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
-            pyjigdo.misc.get_file(url, file_name = self.file_name, working_directory = self.target_location)
+            pyjigdo.misc.get_file(url, file_target = self.file_name, working_directory = self.target_location)
             self.check_self()
             attempt += 1
         return self.finished
@@ -385,14 +385,10 @@ class JigdoImageSlice:
     def check_self(self, announce = False):
         """ Run checks on self to see if we are sane. """
         local_file = os.path.join(self.target_location, self.file_name)
-        print "check self called with local_file %s" % local_file
         if pyjigdo.misc.check_file(local_file, checksum = self.slice_sum):
-            print "match. download done."
-            self.log.info(_("File %s exists and checksum matches." % self.target_location))
+            if announce: self.log.info(_("File %s exists and checksum matches." % self.target_location))
             self.location = local_file
             self.finished = True
-        else:
-            print "no match."
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs. """
