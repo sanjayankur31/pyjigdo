@@ -159,9 +159,12 @@ class JigdoDefinition:
     def create_objects(self):
         """ All data has been parsed into storage, create any remaining needed objects. """
         # This will create the JigdoRepoDefinitions
-        if self.servers: self.servers.create_objects()
+        if self.servers: 
+            self.servers.create_objects()
+        else:
+            self.log.error(_("[Servers] section is not present or can't be parsed. Abort!"), recoverable = False)
         # This will stuff the mirror information into the correct JigdoRepoDefinition
-        if self.mirrors and self.servers: self.mirrors.create_objects(self.servers)
+        if self.mirrors: self.mirrors.create_objects(self.servers)
 
 class JigdoDefinitionSection:
     """ A Section in the Jigdo Definition File """

@@ -101,6 +101,8 @@ def download_file(url, file_name, title=None, timeout = 60):
             return file_name
         except URLGrabError:
             return None
+        except KeyboardInterrupt:
+            return None
     except OSError:
         print _("Unable to write to %s, aborting." % file_name)
         exit(1)
