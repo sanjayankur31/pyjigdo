@@ -48,25 +48,27 @@ def list_images(url, working_directory, log):
 def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)
 
-def get_file(url, file_basename = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None):
+def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None):
     """ Gets a file from an URL and returns the file's full path, or None if unable to download. """
     
-    if not url: 
+    if not url:
+        # This is a bad request, return None
         return None
     elif os.access(url, os.R_OK):
+        # The is returning as existing, we were passed a local
+        # file system path, return it back
         return url
+    elif not file_target:
+        # If we don't have a file name to target, get one from the url
+        file_target = os.path.basename(urlparse.urlparse(url).path)
 
-    if not file_basename:
-        file_basename = os.path.basename(urlparse.urlparse(url).path)
-    else:
-        file_basename = os.path.basename(file_basename)
-    file_name = os.path.join(working_directory, file_basename)
-    
-    #print "Trying to get file %s to %s ..." % (url, file_name)
+    file_name = os.path.join(working_directory, file_target)
+    base_directory = os.path.dirname(file_name)
     
     if not check_file(file_name, destroy = False):
-        # Make sure working directory exists.
-        check_directory(working_directory)
+        # Make sure the path leading up to where we want to store the file exists
+        # this will include the working_directory
+        check_directory(base_directory)
         # File does not exist or wasn't valid. Download the file.
         file_name = download_file(url, file_name)
 
@@ -92,42 +94,28 @@ def download_file(url, file_name, title=None):
 
 def check_file(file_name, checksum = None, destroy = False):
     """
-    Checks if a file exists. Basically returns True if the file exists, unless the
-    checksum doesn't check out or destroy has been set to True.
-
-    If the file exists:
-        Checksum:
-            If specified, run the checksum and return:
-                - True if the checksum checks out.
-                - False if it doesn't and destroy the file.
-            If not specified:
-                - Continue
-        Destroy:
-            If True:
-                - Destroy the file and return False
-            else:
-                - Return True
-    else:
-        - return False
-
+    Checks if a file exists. Returns True if the file exists unless
+    a checksum is given, then the checksum is checked. If the checksum
+    matches, returns True. Otherwise, return False.
+    
+    If the destroy option is used without a checksum, the file is removed if
+    it exists.
+    
+    If the destroy option is used with a checksum, the file is removed if the
+    checksum does not match.
     """
-    if not file_name: return False
+    status = False
+    if not file_name: return status
     if os.access(file_name, os.R_OK):
-        if not checksum == None:
-            if file_checksum(file_name, checksum):
-                return True
-            else:
-                return False
-        elif destroy:
+        if checksum:
+            status = file_checksum(file_name, checksum)
+        if destroy and not status:
             os.remove(file_name)
-            return False
-        else:
-            return True
-    else:
-        return False
+    return status
 
 def file_checksum(file, checksum):
-    """ Compares a file's sum to given sum. """
+    """ Compares a file's sum to given sum.
+        Return True if they match, False if they don't. """
     B, K, M, G = 1, 1024, 1024*1024, 1024*1024*1024
     # now that our sizes are defined let's do some multiplication
     bufsize = 8*K*B
