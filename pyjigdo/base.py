@@ -67,7 +67,7 @@ class PyJigdoBase:
         self.cfg.setup_cfg()
         
         # Initialize the job pool
-        self.queue = JigdoJobPool(self.log)
+        self.queue = JigdoJobPool(self.log, self.cfg)
 
     def run(self):
         """ Split into either running CLI, or GUI. """

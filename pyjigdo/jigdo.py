@@ -49,7 +49,7 @@ class JigdoDefinition:
         """ Print the contents of the definition. """
         self.log.info(_("==== Servers listed in Jigdo ===="))
         self.log.info(self.servers)
-        self.log.info(_("==== Mirrors listed in Jigdo ===="))
+        self.log.info(_("==== Mirror list sources listed in Jigdo ===="))
         self.log.info(self.mirrors)
         self.log.info(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
@@ -140,7 +140,8 @@ class JigdoDefinition:
                             optval = ''
                         # XXX: So, isinstance() is useful here, but should we use it?!
                         if not (isinstance(cursect, JigdoPartsDefinition) or \
-                                isinstance(cursect, JigdoServersDefinition)):
+                                isinstance(cursect, JigdoServersDefinition) or \
+                                isinstance(cursect, JigdoMirrorlistsDefinition)):
                             optname = optname.rstrip().lower().replace("-","_")
                         cursect.add_option(optname,optval)
                     else:
@@ -160,7 +161,7 @@ class JigdoDefinition:
         # This will create the JigdoRepoDefinitions
         if self.servers: self.servers.create_objects()
         # This will stuff the mirror information into the correct JigdoRepoDefinition
-        if self.mirrors: self.mirrors.create_objects()
+        if self.mirrors and self.servers: self.mirrors.create_objects(self.servers)
 
 class JigdoDefinitionSection:
     """ A Section in the Jigdo Definition File """
@@ -210,10 +211,10 @@ class JigdoMirrorlistsDefinition:
         self.i = {}
     
     def __str__(self):
-        """ Print the mirrors we know about. """
+        """ Print the mirror lists we know about. """
         mirror_data = []
-        for (mirror_id, mirror_urls) in self.i:
-            mirror_data.append("ID: %s URL(s): %s" % (mirror_id, " ".join(mirror_urls)))
+        for (mirror_id, mirror_list_urls) in self.i.iteritems():
+            mirror_data.append("ID: %s URL(s): %s" % (mirror_id, " ".join(mirror_list_urls)))
         return "\n".join(mirror_data)
             
     def add_option(self, name, val = None):
@@ -227,10 +228,10 @@ class JigdoMirrorlistsDefinition:
         """ Find the JigdoRepoDefinition and inject the mirrorlists into it. """
         for (repo_id, repo) in servers.objects.iteritems():
             try:
-                repo.mirrors.append(self.i[repo_id])
+                mirrors = pyjigdo.misc.get_mirror_list(self.i[repo_id])
+                if mirrors: repo.mirrorlist.extend(mirrors)
             except KeyError:
-                # [Servers] section repo_id doesn't have a [Mirrorlist] listing, skip it.
-                pass
+                self.log.debug(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id, level = 2)
                 
 
 class JigdoPartsDefinition:
@@ -243,6 +244,7 @@ class JigdoPartsDefinition:
     def __getitem__(self, item):
         # Return the part data
         return self.i[item]
+
     def __str__(self):
         return "There are %s files defined." % len(self.i)
 
@@ -259,20 +261,30 @@ class JigdoRepoDefinition:
         self.mirrorlist = mirrorlist
         self.data_source = data_source
         
-    def get_url(self, file, priority=0):
+    def get_url(self, file, priority=0, use_only_servers = False):
         """ Get a resolved url from this repo, given a file name and resolution priority.
-            The higher the priority, the more direct a response will be given. """
+            The higher the priority, the more direct a response will be given.
+            If use_only_servers is True, only baseurls will be tried. """
         
         num_sources = len(self.baseurls) + len(self.mirrorlist)
         base_url = None    
-        if not priority:
-            # Just be dumb about it and return an url as high up in the resolution stack as possible
-            # Order: top mirror list down, top server listing down; meaning, try the first listed match unless
-            # there is a priority given
+        if not priority and not use_only_servers:
+            # Mirror lists: order of response from mirror list server, these are tried first
+            # Servers: first listed -> down; meaning, try the first listed match
+            # This can all be affected by using priority. The larger the priority, the more specific we
+            # need for a response.
             if self.mirrorlist:
                 base_url = self.mirrorlist[0]
             else:
                 base_url = self.baseurls[0]
+        elif use_only_servers:
+            # Only look for a source defined by a [servers] section
+            while not base_url and (priority > -1) and (priority < len(self.baseurls)):
+                try:
+                    base_url = self.baseurls[priority]
+                except IndexError:
+                    pass
+                priority -= 1
         else:
             # Find the closest match to the priority requested.
             while not base_url and (priority > -1) and (priority < num_sources):
@@ -367,7 +379,7 @@ class JigdoImageSlice:
                                                                self.repo,
                                                                self.target_location)
 
-    def run_download(self, total = None, pending = None):
+    def run_download(self, timeout, max_mirror_tries, total = None, pending = None):
         """ Download and confirm this slice.
             If the target_location exists, check to make sure it's the data we want."""
         if self.finished: return True
@@ -375,13 +387,23 @@ class JigdoImageSlice:
         if total and pending: title = "[%s/%s] %s" % (total-pending, total, self.file_name)
         self.check_self(announce = True, title = title)
         attempt = 0
+        servers_only = False
         while not self.finished:
-            url = self.repo.get_url(self.file_name, attempt)
+            url = None
+            if (attempt > max_mirror_tries):
+                servers_only = True
+                attempt = 0
+            if servers_only: 
+                url = self.repo.get_url(self.file_name, attempt, use_only_servers = True)
+            else:
+                url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
+            self.log.debug(_("Attempting to download %s" % url), level = 2)
             pyjigdo.misc.get_file(url, 
                                   file_target = self.file_name,
                                   working_directory = self.target_location,
-                                  title = title)
+                                  title = title,
+                                  timeout = timeout)
             self.check_self()
             attempt += 1
         return self.finished
@@ -397,8 +419,9 @@ class JigdoImageSlice:
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs. """
-    def __init__(self, log):
+    def __init__(self, log, cfg):
         self.log = log
+        self.cfg = cfg
         self.threads = 0 # Not really threaded, yet. This is still up for debate.
         self.max_threads = 10 # FIXME: Is actually a configuration option (10 makes a good default to play with though)
         self.checkpoint_frequency = 10
@@ -432,7 +455,11 @@ class JigdoJobPool:
             such as the JigdoDownloadJob class. """
         while number > 0 and self.jobs['download']:
             task = self.jobs['download'].pop(0)
-            if not task.run_download(total = self.total_jobs, pending = self.pending_jobs): self.jobs['download_failures'].append(task)
+            if not task.run_download(self.cfg.urlgrab_timeout,
+                                     self.cfg.fallback_number,
+                                     total = self.total_jobs,
+                                     pending = self.pending_jobs):
+                self.jobs['download_failures'].append(task)
             number -= 1
             self.pending_jobs -= 1
         self.checkpoint()

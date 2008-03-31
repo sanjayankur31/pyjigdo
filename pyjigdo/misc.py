@@ -48,8 +48,19 @@ def list_images(url, working_directory, log):
 def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)
 
-def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None):
-    """ Gets a file from an URL and returns the file's full path, or None if unable to download. """
+def get_mirror_list(mirror_list_urls):
+    """ Make a request to the mirror list and return the results as a filtered list. """
+    mirror_list_data = []
+    for mirror_list_url in mirror_list_urls:
+        response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT)
+        for line in response_data.readlines(): 
+            if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
+    return mirror_list_data
+
+def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None, timeout = 60):
+    """ Gets a file from an URL and returns the file's full path, or None if unable to download.
+        This function has a hard coded timeout of 60 seconds unless the keyword argument 'timeout'
+        overrides this. """
     
     if not url:
         # This is a bad request, return None
@@ -70,12 +81,13 @@ def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pb
         # this will include the working_directory
         check_directory(base_directory)
         # File does not exist or wasn't valid. Download the file.
-        file_name = download_file(url, file_name, title)
+        file_name = download_file(url, file_name, title, timeout)
 
     return file_name
 
-def download_file(url, file_name, title=None):
-    """ Use urlgrabber to download given url to given file_name. """
+def download_file(url, file_name, title=None, timeout = 60):
+    """ Use urlgrabber to download given url to given file_name. This function has a hard coded timeout
+        of 60 seconds unless the keyword argument 'timeout' overrides this. """
     try:
         if not title: title = os.path.basename(file_name)
         try:
@@ -84,7 +96,8 @@ def download_file(url, file_name, title=None):
                                copy_local=1,
                                progress_obj = urlgrabber.progress.TextMeter(),
                                user_agent = URLGRABBER_USER_AGENT,
-                               text = title)
+                               text = title,
+                               timeout = float(timeout))
             return file_name
         except URLGrabError:
             return None
