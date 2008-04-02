@@ -18,6 +18,7 @@
 
 from optparse import OptionParser
 import os, sys
+
 import pyjigdo.base
 from pyjigdo.constants import *
 

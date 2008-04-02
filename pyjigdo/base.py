@@ -115,14 +115,18 @@ class PyJigdoBase:
         elif self.cli_options.cli_mode:
             self.cfg._set_cli_mode()
         else:
-            try:
-                import gtk
-                import gtk.glade
-                import gobject
-                import gtk.gdk as gdk
-                self.cfg._set_gui_mode()
-            except:
-                self.cfg._set_cli_mode()
+
+##
+## FIXME: GUI is disabled
+##
+#            try:
+#                import gtk
+#                import gtk.glade
+#                import gobject
+#                import gtk.gdk as gdk
+#                self.cfg._set_gui_mode()
+#            except:
+            self.cfg._set_cli_mode()
 
     def load_jigdo(self, url):
         """ Load a jigdo from a given URL using pyjigdo.misc.get_file. """

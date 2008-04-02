@@ -1,5 +1,6 @@
 PYTHON_FILES = \
     base.py \
+    cfg.py \
     cli.py \
     constants.py \
     gui.py \
@@ -9,6 +10,7 @@ PYTHON_FILES = \
     logger.py \
     misc.py \
     parse.py \
+    progress.py \
     translate.py
 
 EXTRA_DIST = \
