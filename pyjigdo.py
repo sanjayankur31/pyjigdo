@@ -58,7 +58,7 @@ class PyJigdo(object):
         runtime_group.add_option(   "--cli",
                                     dest    = "cli_mode",
                                     action  = "store_true",
-                                    default = False,
+                                    default = True,
                                     help    = "Use the CLI rather then GUI")
         runtime_group.add_option(   "--gui",
                                     dest    = "gui_mode",
