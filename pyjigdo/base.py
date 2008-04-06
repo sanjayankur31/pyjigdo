@@ -65,9 +65,7 @@ class PyJigdoBase:
 
         # Then really setup the ConfigStore (because that needs a logger!)
         self.cfg.setup_cfg()
-        
-        # Initialize the job pool
-        self.queue = JigdoJobPool(self.log, self.cfg)
+
 
     def run(self):
         """ Split into either running CLI, or GUI. """
@@ -132,7 +130,11 @@ class PyJigdoBase:
         """ Load a jigdo from a given URL using pyjigdo.misc.get_file. """
         self.log.debug(_("Loading Jigdo file %s") % url, level=2)
         file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.working_directory, log = self.log)
-        self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, self.log)
+        self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, self.log, self.cfg)
+    
+    def create_job_pool(self):
+        """ Create the job pool. """
+        self.queue = JigdoJobPool(self.log, self.cfg, self.jigdo_definition)
 
     def select_images(self):
         """ Select images based on selections by the user.
@@ -215,7 +217,7 @@ class PyJigdoBase:
     def add_recompose(self, image):
         """ Add the template to be assembled. Generate the needed slice objects. """
         self.log.debug(_("Adding image %s to our queue.") % image.template, level = 4)
-        image.get_template(self.cfg.working_directory, self.log)
+        image.get_template(self.cfg.working_directory)
         image.collect_slices(self.jigdo_definition, self.cfg.working_directory)
     
     def add_download_jobs(self, image):
@@ -227,6 +229,7 @@ class PyJigdoBase:
     def run_tasks(self):
         """ Actually start dealing with selected images. It's go time. """
         while self.queue.jobs['download']:
+            self.queue.do_compose()
             self.queue.do_download()
         # Report on what fails to download:
         self.queue.download_failure_report()

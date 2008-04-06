@@ -34,6 +34,9 @@ class PyJigdoCLI:
 
         # Load the .jigdo file
         self.base.load_jigdo(self.cfg.jigdo_url)
+        
+        # Initialize the job pool
+        self.base.create_job_pool()
 
         # Select the images as per the command line
         if not self.base.select_images():

@@ -106,6 +106,9 @@ def download_file(url, file_name, title=None, timeout = 60):
     except OSError:
         print _("Unable to write to %s, aborting." % file_name)
         exit(1)
+    except IOError:
+        print _("Unable to write to %s, aborting." % file_name)
+        exit(1)
 
 def check_file(file_name, checksum = None, destroy = False):
     """
