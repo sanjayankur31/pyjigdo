@@ -233,7 +233,7 @@ class JigdoMirrorlistsDefinition:
         for (repo_id, repo) in servers.objects.iteritems():
             try:
                 repo.mirrorlist = pyjigdo.misc.get_mirror_list(self.i[repo_id])
-                print repo
+                self.log.debug(repo, level = 3)
             except KeyError:
                 self.log.debug(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id, level = 2)
 
@@ -360,7 +360,7 @@ class JigdoImage:
         finished_slices = {}
         for (slice_hash, slice_object) in self.slices.iteritems():
             if slice_object.finished:
-                finised_slices[slice_hash] = slice_object.target_location
+                finished_slices[slice_hash] = slice_object.target_location
         return finished_slices
 
     def select(self):
@@ -471,7 +471,7 @@ class JigdoJobPool:
             # FIXME: Add checkpoint hooks.
             # Stuff bits into target images:
             for (image_id, image) in self.jigdo_definition.images.iteritems():
-                if not image.finished: self.add_job('compose', image)
+                if not image.finished and image.selected: self.add_job('compose', image)
 
     def do_download(self, number=1):
         """ This is a hack around implementing the threading.
@@ -519,7 +519,7 @@ class JigdoJobPool:
                     "-r", "quiet",
                     "--force",
                     file ]
-        pyjigdo.misc.run_command(command)
+        pyjigdo.misc.run_command(command, inshell=True)
         if destroy: os.remove(file)
 
 
