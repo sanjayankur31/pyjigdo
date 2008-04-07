@@ -18,7 +18,7 @@
 Implementation of Jigdo concepts, calling jigdo-file when needed.
 """
 
-import os, urlparse
+import os, urlparse, sys
 import pyjigdo.misc
 from ConfigParser import RawConfigParser
 
@@ -417,7 +417,10 @@ class JigdoImageSlice:
             else:
                 url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
-            self.log.debug(_("Attempting to download %s" % url), level = 1)
+            url_data = urlparse.urlparse(url)
+            self.log.status(_("Trying %s for %s" % (url_data.netloc,
+                                                    os.path.basename(url_data.path))
+                                                    ))
             pyjigdo.misc.get_file(url,
                                   file_target = self.file_name,
                                   working_directory = self.target_location,
@@ -502,8 +505,8 @@ class JigdoJobPool:
         while number > 0 and self.jobs['compose']:
             task = self.jobs['compose'].pop(0)
             self.log.info(_("Stuffing bits into Jigdo image %s...") % task.filename)
-            for (slice_hash, slice_location) in task.finished_slices().iteritems():
-                self.stuff_bits_into_image(task, slice_location)
+            #for (slice_hash, slice_location) in task.finished_slices().iteritems():
+            #    self.stuff_bits_into_image(task, slice_location)
             number -= 1
             self.pending_jobs -= 1
         self.checkpoint()

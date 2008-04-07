@@ -48,6 +48,10 @@ class Logger:
         be able to distinct between CLI and GUI mode, or even give more details
         about what goes wrong"""
         self.cfg = cfg
+    
+    def status(self, msg):
+        print '%s%s\r' % (msg, " "*(79 - len(str(msg)))),
+        sys.stdout.flush()
 
     def info(self, msg):
         self.log.info(msg)
