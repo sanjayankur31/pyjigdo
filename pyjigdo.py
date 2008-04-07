@@ -102,7 +102,7 @@ class PyJigdo(object):
         config_group.add_option(    "--dest-dir", "--destination-directory",
                                     dest    = "destination_directory",
                                     action  = "store",
-                                    default = "/srv/jigdo/",
+                                    default = "/var/tmp/pyjigdo/",
                                     help    = _("Destination directory for products"),
                                     metavar = "[directory]")
         config_group.add_option(    "--work-dir", "--working-directory",

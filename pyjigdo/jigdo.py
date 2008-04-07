@@ -333,6 +333,7 @@ class JigdoImage:
         self.template_md5sum = ''
         self.template_file = ''
         self.target_location = ''
+        self.destination_dir = destination_dir
 
     def __str__(self):
         """ Print information about the given image. """
@@ -355,12 +356,15 @@ class JigdoImage:
                                                           jigdo_definition.servers.objects[slice_server_id],
                                                           work_dir,
                                                           self.log)
+        self.target_location = os.path.join(self.destination_dir, self.filename)
+        
     def finished_slices(self):
         """ Returns a dictionary of slices that have been downloaded and marked as finished. """
         finished_slices = {}
         for (slice_hash, slice_object) in self.slices.iteritems():
             if slice_object.finished:
-                finished_slices[slice_hash] = slice_object.target_location
+                finished_slices[slice_hash] = os.path.join(slice_object.target_location,
+                                                           slice_object.file_name)
         return finished_slices
 
     def select(self):
@@ -418,8 +422,11 @@ class JigdoImageSlice:
                 url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
             url_data = urlparse.urlparse(url)
+            base_name = os.path.basename(url_data.path)
+            if base_name == 'mirrorlist':
+                base_name = os.path.basename(url_data.query)
             self.log.status(_("Trying %s for %s" % (url_data.netloc,
-                                                    os.path.basename(url_data.path))
+                                                    base_name)
                                                     ))
             pyjigdo.misc.get_file(url,
                                   file_target = self.file_name,
@@ -505,8 +512,8 @@ class JigdoJobPool:
         while number > 0 and self.jobs['compose']:
             task = self.jobs['compose'].pop(0)
             self.log.info(_("Stuffing bits into Jigdo image %s...") % task.filename)
-            #for (slice_hash, slice_location) in task.finished_slices().iteritems():
-            #    self.stuff_bits_into_image(task, slice_location)
+            for (slice_hash, slice_location) in task.finished_slices().iteritems():
+                self.stuff_bits_into_image(task, slice_location)
             number -= 1
             self.pending_jobs -= 1
         self.checkpoint()
@@ -518,7 +525,7 @@ class JigdoJobPool:
         command = [ "jigdo-file", "make-image",
                     "--image", jigdo_image.target_location,
                     "--template", jigdo_image.template_file,
-                    "--jigdo", self.jigdo_definition,
+                    "--jigdo", self.jigdo_definition.file_name,
                     "-r", "quiet",
                     "--force",
                     file ]
