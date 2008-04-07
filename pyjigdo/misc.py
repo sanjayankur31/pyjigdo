@@ -57,9 +57,9 @@ def get_mirror_list(mirror_list_urls):
             if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
     return mirror_list_data
 
-def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None, timeout = 60):
+def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None, timeout = 30):
     """ Gets a file from an URL and returns the file's full path, or None if unable to download.
-        This function has a hard coded timeout of 60 seconds unless the keyword argument 'timeout'
+        This function has a hard coded timeout of 30 seconds unless the keyword argument 'timeout'
         overrides this. """
     
     if not url:
@@ -85,9 +85,9 @@ def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pb
 
     return file_name
 
-def download_file(url, file_name, title=None, timeout = 60):
+def download_file(url, file_name, title=None, timeout = 30):
     """ Use urlgrabber to download given url to given file_name. This function has a hard coded timeout
-        of 60 seconds unless the keyword argument 'timeout' overrides this. """
+        of 30 seconds unless the keyword argument 'timeout' overrides this. """
     try:
         if not title: title = os.path.basename(file_name)
         try:

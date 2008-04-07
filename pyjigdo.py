@@ -137,7 +137,7 @@ class PyJigdo(object):
         general_group.add_option(   "--timeout",
                                     dest    = "urlgrab_timeout",
                                     action  = "store",
-                                    default = 20,
+                                    default = 15,
                                     type    = 'float',
                                     help    = "Number of seconds to wait before switching to different slice source. (Default: 20)",
                                     metavar = "[number of seconds]")

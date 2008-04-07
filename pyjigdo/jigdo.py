@@ -422,9 +422,7 @@ class JigdoImageSlice:
                 url = self.repo.get_url(self.file_name, attempt)
             if not url: return self.finished
             url_data = urlparse.urlparse(url)
-            base_name = os.path.basename(url_data.path)
-            if base_name == 'mirrorlist':
-                base_name = os.path.basename(url_data.query)
+            base_name = os.path.basename(self.file_name)
             self.log.status(_("Trying %s for %s" % (url_data.netloc,
                                                     base_name)
                                                     ))
