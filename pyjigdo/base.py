@@ -231,10 +231,14 @@ class PyJigdoBase:
         while self.queue.jobs['download']:
             self.queue.do_compose()
             self.queue.do_download()
-        # Report on what fails to download:
-        self.queue.download_failure_report()
-        # FIXME: Don't exit, do something.
-        exit(1)
+
+        if self.queue.finish_pending_jobs():
+            self.log.info(_("Success!"))
+        else:
+            # FIXME: Don't exit, do something.
+            self.log.info(_("Something is still to be done!"))
+            self.queue.do_download_failures(report=True)
+            exit(1)
             
                 
         

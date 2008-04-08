@@ -269,7 +269,7 @@ def run_command(command, rundir=None, inshell=False, env=temp_env, stdout=subpro
         rundir = "/var/tmp/"
 
     check_directory(rundir)
-    #print "Running command '%s'" % command
+    #print "Running command '%s'" % " ".join(command)
 
     ret = []
     p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False, env=env)
