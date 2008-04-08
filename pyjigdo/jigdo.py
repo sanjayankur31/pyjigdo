@@ -531,9 +531,10 @@ class JigdoJobPool:
             This will run given number of pending compose jobs. """
         while number > 0 and self.jobs['compose']:
             task = self.jobs['compose'].pop(0)
-            self.log.info(_("Stuffing bits into Jigdo image %s...") % task.filename)
-            for (slice_hash, slice_location) in task.finished_slices().iteritems():
-                self.stuff_bits_into_image(task, slice_location)
+            if not task.finished:
+                self.log.info(_("Stuffing bits into Jigdo image %s...") % task.filename)
+                for (slice_hash, slice_location) in task.finished_slices().iteritems():
+                    self.stuff_bits_into_image(task, slice_location)
             number -= 1
             self.pending_jobs -= 1
         self.checkpoint()
