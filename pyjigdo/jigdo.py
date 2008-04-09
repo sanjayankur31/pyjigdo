@@ -420,7 +420,7 @@ class JigdoImageSlice:
             If the target_location exists, check to make sure it's the data we want."""
         if self.finished: return True
         title = self.file_name
-        if total and pending: title = "[%s/%s] %s" % (total-pending, total, self.file_name)
+        if total and pending: title = "[%s/%s] %s" % (total-pending+1, total, self.file_name)
         self.check_self(announce = True, title = title)
         attempt = 0
         servers_only = False
@@ -465,9 +465,9 @@ class JigdoJobPool:
         self.log = log
         self.cfg = cfg
         self.jigdo_definition = jigdo_definition
-        self.threads = 0 # Not really threaded, yet. This is still up for debate.
+        self.threads = 1 # Not really threaded, yet. This is still up for debate.
         self.max_threads = 10 # FIXME: Is actually a configuration option (10 makes a good default to play with though)
-        self.checkpoint_frequency = 25
+        self.checkpoint_frequency = 25 * self.threads
         self.current_checkpoint = self.checkpoint_frequency
         self.jobs = {
                         'scan': [],
@@ -494,6 +494,16 @@ class JigdoJobPool:
             # Stuff bits into target images:
             for (image_id, image) in self.jigdo_definition.images.iteritems():
                 if not image.finished and image.selected: self.add_job('compose', image)
+            self.order_mirrors()
+    
+    def order_mirrors(self):
+        """ Order the known sources based on average bitrates. """
+        # FIXME: Implement the average bitrate stuff.
+        # For now, it just randomizes the mirrors.
+        from random import shuffle
+        if self.jigdo_definition.servers.objects:
+            for (repo_id, repo) in self.jigdo_definition.servers.objects.iteritems():
+                if repo.mirrorlist: shuffle(repo.mirrorlist)
     
     def do_scan(self, number=1):
         self.checkpoint()

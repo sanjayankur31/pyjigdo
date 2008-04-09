@@ -129,7 +129,7 @@ class PyJigdoBase:
     def load_jigdo(self, url):
         """ Load a jigdo from a given URL using pyjigdo.misc.get_file. """
         self.log.debug(_("Loading Jigdo file %s") % url, level=2)
-        file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.working_directory, log = self.log)
+        file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.destination_directory, log = self.log)
         self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, self.log, self.cfg)
     
     def create_job_pool(self):

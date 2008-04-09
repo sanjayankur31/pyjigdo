@@ -50,6 +50,15 @@ class PyJigdo(object):
             parser = OptionParser(epilog=epilog)
         except:
             parser = OptionParser()
+        
+        ##
+        ## Generated Defaults
+        ##
+        default_base_path = os.getcwd()
+        default_dest = default_base_path
+        default_work = os.path.join(default_base_path, 'pyjigdo-data')
+        default_fallback = 5
+        default_timeout = 15
 
         ##
         ## Runtime Options
@@ -59,17 +68,17 @@ class PyJigdo(object):
                                     dest    = "cli_mode",
                                     action  = "store_true",
                                     default = True,
-                                    help    = "Use the CLI rather then GUI")
+                                    help    = _("Use the CLI rather then GUI"))
         runtime_group.add_option(   "--gui",
                                     dest    = "gui_mode",
                                     action  = "store_true",
                                     default = False,
-                                    help    = "Force Revisor to use the GUI. Does not fallback to CLI and thus shows GUI related errors")
+                                    help    = _("Force Revisor to use the GUI. Does not fallback to CLI and thus shows GUI related errors"))
         runtime_group.add_option(   "--list-images",
                                     dest    = "list_images",
                                     action  = "store_true",
                                     default = False,
-                                    help    = "List available images for a given Jigdo file.")
+                                    help    = _("List available images for a given Jigdo file."))
 
         ##
         ## Logging Options
@@ -98,19 +107,19 @@ class PyJigdo(object):
                                     action  = "store",
                                     default = os.path.join(BASE_CONF_DIR,"pyjigdo.conf"),
                                     help    = _("PyJigdo configuration file to use"),
-                                    metavar = "[config file]")
+                                    metavar = _("[config file]"))
         config_group.add_option(    "--dest-dir", "--destination-directory",
                                     dest    = "destination_directory",
                                     action  = "store",
-                                    default = "/var/tmp/pyjigdo/",
-                                    help    = _("Destination directory for products"),
-                                    metavar = "[directory]")
+                                    default = default_dest,
+                                    help    = _("Destination directory for products. (Default: %s" % default_dest),
+                                    metavar = _("[directory]"))
         config_group.add_option(    "--work-dir", "--working-directory",
                                     dest    = "working_directory",
                                     action  = "store",
-                                    default = "/var/tmp/pyjigdo/",
-                                    help    = _("Working directory"),
-                                    metavar = "[directory]")
+                                    default = default_work,
+                                    help    = _("Working directory. (Default: %s)" % default_work),
+                                    metavar = _("[directory]"))
 
         ## Information Options
         ## Purpose: We should allow a user to query a jigdo and get lots-o-info from just
@@ -120,27 +129,27 @@ class PyJigdo(object):
                                     dest    = "jigdo_url",
                                     action  = "store",
                                     default = "",
-                                    help    = "Location of jigdo file.",
-                                    metavar = "[url]")
+                                    help    = _("Location of jigdo file."),
+                                    metavar = _("[url]"))
         general_group.add_option(   "--info",
                                     dest    = "jigdo_info",
                                     action  = "store_true",
                                     default = False,
-                                    help    = "Print information about the jigdo image and exit.")
+                                    help    = _("Print information about the jigdo image and exit."))
         general_group.add_option(   "--fallback",
                                     dest    = "fallback_number",
                                     action  = "store",
-                                    default = 5,
+                                    default = default_fallback,
                                     type    = 'int',
-                                    help    = "Number of public mirrors to try before using a fallback mirror. (Default: 5)",
-                                    metavar = "[number of tries]")
+                                    help    = _("Number of public mirrors to try before using a fallback mirror. (Default: %s)" % default_fallback),
+                                    metavar = _("[number of tries]"))
         general_group.add_option(   "--timeout",
                                     dest    = "urlgrab_timeout",
                                     action  = "store",
-                                    default = 15,
+                                    default = default_timeout,
                                     type    = 'float',
-                                    help    = "Number of seconds to wait before switching to different slice source. (Default: 20)",
-                                    metavar = "[number of seconds]")
+                                    help    = _("Number of seconds to wait before switching to different slice source. (Default: %s)" % default_timeout),
+                                    metavar = _("[number of seconds]"))
 
         ## Downloading Options
         ## Purpose: Allow a user to non-interactively download a defined image or images.
@@ -153,13 +162,14 @@ class PyJigdo(object):
                                     default = [],
                                     action  = "append",
                                     type    = "int",
-                                    help    = "Download or Host given image number(s).",
-                                    metavar = "[image number]")
+                                    help    = _("Download or Host given image number(s)."),
+                                    metavar = _("[image number]"))
         download_group.add_option(  "--all",
                                     dest    = "image_all",
                                     action  = "store_true",
                                     default = False,
-                                    help    = "Download or Host all images defined in jigdo.")
+                                    help    = _("Download or Host all images defined in jigdo."))
+        
         ## FIXME: Any creative ways to take this data and not limit to just two repos?
         #download_group.add_option(  "--download-mirror-base",
                                     #dest    = "base_download_mirror",
