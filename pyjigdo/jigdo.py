@@ -352,7 +352,10 @@ class JigdoImage:
         self.tmp_location = "%s.tmp" % self.location
         template_target = self.template_file
         iso_exists = False
-        if os.access(self.tmp_location, os.W_OK): template_target = self.tmp_location
+        if os.access(self.tmp_location, os.W_OK):
+            template_target = self.tmp_location
+            self.log.debug(_("Temporary template found at %s" % template_target), level = 4)
+            # FIXME: Need a test to see if this tmp image is usable.
         template_data = pyjigdo.misc.run_command(["jigdo-file", "ls", "--template", template_target], inshell=True)
         if os.access(self.location, os.R_OK): iso_exists = True
         for line in template_data:
