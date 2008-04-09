@@ -299,6 +299,11 @@ class PyJigdo(object):
         self.parser = parser
         # Parse Options
         (self.cli_options, self.args) = parser.parse_args()
+        if not self.cli_options.jigdo_url:
+            try:
+                self.cli_options.jigdo_url = self.args[0]
+            except IndexError:
+                pass
 
     def answer_questions(self):
         """Answers questions such as when --jigdo --info has been specified"""
