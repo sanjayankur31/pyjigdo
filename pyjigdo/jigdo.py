@@ -370,7 +370,9 @@ class JigdoImage:
             elif line.startswith('image-info'):
                 self.filename_md5sum = line.split()[2]
                 if iso_exists:
+                    self.log.info(_("%s exists, checking..." % self.filename))
                     if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
+                        self.log.info(_("%s is complete." % self.filename))
                         self.finished = True
                         self.selected = False
         
@@ -382,6 +384,14 @@ class JigdoImage:
                 finished_slices[slice_hash] = os.path.join(slice_object.target_location,
                                                            slice_object.file_name)
         return finished_slices
+    
+    def missing_slices(self):
+        """ Returns a dictionary of slices that are not marked as finished. """
+        missing_slices = {}
+        for (slice_hash, slice_object) in self.slices.iteritems():
+            if not slice_object.finished:
+                missing_slices[slice_hash] = slice_object
+        return missing_slices
 
     def select(self):
         self.selected = True
@@ -393,11 +403,12 @@ class JigdoImage:
         """ Make sure we have the template and it checks out, or fetch it again. """
         self.template_file = pyjigdo.misc.url_to_file_name(self.template, work_dir)
         if pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-            self.log.info("Template %s exists and checksum matches." % self.template)
+            self.log.info("Template %s exists and checksum matches." % self.filename)
         else:
             self.template_file = pyjigdo.misc.get_file(self.template, working_directory = work_dir)
             if not pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-                self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.template)
+                # FIXME: Prompt user asking if we should clear this data, try again?
+                self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
                 self.unselect()
 
 class JigdoImageSlice:
@@ -503,6 +514,8 @@ class JigdoJobPool:
         """ Order the known sources based on average bitrates. """
         # FIXME: Implement the average bitrate stuff.
         # For now, it just randomizes the mirrors.
+        # FIXME: Implement shuffling the servers, preserving the last listed
+        # source as the fallback
         from random import shuffle
         if self.jigdo_definition.servers.objects:
             for (repo_id, repo) in self.jigdo_definition.servers.objects.iteritems():
@@ -566,8 +579,17 @@ class JigdoJobPool:
         pyjigdo.misc.run_command(command, inshell=True)
         if destroy: os.remove(file)
     
+    def do_last_queue(self):
+        """ Try one last time to queue up the needed actions. """
+        for (image_id, image) in self.jigdo_definition.images.iteritems():
+            if not image.finished and image.selected:
+                pending = image.missing_slices()
+                for slice in pending:
+                    self.add_job('download', slice)
+                    
     def finish_pending_jobs(self):
         """ Check all queues and run remaining tasks. """
+        self.do_last_queue()
         self.current_checkpoint = 0
         self.checkpoint()
         for (type, queue) in self.jobs.iteritems():
