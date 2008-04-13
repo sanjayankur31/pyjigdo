@@ -371,10 +371,12 @@ class JigdoImage:
                 self.filename_md5sum = line.split()[2]
                 if iso_exists:
                     self.log.info(_("%s exists, checking..." % self.filename))
+                    # FIXME: Duplicate check_file!! (See misc.py:120 and pyjigdo.py:416)
                     if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
                         self.log.info(_("%s is complete." % self.filename))
                         self.finished = True
                         self.selected = False
+                        self.cleanup_template()
 
     def finished_slices(self):
         """ Returns a dictionary of slices that have been downloaded and marked as finished. """
@@ -402,7 +404,7 @@ class JigdoImage:
         """ Make sure we have the template and it checks out, or fetch it again. """
         self.template_file = pyjigdo.misc.url_to_file_name(self.template, work_dir)
         if pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-            self.log.info("Template %s exists and checksum matches." % self.filename)
+            self.log.info("Template %s exists and checksum matches." % self.template_file)
         else:
             self.template_file = pyjigdo.misc.get_file(self.template, working_directory = work_dir)
             if not pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
@@ -410,11 +412,16 @@ class JigdoImage:
                 self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
                 self.unselect()
 
+    # FIXME: Duplicate check_file function!! (See misc.py:120)
     def check_self(self):
         """ Run checks on self to see if we are sane. """
         if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
             self.log.info(_("%s is complete." % self.filename))
             self.finished = True
+            self.cleanup_template()
+
+    def cleanup_template(self):
+        os.unlink(self.tmp_location)
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
