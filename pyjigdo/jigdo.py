@@ -445,7 +445,7 @@ class JigdoImageSlice:
         servers_only = False
         while not self.finished:
             url = None
-            if (attempt >= max_mirror_tries):
+            if (attempt >= max_mirror_tries) and not servers_only:
                 servers_only = True
                 attempt = 0
             if servers_only:
