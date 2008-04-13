@@ -48,13 +48,16 @@ def list_images(url, working_directory, log):
 def urlparse_basename(url):
     return os.path.basename(urlparse.urlparse(url).path)
 
-def get_mirror_list(mirror_list_urls):
+def get_mirror_list(mirror_list_urls, log):
     """ Make a request to the mirror list and return the results as a filtered list. """
     mirror_list_data = []
     for mirror_list_url in mirror_list_urls:
-        response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT)
-        for line in response_data.readlines(): 
-            if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
+        try:
+            response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT)
+            for line in response_data.readlines(): 
+                if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
+        except urlgrabber.grabber.URLGrabError:
+            self.log.error(_("Mirror list %s was unable to be fetched." % mirror_list_url), recoverable=True)
     return mirror_list_data
 
 def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None, timeout = 30):
