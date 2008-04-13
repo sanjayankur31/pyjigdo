@@ -47,6 +47,9 @@ class PyJigdoCLI:
         
         # Run everything
         self.base.run_tasks()
+        
+        # Report the results to the user
+        self.report_results()
 
     def select_images_interaction(self):
         """ Interactively work with the user to select what images to download. """
@@ -120,3 +123,15 @@ class PyJigdoCLI:
         if self.cfg.scan_isos:
             for iso in self.cfg.scan_isos:
                 self.base.add_scan_job(iso, is_iso=True)
+    
+    def report_results(self):
+        """ Tell the user what happened. """
+        for (image_id, image) in self.base.jigdo_definition.images.iteritems():
+            if image.selected:
+                if image.finished:
+                    self.log.info(_("Image %s successfully downloaded to: %s" %
+                                    (image.filename,
+                                    image.location)))
+                else:
+                    self.log.error(_("Image %s failed to complete. Try running pyjigdo again." %
+                                     image.filename), recoverable=False)

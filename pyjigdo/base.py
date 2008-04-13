@@ -265,11 +265,8 @@ class PyJigdoBase:
             self.queue.do_compose()
             self.queue.do_download()
 
-        if self.queue.finish_pending_jobs():
-            self.log.info(_("Success!"))
-        else:
-            # FIXME: Don't exit, do something.
-            self.log.info(_("Something is still to be done!"))
+        if not self.queue.finish_pending_jobs():
+            self.log.info(_("Something failed to finish...\n"))
             self.queue.do_download_failures(report=True)
         
         # Cleanup Mounts, if any

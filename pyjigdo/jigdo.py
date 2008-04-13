@@ -599,7 +599,8 @@ class JigdoJobPool:
     def do_download_failures(self, requeue=True, report=False, number=1):
         """ Requeue what files failed to download that had been added to the queue.
             Optionally, report on the status. """
-        if report: self.log.info(_("The following downloads failed:"))
+        if report and (len(self.jobs['download_failures']) > 0): 
+            self.log.info(_("The following downloads failed:"))
         for task in self.jobs['download_failures']:
             if report: self.log(_("Download of %s failed." % task))
             if requeue: self.jobs['download'].append(task)
