@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import logging, sys
+import logging, sys, os
 
 import pyjigdo.cfg
 import pyjigdo.jigdo
@@ -135,6 +135,15 @@ class PyJigdoBase:
     def create_job_pool(self):
         """ Create the job pool. """
         self.queue = JigdoJobPool(self.log, self.cfg, self.jigdo_definition)
+    
+    def setup_file_lookup(self):
+        """ Create a location where we can query globally needed files
+            when doing pre-download data acquisition. """
+        self.needed_files = {}
+        for (image_id, image) in self.jigdo_definition.images.iteritems():
+            if image.selected:
+                for (slice_md5, slice) in image.slices.iteritems():
+                    self.needed_files[os.path.basename(slice.file_name)] = slice
 
     def select_images(self):
         """ Select images based on selections by the user.
@@ -225,9 +234,21 @@ class PyJigdoBase:
         self.log.debug(_("Creating download tasks for %s") % image.filename)
         for (slice_hash, slice_object) in image.slices.iteritems():
             self.queue.add_job('download', slice_object)
+    
+    def add_scan_job(self, location, is_iso=False):
+        """ Add a scan job to source local data. """
+        self.log.debug(_("Adding directory %s to be scanned for data." % location), level=3)
+        if is_iso:
+            pass
+        else:
+            scan_object = pyjigdo.jigdo.JigdoScanTarget(location, self.log, self.needed_files)
+            self.queue.add_job('scan', scan_object)
 
     def run_tasks(self):
         """ Actually start dealing with selected images. It's go time. """
+        while self.queue.jobs['scan']:
+            self.queue.do_scan()
+        
         while self.queue.jobs['download']:
             self.queue.do_compose()
             self.queue.do_download()

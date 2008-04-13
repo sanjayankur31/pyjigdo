@@ -73,7 +73,7 @@ class PyJigdo(object):
                                     dest    = "gui_mode",
                                     action  = "store_true",
                                     default = False,
-                                    help    = _("Force Revisor to use the GUI. Does not fallback to CLI and thus shows GUI related errors"))
+                                    help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors"))
         runtime_group.add_option(   "--list-images",
                                     dest    = "list_images",
                                     action  = "store_true",
@@ -92,11 +92,11 @@ class PyJigdo(object):
         ##
         ## Redundant Options
         ##
-        runtime_group.add_option(   "-y", "--yes",
-                                    dest    = "answer_yes",
-                                    action  = "store_true",
-                                    default = False,
-                                    help    = _("Answer all questions as 'yes'"))
+        #runtime_group.add_option(   "-y", "--yes",
+        #                            dest    = "answer_yes",
+        #                            action  = "store_true",
+        #                            default = False,
+        #                            help    = _("Answer all questions as 'yes'"))
 
         ##
         ## Configuration Options
@@ -143,7 +143,7 @@ class PyJigdo(object):
                                     type    = 'int',
                                     help    = _("Number of public mirrors to try before using a fallback mirror. (Default: %s)" % default_fallback),
                                     metavar = _("[number of tries]"))
-        general_group.add_option(   "--timeout",
+        general_group.add_option(   "-t", "--timeout",
                                     dest    = "urlgrab_timeout",
                                     action  = "store",
                                     default = default_timeout,
@@ -157,14 +157,14 @@ class PyJigdo(object):
         ##          This is also for download options, like how many threads to use, to cache or not, etc.
         # FIXME: Make --image take a comma seperated list also
         download_group = parser.add_option_group(_("Download Options"))
-        download_group.add_option(  "--image",
+        download_group.add_option(  "-i", "--image",
                                     dest    = "image_numbers",
                                     default = [],
                                     action  = "append",
                                     type    = "int",
                                     help    = _("Download or Host given image number(s)."),
                                     metavar = _("[image number]"))
-        download_group.add_option(  "--all",
+        download_group.add_option(  "-a", "--all",
                                     dest    = "image_all",
                                     action  = "store_true",
                                     default = False,
@@ -209,13 +209,13 @@ class PyJigdo(object):
         ## Purpose: Allow a user to specify directories to scan for files, including pointing
         ## to existing ISO image(s)
         #
-        #scan_group = parser.add_option_group(_("Scan Options"))
-        #scan_group.add_option(      "--scan-dir",
-                                    #dest    = "scan_dirs",
-                                    #action  = "append",
-                                    #type    = "str",
-                                    #help    = "Scan given directory for files needed by selected image(s).",
-                                    #metavar = "[directory]")
+        scan_group = parser.add_option_group(_("Scan Options"))
+        scan_group.add_option(      "-s", "--scan-dir",
+                                    dest    = "scan_dirs",
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = _("Scan given directory for files needed by selected image(s)."),
+                                    metavar = _("[directory]"))
         #scan_group.add_option(      "--scan-iso",
                                     #dest    = "scan_isos",
                                     #action  = "append",
@@ -314,6 +314,10 @@ class PyJigdo(object):
                 self.cli_options.jigdo_url = self.args[0]
             except IndexError:
                 pass
+        # No GUI, yet ;-)
+        if self.cli_options.gui_mode:
+            print "No GUI, yet ;-) Running CLI..."
+            self.cli_options.gui_mode = False
 
     def answer_questions(self):
         """Answers questions such as when --jigdo --info has been specified"""

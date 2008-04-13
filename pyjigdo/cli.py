@@ -91,7 +91,7 @@ class PyJigdoCLI:
                 try:
                     choice = int(choice)
                 except ValueError, e:
-                    self.log.error(_("NAN!"), recoverable = True)
+                    self.log.error(_("Invalid selection."), recoverable = True)
                     continue
 
                 self.base.select_image(choice)
@@ -107,8 +107,13 @@ class PyJigdoCLI:
 
     def build_jobs(self):
         """ Create the jobs that are needed to complete the requested actions. """
-        for image in self.base.jigdo_definition.images.keys():
-            this_image = self.base.jigdo_definition.images[image]
-            if this_image.selected:
-                self.base.add_recompose(this_image)
-                self.base.add_download_jobs(this_image)
+        # Add images that need to be composed
+        for (image_id, image) in self.base.jigdo_definition.images.iteritems():
+            if image.selected:
+                self.base.add_recompose(image)
+                self.base.add_download_jobs(image)
+        # Build a list of globally needed files, setup scan tasks
+        self.base.setup_file_lookup()
+        if self.cfg.scan_dirs:
+            for directory in self.cfg.scan_dirs:
+                self.base.add_scan_job(directory)

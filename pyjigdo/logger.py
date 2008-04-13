@@ -50,6 +50,8 @@ class Logger:
         self.cfg = cfg
     
     def status(self, msg):
+        """ Send a status. If len() > 79, data will be truncated. """
+        if len(msg) > 79: msg = "%s..." % msg[:76]
         print '%s%s\r' % (msg, " "*(79 - len(str(msg)))),
         sys.stdout.flush()
 

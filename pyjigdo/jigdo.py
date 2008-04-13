@@ -233,7 +233,7 @@ class JigdoMirrorlistsDefinition:
         for (repo_id, repo) in servers.objects.iteritems():
             try:
                 repo.mirrorlist = pyjigdo.misc.get_mirror_list(self.i[repo_id])
-                self.log.debug(repo, level = 3)
+                self.log.debug(repo, level = 5)
             except KeyError:
                 self.log.debug(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id, level = 2)
 
@@ -465,12 +465,50 @@ class JigdoImageSlice:
 
     def check_self(self, announce = False, title = None):
         """ Run checks on self to see if we are sane. """
-        local_file = os.path.join(self.target_location, self.file_name)
+        local_file = self.location
+        if not self.location:
+            local_file = os.path.join(self.target_location, self.file_name)
         if not title: title = local_file
         if pyjigdo.misc.check_file(local_file, checksum = self.slice_sum):
             if announce: self.log.info(_("%s exists and checksum matches." % title))
             self.location = local_file
             self.finished = True
+
+class JigdoScanTarget:
+    """ A definition of where to look for existing bits. """
+    def __init__(self, location, log, needed_files, is_iso=False):
+        self.location = location
+        if is_iso: self.iso_location = location
+        self.log = log
+        self.is_iso = is_iso
+        self.needed_files = needed_files
+
+    def run_scan(self):
+        """ Scan a given location for needed file names and update the slice
+            object with the found location for later use. """
+        if self.is_iso: self.mount()
+        self.log.debug(_("Scanning %s for needed files..." % self.location), level=3)
+        for (path, directories, files) in os.walk(self.location):
+            for name in files:
+                try:
+                    self.log.status(_("Looking for file %s ..." % name))
+                    target_slice = self.needed_files[name]
+                    found_target = os.path.join(path, name)
+                    target_slice.location = found_target
+                    self.log.debug(_("Found file %s, marking location." % name), level=3)
+                except KeyError:
+                    # We don't need this file
+                    pass
+
+        if self.is_iso: self.unmount()
+
+    def mount(self):
+        """ Mount the ISO. """
+        pass
+    
+    def unmount(self):
+        """ Un-Mount the ISO. """
+        pass
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs.
@@ -481,7 +519,7 @@ class JigdoJobPool:
         self.jigdo_definition = jigdo_definition
         self.threads = 1 # Not really threaded, yet. This is still up for debate.
         self.max_threads = 10 # FIXME: Is actually a configuration option (10 makes a good default to play with though)
-        self.checkpoint_frequency = 25 * self.threads
+        self.checkpoint_frequency = 50 * self.threads
         self.current_checkpoint = self.checkpoint_frequency
         self.jobs = {
                         'scan': [],
@@ -522,6 +560,11 @@ class JigdoJobPool:
                 if repo.mirrorlist: shuffle(repo.mirrorlist)
     
     def do_scan(self, number=1):
+        """ Scan a location for needed files and stuff them into our image.
+            Order of logic is, match file name, match sum then stuff bits. """
+        while number > 0 and self.jobs['scan']:
+            task = self.jobs['scan'].pop(0)
+            task.run_scan()
         self.checkpoint()
 
     def do_download(self, number=1):
