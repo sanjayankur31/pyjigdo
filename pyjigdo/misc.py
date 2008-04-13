@@ -53,9 +53,12 @@ def get_mirror_list(mirror_list_urls, log):
     mirror_list_data = []
     for mirror_list_url in mirror_list_urls:
         # Retries getting the mirrorlist until it gets it
-        response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0)
-        for line in response_data.readlines():
-            if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
+        try:
+            response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0)
+            for line in response_data.readlines():
+                if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
+        except urlgrabber.grabber.URLGrabError:
+            self.log.error(_("Mirrorlist %s was unable to be fetched." % mirror_list_urls), recoverable = True)
     return mirror_list_data
 
 def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None, timeout = 30):
