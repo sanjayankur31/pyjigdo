@@ -528,7 +528,6 @@ class JigdoJobPool:
                         'scan': [],
                         'download': [],
                         'download_failures': [],
-                        'loopmount': [],
                         'compose': [],
                     }
         self.pending_jobs = 0
@@ -593,9 +592,6 @@ class JigdoJobPool:
             if report: self.log(_("Download of %s failed." % task))
             if requeue: self.jobs['download'].append(task)
         if requeue: self.jobs['download_failures'] = []
-        self.checkpoint()
-    
-    def do_loopmount(self, number=1):
         self.checkpoint()
 
     def do_compose(self, number=1):
