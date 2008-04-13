@@ -52,8 +52,9 @@ def get_mirror_list(mirror_list_urls):
     """ Make a request to the mirror list and return the results as a filtered list. """
     mirror_list_data = []
     for mirror_list_url in mirror_list_urls:
-        response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT)
-        for line in response_data.readlines(): 
+        # Retries getting the mirrorlist until it gets it
+        response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0)
+        for line in response_data.readlines():
             if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
     return mirror_list_data
 
@@ -61,7 +62,7 @@ def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pb
     """ Gets a file from an URL and returns the file's full path, or None if unable to download.
         This function has a hard coded timeout of 30 seconds unless the keyword argument 'timeout'
         overrides this. """
-    
+
     if not url:
         # This is a bad request, return None
         return None
@@ -75,7 +76,7 @@ def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pb
 
     file_name = os.path.join(working_directory, file_target)
     base_directory = os.path.dirname(file_name)
-    
+
     if not check_file(file_name, destroy = False):
         # Make sure the path leading up to where we want to store the file exists
         # this will include the working_directory
@@ -115,10 +116,10 @@ def check_file(file_name, checksum = None, destroy = False):
     Checks if a file exists. Returns True if the file exists unless
     a checksum is given, then the checksum is checked. If the checksum
     matches, returns True. Otherwise, return False.
-    
+
     If the destroy option is used without a checksum, the file is removed if
     it exists.
-    
+
     If the destroy option is used with a checksum, the file is removed if the
     checksum does not match.
     """
