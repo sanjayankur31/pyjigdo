@@ -238,11 +238,15 @@ class PyJigdoBase:
     def add_scan_job(self, location, is_iso=False):
         """ Add a scan job to source local data. """
         self.log.debug(_("Adding directory %s to be scanned for data." % location), level=3)
+        scan_object = False
         if is_iso:
-            pass
+            scan_object = pyjigdo.jigdo.JigdoScanTarget(location,
+                                                        self.log,
+                                                        self.needed_files,
+                                                        is_iso=is_iso)
         else:
             scan_object = pyjigdo.jigdo.JigdoScanTarget(location, self.log, self.needed_files)
-            self.queue.add_job('scan', scan_object)
+        if scan_object: self.queue.add_job('scan', scan_object)
 
     def run_tasks(self):
         """ Actually start dealing with selected images. It's go time. """

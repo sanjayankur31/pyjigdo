@@ -381,8 +381,7 @@ class JigdoImage:
         finished_slices = {}
         for (slice_hash, slice_object) in self.slices.iteritems():
             if slice_object.finished:
-                finished_slices[slice_hash] = os.path.join(slice_object.target_location,
-                                                           slice_object.file_name)
+                finished_slices[slice_hash] = slice_object.location
         return finished_slices
     
     def missing_slices(self):
@@ -479,6 +478,8 @@ class JigdoScanTarget:
     def __init__(self, location, log, needed_files, is_iso=False):
         self.location = location
         if is_iso: self.iso_location = location
+        self.mounted = False
+        self.loopdev = False
         self.log = log
         self.is_iso = is_iso
         self.needed_files = needed_files
@@ -504,7 +505,9 @@ class JigdoScanTarget:
 
     def mount(self):
         """ Mount the ISO. """
-        pass
+        if self.mounted: return
+        
+               
     
     def unmount(self):
         """ Un-Mount the ISO. """
@@ -612,6 +615,7 @@ class JigdoJobPool:
         """ Put given file into given jigdo_image.
             If destroy, the bits will be removed after being added to the
             target image. """
+        self.log.debug(_("Stuffing %s into %s ..." % (file, jigdo_image)), level=3)
         command = [ "jigdo-file", "make-image",
                     "--image", jigdo_image.location,
                     "--template", jigdo_image.template_file,

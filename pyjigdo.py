@@ -216,12 +216,12 @@ class PyJigdo(object):
                                     type    = "str",
                                     help    = _("Scan given directory for files needed by selected image(s)."),
                                     metavar = _("[directory]"))
-        #scan_group.add_option(      "--scan-iso",
-                                    #dest    = "scan_isos",
-                                    #action  = "append",
-                                    #type    = "str",
-                                    #help    = "Mount and then scan existing ISO images for files needed by selected image(s).",
-                                    #metavar = "[iso image]")
+        scan_group.add_option(      "--scan-iso",
+                                    dest    = "scan_isos",
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = _("Mount and then scan existing ISO images for files needed by selected image(s)."),
+                                    metavar = _("[iso image]"))
 
         #
         ## Hosting Options

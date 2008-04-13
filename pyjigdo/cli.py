@@ -117,3 +117,6 @@ class PyJigdoCLI:
         if self.cfg.scan_dirs:
             for directory in self.cfg.scan_dirs:
                 self.base.add_scan_job(directory)
+        if self.cfg.scan_isos:
+            for iso in self.cfg.scan_isos:
+                self.base.add_scan_job(iso, is_iso=True)
