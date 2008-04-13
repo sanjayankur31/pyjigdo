@@ -53,7 +53,10 @@ def get_mirror_list(mirror_list_urls, log):
     mirror_list_data = []
     for mirror_list_url in mirror_list_urls:
         # Retries getting the mirrorlist until it gets it
-        response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0)
+        retrycodes = urlgrabber.grabber.URLGrabberOptions().retrycodes
+        if not 12 in retrycodes: retrycodes.append(12) # 503 Service Unavailable
+        if not 14 in retrycodes: retrycodes.append(14) # 502 Proxy Error
+        response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0, retrycodes = retrycodes)
         for line in response_data.readlines():
             if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
     return mirror_list_data
