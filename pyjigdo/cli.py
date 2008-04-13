@@ -110,12 +110,17 @@ class PyJigdoCLI:
 
     def build_jobs(self):
         """ Create the jobs that are needed to complete the requested actions. """
+        pending_compose = False
         # Add images that need to be composed
         for (image_id, image) in self.base.jigdo_definition.images.iteritems():
             if image.selected:
                 self.base.add_recompose(image)
                 if not image.finished:
                     self.base.add_download_jobs(image)
+                    pending_compose = True
+        if not pending_compose:
+            self.log.info(_("All images have reported as complete. Nothing to do."))
+            return
         # Build a list of globally needed files, setup scan tasks
         self.base.setup_file_lookup()
         if self.cfg.scan_dirs:
