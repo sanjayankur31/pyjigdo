@@ -251,7 +251,10 @@ class PyJigdoBase:
                                                         self.needed_files,
                                                         is_iso=is_iso)
         else:
-            scan_object = pyjigdo.jigdo.JigdoScanTarget(location, self.log, self.needed_files)
+            scan_object = pyjigdo.jigdo.JigdoScanTarget(location,
+                                                        self.cfg,
+                                                        self.log,
+                                                        self.needed_files)
         if scan_object:
             self.scan_targets.append(scan_object)
             self.queue.add_job('scan', scan_object)

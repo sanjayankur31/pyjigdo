@@ -232,7 +232,7 @@ class JigdoMirrorlistsDefinition:
         """ Find the JigdoRepoDefinition and inject the mirrorlists into it. """
         for (repo_id, repo) in servers.objects.iteritems():
             try:
-                repo.mirrorlist = pyjigdo.misc.get_mirror_list(self.i[repo_id])
+                repo.mirrorlist = pyjigdo.misc.get_mirror_list(self.i[repo_id], self.log)
                 self.log.debug(repo, level = 5)
             except KeyError:
                 self.log.debug(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id, level = 2)
