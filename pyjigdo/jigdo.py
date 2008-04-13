@@ -409,6 +409,12 @@ class JigdoImage:
                 # FIXME: Prompt user asking if we should clear this data, try again?
                 self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
                 self.unselect()
+    
+    def check_self(self):
+        """ Run checks on self to see if we are sane. """
+        if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
+            self.log.info(_("%s is complete." % self.filename))
+            self.finished = True
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
@@ -556,10 +562,13 @@ class JigdoJobPool:
         self.current_checkpoint -= 1
         if self.current_checkpoint <= 0:
             self.current_checkpoint = self.checkpoint_frequency
-            # FIXME: Add checkpoint hooks.
+            # FIXME: Add checkpoint hooks/define what we do
+            # during a checkpoint.
             # Stuff bits into target images:
             for (image_id, image) in self.jigdo_definition.images.iteritems():
-                if not image.finished and image.selected: self.add_job('compose', image)
+                if not image.finished \
+                and image.selected \
+                and image.finished_slices(): self.add_job('compose', image)
             self.order_mirrors()
     
     def order_mirrors(self):
