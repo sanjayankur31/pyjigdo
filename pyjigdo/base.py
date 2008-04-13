@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import logging, sys, os
+from urllib import unquote
 
 import pyjigdo.cfg
 import pyjigdo.jigdo
@@ -65,6 +66,9 @@ class PyJigdoBase:
 
         # Then really setup the ConfigStore (because that needs a logger!)
         self.cfg.setup_cfg()
+        
+        # Store our JigdoScanTarget objects so we can unmount() them
+        self.scan_targets = []
 
 
     def run(self):
@@ -143,7 +147,8 @@ class PyJigdoBase:
         for (image_id, image) in self.jigdo_definition.images.iteritems():
             if image.selected:
                 for (slice_md5, slice) in image.slices.iteritems():
-                    self.needed_files[os.path.basename(slice.file_name)] = slice
+                    filename = unquote(slice.file_name)
+                    self.needed_files[os.path.basename(filename)] = slice
 
     def select_images(self):
         """ Select images based on selections by the user.
@@ -237,16 +242,19 @@ class PyJigdoBase:
     
     def add_scan_job(self, location, is_iso=False):
         """ Add a scan job to source local data. """
-        self.log.debug(_("Adding directory %s to be scanned for data." % location), level=3)
+        self.log.debug(_("Adding source %s to be scanned for data." % location), level=3)
         scan_object = False
         if is_iso:
             scan_object = pyjigdo.jigdo.JigdoScanTarget(location,
+                                                        self.cfg,
                                                         self.log,
                                                         self.needed_files,
                                                         is_iso=is_iso)
         else:
             scan_object = pyjigdo.jigdo.JigdoScanTarget(location, self.log, self.needed_files)
-        if scan_object: self.queue.add_job('scan', scan_object)
+        if scan_object:
+            self.scan_targets.append(scan_object)
+            self.queue.add_job('scan', scan_object)
 
     def run_tasks(self):
         """ Actually start dealing with selected images. It's go time. """
@@ -263,7 +271,10 @@ class PyJigdoBase:
             # FIXME: Don't exit, do something.
             self.log.info(_("Something is still to be done!"))
             self.queue.do_download_failures(report=True)
-            exit(1)
+        
+        # Cleanup Mounts, if any
+        for scan_target in self.scan_targets:
+            scan_target.unmount()
             
                 
         

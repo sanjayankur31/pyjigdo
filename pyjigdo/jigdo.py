@@ -475,14 +475,16 @@ class JigdoImageSlice:
 
 class JigdoScanTarget:
     """ A definition of where to look for existing bits. """
-    def __init__(self, location, log, needed_files, is_iso=False):
+    def __init__(self, location, cfg, log, needed_files, is_iso=False):
         self.location = location
-        if is_iso: self.iso_location = location
         self.mounted = False
-        self.loopdev = False
+        self.mount_location = ""
+        self.cfg = cfg
         self.log = log
         self.is_iso = is_iso
         self.needed_files = needed_files
+        # Make location absolute:
+        self.location = os.path.abspath(self.location)
 
     def run_scan(self):
         """ Scan a given location for needed file names and update the slice
@@ -501,17 +503,27 @@ class JigdoScanTarget:
                     # We don't need this file
                     pass
 
-        if self.is_iso: self.unmount()
-
     def mount(self):
         """ Mount the ISO. """
         if self.mounted: return
-        
-               
+        self.mount_location = os.path.join(self.cfg.working_directory,
+                                           "mounts",
+                                           os.path.basename(self.location))
+        pyjigdo.misc.check_directory(self.mount_location)
+        mount_command = ["fuseiso",
+                         "-p",
+                         self.location,
+                         self.mount_location]
+        self.log.debug(_("Mounting %s at %s ..." % (self.location, self.mount_location)), level=3)
+        pyjigdo.misc.run_command(mount_command)
+        self.mounted = True
+        self.location = self.mount_location
     
     def unmount(self):
         """ Un-Mount the ISO. """
-        pass
+        if not self.mounted: return
+        umount_command = ["fusermount", "-u", self.mount_location]
+        pyjigdo.misc.run_command(umount_command)
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs.
@@ -611,7 +623,7 @@ class JigdoJobPool:
         """ Put given file into given jigdo_image.
             If destroy, the bits will be removed after being added to the
             target image. """
-        self.log.debug(_("Stuffing %s into %s ..." % (file, jigdo_image)), level=3)
+        self.log.debug(_("Stuffing %s into %s ..." % (file, jigdo_image.location)), level=5)
         command = [ "jigdo-file", "make-image",
                     "--image", jigdo_image.location,
                     "--template", jigdo_image.template_file,
