@@ -335,7 +335,7 @@ class JigdoImage:
         self.template_file = ''
         self.target_location = destination_dir
         self.location = ''
-        self.tmp_location = '' 
+        self.tmp_location = ''
 
     def __str__(self):
         """ Print information about the given image. """
@@ -375,7 +375,7 @@ class JigdoImage:
                         self.log.info(_("%s is complete." % self.filename))
                         self.finished = True
                         self.selected = False
-        
+
     def finished_slices(self):
         """ Returns a dictionary of slices that have been downloaded and marked as finished. """
         finished_slices = {}
@@ -383,7 +383,7 @@ class JigdoImage:
             if slice_object.finished:
                 finished_slices[slice_hash] = slice_object.location
         return finished_slices
-    
+
     def missing_slices(self):
         """ Returns a dictionary of slices that are not marked as finished. """
         missing_slices = {}
@@ -409,7 +409,7 @@ class JigdoImage:
                 # FIXME: Prompt user asking if we should clear this data, try again?
                 self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
                 self.unselect()
-    
+
     def check_self(self):
         """ Run checks on self to see if we are sane. """
         if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
@@ -524,7 +524,7 @@ class JigdoScanTarget:
         pyjigdo.misc.run_command(mount_command)
         self.mounted = True
         self.location = self.mount_location
-    
+
     def unmount(self):
         """ Un-Mount the ISO. """
         if not self.mounted: return
@@ -570,7 +570,7 @@ class JigdoJobPool:
                 and image.selected \
                 and image.finished_slices(): self.add_job('compose', image)
             self.order_mirrors()
-    
+
     def order_mirrors(self):
         """ Order the known sources based on average bitrates. """
         # FIXME: Implement the average bitrate stuff.
@@ -581,7 +581,7 @@ class JigdoJobPool:
         if self.jigdo_definition.servers.objects:
             for (repo_id, repo) in self.jigdo_definition.servers.objects.iteritems():
                 if repo.mirrorlist: shuffle(repo.mirrorlist)
-    
+
     def do_scan(self, number=1):
         """ Scan a location for needed files and stuff them into our image.
             Order of logic is, match file name, match sum then stuff bits. """
@@ -608,7 +608,7 @@ class JigdoJobPool:
     def do_download_failures(self, requeue=True, report=False, number=1):
         """ Requeue what files failed to download that had been added to the queue.
             Optionally, report on the status. """
-        if report and (len(self.jobs['download_failures']) > 0): 
+        if report and (len(self.jobs['download_failures']) > 0):
             self.log.info(_("The following downloads failed:"))
         for task in self.jobs['download_failures']:
             if report: self.log(_("Download of %s failed." % task))
@@ -643,7 +643,7 @@ class JigdoJobPool:
                     file ]
         pyjigdo.misc.run_command(command, inshell=True)
         if destroy: os.remove(file)
-    
+
     def do_last_queue(self):
         """ Try one last time to queue up the needed actions. """
         for (image_id, image) in self.jigdo_definition.images.iteritems():
@@ -651,7 +651,7 @@ class JigdoJobPool:
                 pending = image.missing_slices()
                 for slice in pending:
                     self.add_job('download', slice)
-                    
+
     def finish_pending_jobs(self):
         """ Check all queues and run remaining tasks. """
         self.do_last_queue()
@@ -663,7 +663,7 @@ class JigdoJobPool:
         for leftovers in self.jobs.itervalues():
             if leftovers: return False
         return True
-            
+
 
 
 # FIXME: None of this is in use, yet ######################################
