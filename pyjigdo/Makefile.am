@@ -4,12 +4,10 @@ PYTHON_FILES = \
     cli.py \
     constants.py \
     gui.py \
-    image.py \
     __init__.py \
     jigdo.py \
     logger.py \
     misc.py \
-    parse.py \
     progress.py \
     translate.py
 

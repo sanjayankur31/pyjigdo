@@ -348,25 +348,3 @@ def compare_sum(target, base64_sum):
         return True
     else:
         return False
-
-def sortDictValues(adict):
-    keys = adict.keys()
-    keys.sort()
-    return map(adict.get, keys)
-
-def printOut(dictionary, loop):
-    """ Print out a dict """
-    addStr = '\t'
-    endStr = '--> '
-    fullLoopStr = addStr
-    for number in range(loop):
-        fullLoopStr += addStr
-    fullLoopStr += endStr
-    for key, value in dictionary.iteritems():
-        if type(key) == types.DictType: # loop
-            printOut(key, loop+1)
-        elif type(value) == types.DictType:
-            print '%s%s:' % (fullLoopStr, key)
-            printOut(value, loop+1)
-        else:
-            print '%s%s:\t%s' % (fullLoopStr, key, value)
