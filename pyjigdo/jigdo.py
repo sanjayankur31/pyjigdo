@@ -379,11 +379,12 @@ class JigdoImage:
                         self.cleanup_template()
 
     def finished_slices(self):
-        """ Returns a dictionary of slices that have been downloaded and marked as finished. """
+        """ Returns a dictionary of slices that have been downloaded and marked as finished.
+            This also checks if the slice has been added to the target image during this session. """
         finished_slices = {}
         for (slice_hash, slice_object) in self.slices.iteritems():
-            if slice_object.finished:
-                finished_slices[slice_hash] = slice_object.location
+            if slice_object.finished and not slice_object.in_image:
+                finished_slices[slice_hash] = slice_object
         return finished_slices
 
     def missing_slices(self):
@@ -429,6 +430,7 @@ class JigdoImageSlice:
         """ Initialize the ImageSlice """
         self.location = ""
         self.finished = False
+        self.in_image = False
         self.slice_sum = md5_sum
         self.file_name = file_name
         self.repo = repo
@@ -630,8 +632,10 @@ class JigdoJobPool:
             task = self.jobs['compose'].pop(0)
             if not task.finished:
                 self.log.info(_("Stuffing bits into Jigdo image %s...") % task.filename)
-                for (slice_hash, slice_location) in task.finished_slices().iteritems():
-                    self.stuff_bits_into_image(task, slice_location)
+                for (slice_hash, slice) in task.finished_slices().iteritems():
+                    self.stuff_bits_into_image(task, slice.file_name)
+                    # FIXME: Check if we succeeded or not:
+                    slice.in_image = True
             number -= 1
             self.pending_jobs -= 1
         self.checkpoint()
@@ -640,7 +644,9 @@ class JigdoJobPool:
         """ Put given file into given jigdo_image.
             If destroy, the bits will be removed after being added to the
             target image. """
-        self.log.debug(_("Stuffing %s into %s ..." % (file, jigdo_image.location)), level=5)
+        self.log.debug(_("Stuffing %s into %s ..." % (file,
+                                                      os.path.basename(jigdo_image.location))),
+                                                      level=5)
         command = [ "jigdo-file", "make-image",
                     "--image", jigdo_image.location,
                     "--template", jigdo_image.template_file,
