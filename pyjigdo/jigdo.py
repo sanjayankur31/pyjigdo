@@ -422,8 +422,10 @@ class JigdoImage:
             self.cleanup_template()
 
     def cleanup_template(self):
+        """ Remove un-needed data. """
         try:
-            os.unlink(self.tmp_location)
+            if os.access(self.tmp_location, os.R_OK):
+                os.unlink(self.tmp_location)
         except OSError:
             pass
 
