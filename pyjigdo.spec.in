@@ -42,8 +42,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
-* Tue Feb 5 2008 Jonathan Steffan <jon a fedoraunity.org> 0.3-1
-- Update Requires
+* Tue Feb 5 2008 Jonathan Steffan <jon a fedoraunity.org> 0.3.0-1
+- Update Requires for fuseiso
+- Update for version 0.3.0
 
 * Wed Dec 19 2007 Jonathan Steffan <jon a fedoraunity.org> 0.2-3
 - Remove gitdate
