@@ -422,7 +422,8 @@ class JigdoImage:
             self.cleanup_template()
 
     def cleanup_template(self):
-        os.unlink(self.tmp_location)
+        if os.access(self.tmp_location, os.R_OK):
+            os.unlink(self.tmp_location)
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
