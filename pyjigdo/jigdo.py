@@ -591,15 +591,15 @@ class JigdoJobPool:
             for (repo_id, repo) in self.jigdo_definition.servers.objects.iteritems():
                 if repo.mirrorlist: shuffle(repo.mirrorlist)
 
-    def do_scan(self, number=1):
+    def do_scan(self, number=1, final_run=False):
         """ Scan a location for needed files and stuff them into our image.
             Order of logic is, match file name, match sum then stuff bits. """
         while number > 0 and self.jobs['scan']:
             task = self.jobs['scan'].pop(0)
             task.run_scan()
-        self.checkpoint()
+        if not final_run: self.checkpoint()
 
-    def do_download(self, number=1):
+    def do_download(self, number=1, final_run=False):
         """ This is a hack around implementing the threading.
             For threaded, we will need to define something thread safe
             such as the JigdoDownloadJob class. """
@@ -612,9 +612,9 @@ class JigdoJobPool:
                 self.jobs['download_failures'].append(task)
             number -= 1
             self.pending_jobs -= 1
-        self.checkpoint()
+        if not final_run: self.checkpoint()
 
-    def do_download_failures(self, requeue=True, report=False, number=1):
+    def do_download_failures(self, requeue=True, report=False, number=1, final_run=False):
         """ Requeue what files failed to download that had been added to the queue.
             Optionally, report on the status. """
         if report and (len(self.jobs['download_failures']) > 0):
@@ -623,9 +623,9 @@ class JigdoJobPool:
             if report: self.log(_("Download of %s failed." % task))
             if requeue: self.jobs['download'].append(task)
         if requeue: self.jobs['download_failures'] = []
-        self.checkpoint()
+        if not final_run: self.checkpoint()
 
-    def do_compose(self, number=1):
+    def do_compose(self, number=1, final_run=False):
         """ Take what bits we know about and stuff them into the Jigdo image.
             This will run given number of pending compose jobs. """
         while number > 0 and self.jobs['compose']:
@@ -638,7 +638,7 @@ class JigdoJobPool:
                     slice.in_image = True
             number -= 1
             self.pending_jobs -= 1
-        self.checkpoint()
+        if not final_run: self.checkpoint()
 
     def stuff_bits_into_image(self, jigdo_image, file, destroy=False):
         """ Put given file into given jigdo_image.
@@ -675,7 +675,7 @@ class JigdoJobPool:
             self.log.debug(_("Running %s for:\n %s" % (
                             "do_%s" % type,
                             queue)), level = 5)
-            if len(queue): action(number=(len(queue)))
+            if len(queue): action(number=len(queue), final_run=True)
         for leftovers in self.jobs.itervalues():
             if leftovers: return False
         return True
