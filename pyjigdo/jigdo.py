@@ -422,7 +422,10 @@ class JigdoImage:
             self.cleanup_template()
 
     def cleanup_template(self):
-        os.unlink(self.tmp_location)
+        try:
+            os.unlink(self.tmp_location)
+        except OSError:
+            pass
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
@@ -609,7 +612,7 @@ class JigdoJobPool:
                                      self.cfg.fallback_number,
                                      total = self.total_jobs,
                                      pending = self.pending_jobs):
-                self.jobs['download_failures'].append(task)
+                self.add_job('download_failures', task)
             number -= 1
             self.pending_jobs -= 1
         if not final_run: self.checkpoint()
@@ -621,7 +624,10 @@ class JigdoJobPool:
             self.log.info(_("The following downloads failed:"))
         for task in self.jobs['download_failures']:
             if report: self.log(_("Download of %s failed." % task))
-            if requeue: self.jobs['download'].append(task)
+            if requeue:
+                self.log.debug(_("Re-queuing %s ..." % task.file_name), level = 5)
+                self.add_jobs('download', task)
+            self.pending_jobs -= 1
         if requeue: self.jobs['download_failures'] = []
         if not final_run: self.checkpoint()
 
