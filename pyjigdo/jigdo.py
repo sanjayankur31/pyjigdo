@@ -44,7 +44,7 @@ class JigdoDefinition:
         """ Print the details about all images. """
         self.log.info(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
-            self.log.info(_("Number %s: %s" % (image_id, image)))
+            self.log.info(_("Image Number %s:\n\t %s" % (image_id, image)))
 
     def print_information(self):
         """ Print the contents of the definition. """
@@ -54,7 +54,7 @@ class JigdoDefinition:
         self.log.info(self.mirrors)
         self.log.info(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
-            self.log.info(_("Number %s: %s" % (image_id, image)))
+            self.log.info(_("Number %s:\n\t %s" % (image_id, image)))
         self.log.info(_("==== Parts defined in Jigdo ===="))
         self.log.info(self.parts)
 

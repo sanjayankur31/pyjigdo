@@ -324,12 +324,14 @@ class PyJigdo(object):
         if self.cli_options.jigdo_info:
             sys.exit(pyjigdo.misc.jigdo_info(self.cli_options.jigdo_url,
                                              self.cli_options.working_directory,
-                                             self.base.log))
+                                             self.base.log,
+                                             self.base.cfg))
 
         if self.cli_options.list_images:
             sys.exit(pyjigdo.misc.list_images(self.cli_options.jigdo_url,
                                               self.cli_options.working_directory,
-                                              self.base.log))
+                                              self.base.log,
+                                              self.base.cfg))
 
     def run(self):
         self.base.run()
