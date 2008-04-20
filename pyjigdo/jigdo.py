@@ -633,7 +633,7 @@ class JigdoJobPool:
             if not task.finished:
                 self.log.info(_("Stuffing bits into Jigdo image %s...") % task.filename)
                 for (slice_hash, slice) in task.finished_slices().iteritems():
-                    self.stuff_bits_into_image(task, slice.file_name)
+                    self.stuff_bits_into_image(task, slice.location)
                     # FIXME: Check if we succeeded or not:
                     slice.in_image = True
             number -= 1
