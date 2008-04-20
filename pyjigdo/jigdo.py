@@ -672,6 +672,9 @@ class JigdoJobPool:
         self.checkpoint()
         for (type, queue) in self.jobs.iteritems():
             action = getattr(self, 'do_%s' % type)
+            self.log.debug(_("Running %s for:\n %s" % (
+                            "do_%s" % type,
+                            queue)), level = 5)
             if len(queue): action(number=(len(queue)))
         for leftovers in self.jobs.itervalues():
             if leftovers: return False
