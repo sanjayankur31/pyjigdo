@@ -639,6 +639,18 @@ class JigdoJobPool:
             number -= 1
             self.pending_jobs -= 1
         if not final_run: self.checkpoint()
+    
+    def do_final_compose(self):
+        """ Run a compose against all enabled images, just to make sure we didn't miss
+            anything. """
+        for (image_id, image) in self.jigdo_definition.images.iteritems():
+            if not image.finished \
+            and image.selected \
+            and image.finished_slices():
+                self.add_job('compose', image)
+        added_jobs = len(self.jobs['compose'])
+        if added_jobs: self.do_compose(added_jobs,
+                                       final_run=True)
 
     def stuff_bits_into_image(self, jigdo_image, file, destroy=False):
         """ Put given file into given jigdo_image.
@@ -676,6 +688,7 @@ class JigdoJobPool:
                             "do_%s" % type,
                             queue)), level = 5)
             if len(queue): action(number=len(queue), final_run=True)
+        self.do_final_compose()
         for leftovers in self.jobs.itervalues():
             if leftovers: return False
         return True
