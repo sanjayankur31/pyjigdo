@@ -416,6 +416,7 @@ class JigdoImage:
     # FIXME: Duplicate check_file function!! (See misc.py:120)
     def check_self(self):
         """ Run checks on self to see if we are sane. """
+        self.log.info(_("Checking image %s ..." % self.filename))
         if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
             self.log.info(_("%s is complete." % self.filename))
             self.finished = True
@@ -567,9 +568,12 @@ class JigdoJobPool:
 
     def add_job(self, job_type, object):
         queue = self.jobs[job_type]
+        self.log.debug(_("Adding a job for %s: %s" % (job_type, object)), level = 4)
         queue.append(object)
         self.pending_jobs += 1
         self.total_jobs += 1
+        if type(object) == "str":
+            sys.exit(1)
 
     def checkpoint(self):
         """ Check if we need to do checkpointing tasks. """
@@ -614,6 +618,7 @@ class JigdoJobPool:
                                      self.cfg.fallback_number,
                                      total = self.total_jobs,
                                      pending = self.pending_jobs):
+                self.log.debug(_("Download failed: %s" % task), level = 4)
                 self.add_job('download_failures', task)
             number -= 1
             self.pending_jobs -= 1
