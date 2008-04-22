@@ -155,7 +155,7 @@ class PyJigdoBase:
             Return True if actions were successful. """
         self.log.debug(_("Selecting Images"), level = 4)
         success = False
-        if self.cfg.image_all:
+        if self.cfg.image_all or len(self.jigdo_definition.images) == 1:
             for image in self.jigdo_definition.images:
                 # Select all Images
                 self.select_image(image)
