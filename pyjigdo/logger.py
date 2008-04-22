@@ -111,7 +111,7 @@ class Logger:
 
     def error_prompt(self, text):
         """The error has already been logged to the console, try and catch some input"""
-        if self.cfg.cli_mode and not self.cfg.answer_yes:
+        if self.cfg.cli_mode: # and not self.cfg.answer_yes:
             sys.stderr.write(_("Do you want to continue? [Y/n]") + " ")
             answer = sys.stdin.readline()[:-1]
             if answer == "n":
@@ -120,7 +120,7 @@ class Logger:
 
     def warning_prompt(self, text):
         """The error has already been logged to the console, try and catch some input"""
-        if self.cfg.cli_mode and not self.cfg.answer_yes:
+        if self.cfg.cli_mode: #and not self.cfg.answer_yes:
             sys.stdout.write(_("Do you want to continue? [Y/n]") + " ")
             answer = sys.stdin.readline()[:-1]
             if answer == "n":

@@ -446,7 +446,7 @@ class JigdoImageSlice:
     def __str__(self):
         """ Return information about this slice. """
         return "Filename: %s Repo: %s Target Location: %s" % (self.file_name,
-                                                               self.repo,
+                                                               self.repo.label,
                                                                self.target_location)
 
     def run_download(self, timeout, max_mirror_tries, total = None, pending = None):
@@ -568,7 +568,7 @@ class JigdoJobPool:
 
     def add_job(self, job_type, object):
         queue = self.jobs[job_type]
-        self.log.debug(_("Adding a job for %s: %s" % (job_type, object)), level = 4)
+        self.log.debug(_("Adding a job for %s: %s" % (job_type, object)), level = 7)
         queue.append(object)
         self.pending_jobs += 1
         self.total_jobs += 1
@@ -630,12 +630,12 @@ class JigdoJobPool:
         if report and (len(self.jobs['download_failures']) > 0):
             self.log.info(_("The following downloads failed:"))
         for task in self.jobs['download_failures']:
-            if report: self.log(_("Download of %s failed." % task))
+            if report: self.log.info(_("Download of %s failed." % task))
             if requeue:
                 self.log.debug(_("Re-queuing %s ..." % task.file_name), level = 5)
-                self.add_jobs('download', task)
+                self.add_job('download', task)
             self.pending_jobs -= 1
-        if requeue: self.jobs['download_failures'] = []
+        if requeue and not final_run: self.jobs['download_failures'] = []
         if not final_run: self.checkpoint()
 
     def do_compose(self, number=1, final_run=False):
@@ -686,8 +686,9 @@ class JigdoJobPool:
         """ Try one last time to queue up the needed actions. """
         for (image_id, image) in self.jigdo_definition.images.iteritems():
             if not image.finished and image.selected:
-                pending = image.missing_slices()
-                for slice in pending:
+                # FIXME: We might not want to do this, but other things should
+                # be done in do_last_queue, so please don't remove
+                for (slice_hash, slice) in image.missing_slices().iteritems():
                     self.add_job('download', slice)
 
     def finish_pending_jobs(self):

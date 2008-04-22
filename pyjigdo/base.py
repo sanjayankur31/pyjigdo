@@ -267,10 +267,13 @@ class PyJigdoBase:
         while self.queue.jobs['download']:
             self.queue.do_compose()
             self.queue.do_download()
+        
+        # Queue up missing files for a final automated go at fetching the file(s)
+        self.queue.do_download_failures()
 
         if not self.queue.finish_pending_jobs():
             self.log.info(_("Something failed to finish...\n"))
-            self.queue.do_download_failures(report=True)
+            self.queue.do_download_failures(report=True, requeue=False)
         
         # Cleanup Mounts, if any
         for scan_target in self.scan_targets:
