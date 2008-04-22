@@ -652,7 +652,7 @@ class JigdoJobPool:
             number -= 1
             self.pending_jobs -= 1
         if not final_run: self.checkpoint()
-    
+
     def do_final_compose(self):
         """ Run a compose against all enabled images, just to make sure we didn't miss
             anything. """

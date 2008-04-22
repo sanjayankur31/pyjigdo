@@ -66,7 +66,7 @@ class PyJigdoBase:
 
         # Then really setup the ConfigStore (because that needs a logger!)
         self.cfg.setup_cfg()
-        
+
         # Store our JigdoScanTarget objects so we can unmount() them
         self.scan_targets = []
 
@@ -132,14 +132,16 @@ class PyJigdoBase:
 
     def load_jigdo(self, url):
         """ Load a jigdo from a given URL using pyjigdo.misc.get_file. """
+
         self.log.debug(_("Loading Jigdo file %s") % url, level=2)
-        file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.destination_directory, log = self.log)
+        file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.destination_directory, log = self.log, fatality = 666)
+
         self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, self.log, self.cfg)
-    
+
     def create_job_pool(self):
         """ Create the job pool. """
         self.queue = JigdoJobPool(self.log, self.cfg, self.jigdo_definition)
-    
+
     def setup_file_lookup(self):
         """ Create a location where we can query globally needed files
             when doing pre-download data acquisition. """
@@ -204,7 +206,7 @@ class PyJigdoBase:
                 return pyjigdo.progress.ProgressCLI(title = title)
 
     def select_image(self, image_unique_id):
-        """ Flip the switch to set an image to download. 
+        """ Flip the switch to set an image to download.
             Return True if the action was successful. """
         image_unique_id = int(image_unique_id)
         self.log.debug(_("Selecting Image %d") % image_unique_id, level = 4)
@@ -233,13 +235,13 @@ class PyJigdoBase:
         self.log.debug(_("Adding image %s to our queue.") % image.template, level = 4)
         image.get_template(self.cfg.working_directory)
         image.collect_slices(self.jigdo_definition, self.cfg.working_directory)
-    
+
     def add_download_jobs(self, image):
         """ Add the download jobs that need to be done for the given image. """
         self.log.debug(_("Creating download tasks for %s") % image.filename)
         for (slice_hash, slice_object) in image.slices.iteritems():
             self.queue.add_job('download', slice_object)
-    
+
     def add_scan_job(self, location, is_iso=False):
         """ Add a scan job to source local data. """
         self.log.debug(_("Adding source %s to be scanned for data." % location), level=3)
@@ -263,24 +265,24 @@ class PyJigdoBase:
         """ Actually start dealing with selected images. It's go time. """
         while self.queue.jobs['scan']:
             self.queue.do_scan()
-        
+
         while self.queue.jobs['download']:
             self.queue.do_compose()
             self.queue.do_download()
-        
+
         # Queue up missing files for a final automated go at fetching the file(s)
         self.queue.do_download_failures()
 
         if not self.queue.finish_pending_jobs():
             self.log.info(_("Something failed to finish...\n"))
             self.queue.do_download_failures(report=True, requeue=False)
-        
+
         # Cleanup Mounts, if any
         for scan_target in self.scan_targets:
             scan_target.unmount()
-            
-                
-        
-        
-        
-        
+
+
+
+
+
+

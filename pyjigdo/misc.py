@@ -64,7 +64,7 @@ def get_mirror_list(mirror_list_urls, log):
             self.log.error(_("Mirrorlist %s was unable to be fetched." % mirror_list_urls), recoverable = True)
     return mirror_list_data
 
-def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None, timeout = 30):
+def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pbar = None, log = None, title = None, timeout = 30, fatality = 0):
     """ Gets a file from an URL and returns the file's full path, or None if unable to download.
         This function has a hard coded timeout of 30 seconds unless the keyword argument 'timeout'
         overrides this. """
@@ -88,11 +88,11 @@ def get_file(url, file_target = None, working_directory = "/var/tmp/pyjigdo", pb
         # this will include the working_directory
         check_directory(base_directory)
         # File does not exist or wasn't valid. Download the file.
-        file_name = download_file(url, file_name, title, timeout)
+        file_name = download_file(url, file_name, title, timeout, fatality = fatality)
 
     return file_name
 
-def download_file(url, file_name, title=None, timeout = 30):
+def download_file(url, file_name, title=None, timeout = 30, fatality = 0):
     """ Use urlgrabber to download given url to given file_name. This function has a hard coded timeout
         of 30 seconds unless the keyword argument 'timeout' overrides this. """
     try:
@@ -106,16 +106,20 @@ def download_file(url, file_name, title=None, timeout = 30):
                                text = title,
                                timeout = float(timeout))
             return file_name
-        except URLGrabError:
-            return None
+        except URLGrabError, e:
+            if fatality > 1:
+                print _("Could not find URL %s: %s") % (url, e)
+                sys.exit(1)
+            else:
+                return None
         except KeyboardInterrupt:
             return None
     except OSError:
-        print _("Unable to write to %s, aborting." % file_name)
-        exit(1)
+        print _("Unable to write to %s, aborting.") % file_name
+        sys.exit(1)
     except IOError:
-        print _("Unable to write to %s, aborting." % file_name)
-        exit(1)
+        print _("Unable to write to %s, aborting.") % file_name
+        sys.exit(1)
 
 def check_file(file_name, checksum = None, destroy = False):
     """

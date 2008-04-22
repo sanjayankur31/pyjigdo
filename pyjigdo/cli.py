@@ -27,6 +27,7 @@ class PyJigdoCLI:
         # with information we can make good use of.
         self.base = base
         self.cfg = base.cfg
+
         self.log = base.log
 
     def run(self):
@@ -34,7 +35,7 @@ class PyJigdoCLI:
 
         # Load the .jigdo file
         self.base.load_jigdo(self.cfg.jigdo_url)
-        
+
         # Initialize the job pool
         self.base.create_job_pool()
 
@@ -44,10 +45,10 @@ class PyJigdoCLI:
 
         # Add the jobs we know we need to finish
         self.build_jobs()
-        
+
         # Run everything
         self.base.run_tasks()
-        
+
         # Report the results to the user
         self.report_results()
 
@@ -129,7 +130,7 @@ class PyJigdoCLI:
         if self.cfg.scan_isos:
             for iso in self.cfg.scan_isos:
                 self.base.add_scan_job(iso, is_iso=True)
-    
+
     def report_results(self):
         """ Tell the user what happened. """
         for (image_id, image) in self.base.jigdo_definition.images.iteritems():

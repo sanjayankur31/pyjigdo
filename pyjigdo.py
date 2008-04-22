@@ -50,7 +50,7 @@ class PyJigdo(object):
             parser = OptionParser(epilog=epilog)
         except:
             parser = OptionParser()
-        
+
         ##
         ## Generated Defaults
         ##
@@ -169,7 +169,7 @@ class PyJigdo(object):
                                     action  = "store_true",
                                     default = False,
                                     help    = _("Download or Host all images defined in jigdo."))
-        
+
         ## FIXME: Any creative ways to take this data and not limit to just two repos?
         #download_group.add_option(  "--download-mirror-base",
                                     #dest    = "base_download_mirror",
@@ -309,11 +309,13 @@ class PyJigdo(object):
         self.parser = parser
         # Parse Options
         (self.cli_options, self.args) = parser.parse_args()
+
         if not self.cli_options.jigdo_url:
             try:
                 self.cli_options.jigdo_url = self.args[0]
             except IndexError:
                 pass
+
         # No GUI, yet ;-)
         if self.cli_options.gui_mode:
             print "No GUI, yet ;-) Running CLI..."
