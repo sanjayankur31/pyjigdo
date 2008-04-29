@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import os, sys, urlparse
+import os, sys, urlparse, re
 
 import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
@@ -55,13 +55,15 @@ class PyJigdoCLI:
     def select_images_interaction(self):
         """ Interactively work with the user to select what images to download. """
         choosing_images = True
+        num_images = len(self.base.jigdo_definition.images)
+        image_maxwidth = len(str(num_images))   # for justified formatting
         # Require Raw Input
         while choosing_images:
             print "Please select one or more of the available Images:"
             for image in self.base.jigdo_definition.images:
-                print "#%d: %s" % (image,self.base.jigdo_definition.images[image].filename)
+                #print "#%d: %s" % (image,self.base.jigdo_definition.images[image].filename)
+                print "%*s: %s" % (image_maxwidth+1, "#" + str(image), self.base.jigdo_definition.images[image].filename)
 
-            num_images = len(self.base.jigdo_definition.images)
             image_choice = raw_input("What image(s) would you like to download? [1-%s] " % num_images )
             if image_choice == "":
                 print "Choose the number(s) of the image file(s), seperated by commas or spaces, or specify a range (1-5)"
@@ -79,19 +81,29 @@ class PyJigdoCLI:
 
             # First, eliminate all the commas
             image_choice = image_choice.replace(',', ' ')
-            # Then, eliminate all the double spaces
-            try:
-                while image_choice.index('  '):
-                    image_choice = image_choice.replace('  ', ' ')
-            except ValueError, e:
-                    pass
-
-            # FIXME: Then, see if there is a range in there somewhere
-            # Not Implemented Yet
+            
+            # Then, split and expand ranges, if any
+            image_choices = image_choice.split()
+            expanded_image_choices = []
+            for choice in image_choices:
+                if '-' in choice:
+                    range_start, range_end = choice.split('-')
+                    try:
+                        range_start = int(range_start)
+                        range_end = int(range_end)
+                        if range_start <= range_end:
+                            step = 1
+                        else:
+                            step = -1
+                        expanded_image_choices.extend(range(range_start, range_end + step, step))
+                    except ValueError, e:
+                        self.log.error(_("Invalid range selection."), recoverable = True)
+                        continue
+                else:
+                    expanded_image_choices.append(choice)
 
             # Finally
-            image_choices = image_choice.split(' ')
-            for choice in image_choices:
+            for choice in expanded_image_choices:
                 try:
                     choice = int(choice)
                 except ValueError, e:

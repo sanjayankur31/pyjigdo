@@ -114,7 +114,7 @@ class Logger:
         if self.cfg.cli_mode: # and not self.cfg.answer_yes:
             sys.stderr.write(_("Do you want to continue? [Y/n]") + " ")
             answer = sys.stdin.readline()[:-1]
-            if answer == "n":
+            if answer.lower() == "n":
                 self.error(_("Abort! Abort! Abort!"), recoverable = False)
                 sys.exit(1)
 
@@ -123,7 +123,7 @@ class Logger:
         if self.cfg.cli_mode: #and not self.cfg.answer_yes:
             sys.stdout.write(_("Do you want to continue? [Y/n]") + " ")
             answer = sys.stdin.readline()[:-1]
-            if answer == "n":
+            if answer.lower() == "n":
                 self.error(_("Abort! Abort! Abort!"), recoverable = False)
                 sys.exit(1)
 
