@@ -4,9 +4,7 @@ pyjigdo/__init__.py.in
 pyjigdo/base.py
 pyjigdo/cfg.py
 pyjigdo/cli.py
-pyjigdo/image.py
 pyjigdo/jigdo.py
 pyjigdo/logger.py
 pyjigdo/misc.py
-pyjigdo/parse.py
 
