@@ -47,7 +47,7 @@ class PyJigdo(object):
                 http://pyjigdo.org/"""
 
         try:
-            parser = OptionParser(epilog=epilog)
+            parser = OptionParser(epilog=epilog, version="%prog " + VERSION)
         except:
             parser = OptionParser()
 
@@ -68,11 +68,13 @@ class PyJigdo(object):
                                     dest    = "cli_mode",
                                     action  = "store_true",
                                     default = True,
-                                    help    = _("Use the CLI rather then GUI"))
+                                    help    = _("Use the CLI rather then GUI (default)"))
         runtime_group.add_option(   "--gui",
                                     dest    = "gui_mode",
                                     action  = "store_true",
                                     default = False,
+                                    #TODO: when the GUI is ready, a pyjigdo-gui symlink should default to --gui (by checking argv[0])
+                                    #help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors. (pyjigdo-gui default)"))
                                     help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors"))
         runtime_group.add_option(   "--list-images",
                                     dest    = "list_images",
@@ -112,7 +114,7 @@ class PyJigdo(object):
                                     dest    = "destination_directory",
                                     action  = "store",
                                     default = default_dest,
-                                    help    = _("Destination directory for products. (Default: %s" % default_dest),
+                                    help    = _("Destination directory for products. (Default: %s)" % default_dest),
                                     metavar = _("[directory]"))
         config_group.add_option(    "--work-dir", "--working-directory",
                                     dest    = "working_directory",

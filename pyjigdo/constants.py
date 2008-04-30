@@ -16,4 +16,5 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 BASE_CONF_DIR = "/etc/pyjigdo"
-URLGRABBER_USER_AGENT = "pyJigdo/0.3.0"
+VERSION = "0.3.0"
+URLGRABBER_USER_AGENT = "pyJigdo/" + VERSION
