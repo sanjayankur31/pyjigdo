@@ -3,7 +3,7 @@
 Summary:        Python version of Jigdo, slightly modified
 Name:           pyjigdo
 Version:        @VERSION@
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        GPLv2+
 Group:          Applications/System
 URL:            https://hosted.fedoraproject.org/projects/pyjigdo
@@ -34,6 +34,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc README NEWS AUTHORS COPYING TODO
+%doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
 %doc %{_mandir}/man8/*
 %{python_sitelib}/pyjigdo/
@@ -42,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Wed Apr 30 2008 Jason Farrell <farrellj a gmail.com> 0.3.0-2
+- Added pyjigdo.1 manpage
+
 * Thu Apr 24 2008 Jonathan Steffan <jon a fedoraunity.org> 0.3.0-1
 - Update Requires for fuseiso
 - Update to version 0.3.0
