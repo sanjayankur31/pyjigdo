@@ -6,8 +6,8 @@ Version:        @VERSION@
 Release:        2%{?dist}
 License:        GPLv2+
 Group:          Applications/System
-URL:            https://hosted.fedoraproject.org/projects/pyjigdo
-Source0:        http://files.pyjigdo.fedoraunity.org/%{name}-%{version}.tar.gz
+URL:            http://fedorahosted.org/pyjigdo
+Source0:        http://fedorahosted.org/releases/p/y/pyjigdo/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  intltool, gettext, python
