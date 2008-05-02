@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import os, sys, urlparse, re
+import os, sys, urlparse
 
 import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
@@ -79,30 +79,9 @@ class PyJigdoCLI:
             except ValueError, e:
                 pass
 
-            # First, eliminate all the commas
-            image_choice = image_choice.replace(',', ' ')
-            
-            # Then, split and expand ranges, if any
-            image_choices = image_choice.split()
-            expanded_image_choices = []
-            for choice in image_choices:
-                if '-' in choice:
-                    range_start, range_end = choice.split('-')
-                    try:
-                        range_start = int(range_start)
-                        range_end = int(range_end)
-                        if range_start <= range_end:
-                            step = 1
-                        else:
-                            step = -1
-                        expanded_image_choices.extend(range(range_start, range_end + step, step))
-                    except ValueError, e:
-                        self.log.error(_("Invalid range selection."), recoverable = True)
-                        continue
-                else:
-                    expanded_image_choices.append(choice)
+            # convert "1,2  3-5, 8" to [1,2,3,4,5,8]
+            expanded_image_choices = pyjigdo.misc.image_numstr_to_list(image_choice)
 
-            # Finally
             for choice in expanded_image_choices:
                 try:
                     choice = int(choice)

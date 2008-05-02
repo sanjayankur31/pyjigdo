@@ -10,19 +10,23 @@ pyjigdo [\fIoption\fP]... \fIjigdoURL\fP
 PyJigdo is a Python rewrite of the popular Jigdo distribution framework. It has also been slightly modified to add some extra features.
 .SH "EXAMPLES"
 .LP 
-Interactively download an ISO image listed in the specified .jigdo file or URL.
+Interactively download an ISO image listed in the specified .jigdo file or URL:
 .IP 
 pyjigdo\ http://jigdo.fedoraunity.org/templates/20080331/Fedora\-Unity\-20080331\-8.jigdo
 .LP 
-Save \fItime\fP and \fIbandwidth\fP by not downloading parts you already have available locally. Point \-\-scan\-dir at base dirs and/or \-\-scan\-iso at ISO images. One of these options should \fIalways\fP be used when possible, and is a primary feature of using Jigdo over other download methods.
+Save \fItime\fP and \fIbandwidth\fP by not downloading unchanged parts of the image you may already have available locally. Point \-\-scan\-dir at base directories and/or \-\-scan\-iso at ISO images. One or both of these options should \fIalways\fP be used when possible, and is a primary feature of using Jigdo over other download methods.
 .IP 
 pyjigdo \-\-scan\-dir "/media/Fedora\ 8\ i386\ DVD" Fedora\-Unity\-20080331\-8.jigdo
 .br 
 pyjigdo \-\-scan\-iso ~/downloads/Fedora\-8\-i386\-DVD.iso Fedora\-Unity\-20080331\-8.jigdo
 .LP 
-Automatically start downloading ISO image #6 (e.g. the i386 DVD ISO).
+Automatically start downloading ISO image numbers 6, 7, and 16 to 21:
 .IP 
-pyjigdo \-\-image 6 Fedora\-Unity\-20080331\-8.jigdo
+pyjigdo \-n 6,7,16\-21 Fedora\-Unity\-20080331\-8.jigdo
+.LP 
+Automatically start downloading all of the 32bit CD ISO image filenames using a simple wildcard glob pattern:
+.IP 
+pyjigdo \-f "*i386*CD*" Fedora\-Unity\-20080331\-8.jigdo
 .SH "OPTIONS"
 .LP 
 .TP 
@@ -38,7 +42,6 @@ List available images for a given Jigdo file.
 \fB\-d DEBUGLEVEL, \-\-debug=DEBUGLEVEL\fR
 Set debugging level (0 by default)
 .TP 
-
 \fB\-c [\fIconfig file\fP], \-\-config=[\fIconfig file\fP]\fR
 PyJigdo configuration file to use
 .TP 
@@ -48,7 +51,6 @@ Destination directory for products. (Default: /tmp/dl)
 \fB\-\-work\-dir=[\fIdirectory\fP], \-\-working\-directory=[\fIdirectory\fP]\fR
 Working directory. (Default: /tmp/dl/pyjigdo\-data)
 .TP 
-
 \fB\-j [\fIurl\fP], \-\-jigdo=[\fIurl\fP]\fR
 Location of jigdo file.
 .TP 
@@ -61,12 +63,14 @@ Number of public mirrors to try before using a fallback mirror. (Default: 5)
 \fB\-t [number of seconds], \-\-timeout=[number of seconds]\fR
 Number of seconds to wait before switching to different slice source. (Default: 15)
 .TP 
-
-\fB\-i [image number], \-\-image=[image number]\fR
-Download or Host given image number(s).
+\fB\-n [image numbers], \-\-image\-numbers=[image numbers]\fR
+Download or Host a given comma\-separated list of image numbers or ranges. e.g.: "7,15,23,8\-13"
+.TP 
+\fB\-f [image filenames], \-\-image\-filenames=[image filenames]\fR
+Download or Host a given comma\-separated list of image filenames or file glob patterns. e.g.: "*i386*CD*,*64*DVD*"
 .TP 
 \fB\-a, \-\-all\fR
-Download or Host all images defined in jigdo.
+Download or Host all images defined in jigdo. Same as \fB\-f "*"\fR
 .TP 
 \fB\-s [directory], \-\-scan\-dir=[directory]\fR
 Scan given directory for files needed by selected image(s).
@@ -89,7 +93,7 @@ show help message and exit
 \fI ./pyjigdo.log\fP
 .SH "AUTHORS"
 .LP 
-Jonathan Steffan, Jeroen van Meeuwen, Ignacio Vazquez\-Abrams, Stewart Adam.
+Jonathan Steffan, Jeroen van Meeuwen, Ignacio Vazquez\-Abrams, Stewart Adam, Jason Farrell
 .SH "BUGS"
 .LP 
 Report bugs at http://bugzilla.redhat.com/ .
