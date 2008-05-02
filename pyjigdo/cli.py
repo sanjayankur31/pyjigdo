@@ -19,6 +19,7 @@ import os, sys, urlparse
 
 import pyjigdo.translate as translate
 from pyjigdo.translate import _, N_
+import pyjigdo.misc
 
 class PyJigdoCLI:
     """ The pyJigdo Command Line Interface. """
