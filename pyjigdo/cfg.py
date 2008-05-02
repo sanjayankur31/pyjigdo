@@ -38,9 +38,7 @@ class ConfigStore:
 
     def set_defaults_from_cli_options(self):
         for long_opt in self.parser.__dict__['_long_opt'].keys():
-            if long_opt == "--help":
-                continue
-            if long_opt == "--version":
+            if long_opt in [ "--help", "--version" ]:
                 continue
             setattr(self.defaults,self.parser._long_opt[long_opt].dest,self.parser._long_opt[long_opt].default)
 

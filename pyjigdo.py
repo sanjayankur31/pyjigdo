@@ -68,7 +68,7 @@ class PyJigdo(object):
                                     dest    = "cli_mode",
                                     action  = "store_true",
                                     default = True,
-                                    help    = _("Use the CLI rather then GUI (default)"))
+                                    help    = _("Use the CLI rather than GUI (default)"))
         runtime_group.add_option(   "--gui",
                                     dest    = "gui_mode",
                                     action  = "store_true",
@@ -157,20 +157,26 @@ class PyJigdo(object):
         ## Purpose: Allow a user to non-interactively download a defined image or images.
         ##          This should include being able to download all images with one command.
         ##          This is also for download options, like how many threads to use, to cache or not, etc.
-        # FIXME: Make --image take a comma seperated list also
         download_group = parser.add_option_group(_("Download Options"))
-        download_group.add_option(  "-i", "--image",
+        download_group.add_option(  "-n", "--image-numbers",
                                     dest    = "image_numbers",
                                     default = [],
                                     action  = "append",
-                                    type    = "int",
-                                    help    = _("Download or Host given image number(s)."),
-                                    metavar = _("[image number]"))
+                                    type    = "str",
+                                    help    = _("Download or Host a given comma-separated list of image number(s) or range(s). e.g.: \"7,15,23,8-13\""),
+                                    metavar = _("[image numbers]"))
+        download_group.add_option(  "-f", "--image-filenames",
+                                    dest    = "image_filenames",
+                                    default = [],
+                                    action  = "append",
+                                    type    = "str",
+                                    help    = _("Download or Host a given comma-separated list of image filenames or file glob patterns. e.g.: \"*i386*CD*,foo.iso\""),
+                                    metavar = _("[image filenames]"))
         download_group.add_option(  "-a", "--all",
                                     dest    = "image_all",
                                     action  = "store_true",
                                     default = False,
-                                    help    = _("Download or Host all images defined in jigdo."))
+                                    help    = _("Download or Host all images defined in jigdo. Same as -f \"*\""))
 
         ## FIXME: Any creative ways to take this data and not limit to just two repos?
         #download_group.add_option(  "--download-mirror-base",

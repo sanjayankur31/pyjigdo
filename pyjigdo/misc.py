@@ -352,3 +352,31 @@ def compare_sum(target, base64_sum):
         return True
     else:
         return False
+
+
+def image_numstr_to_list(image_numstr):
+    """ Expand a comma-separated list of image numbers and ranges into a list.
+        e.g.: "1,2,  3, 5-8, 12" -> [1,2,3,5,6,7,8,12] """
+    # First, eliminate all the commas
+    image_numstr = image_numstr.replace(',', ' ')
+    
+    # Then, split and expand ranges, if any
+    image_numstrs = image_numstr.split()
+    expanded_image_numstrs = []
+    for choice in image_numstrs:
+        if '-' in choice:
+            range_start, range_end = choice.split('-')
+            try:
+                range_start = int(range_start)
+                range_end = int(range_end)
+                if range_start <= range_end:
+                    step = 1
+                else:
+                    step = -1
+                expanded_image_numstrs.extend(range(range_start, range_end + step, step))
+            except ValueError, e:
+                self.log.error(_("Invalid range selection."), recoverable = True)
+                continue
+        else:
+            expanded_image_numstrs.append(choice)
+    return expanded_image_numstrs

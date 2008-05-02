@@ -152,6 +152,20 @@ class PyJigdoBase:
                     filename = unquote(slice.file_name)
                     self.needed_files[os.path.basename(filename)] = slice
 
+    def select_image(self, image_unique_id):
+        """ Flip the switch to set an image to download.
+            Return True if the action was successful. """
+        image_unique_id = int(image_unique_id)
+        self.log.debug(_("Selecting Image %d") % image_unique_id, level = 4)
+        success = True
+        # Find the image with unique_id
+        if self.jigdo_definition.images.has_key(image_unique_id):
+            self.jigdo_definition.images[image_unique_id].select()
+        else:
+            self.log.warning(_("Could not select image %s") % image_unique_id)
+            success = False
+        return success
+
     def select_images(self):
         """ Select images based on selections by the user.
             Return True if actions were successful. """
@@ -162,16 +176,44 @@ class PyJigdoBase:
                 # Select all Images
                 self.select_image(image)
             success = True
-        elif self.cfg.image_numbers:
-            for image in self.cfg.image_numbers:
-                if self.select_image(image):
-                    # At least one image was able to be selected,
-                    # return successfully. We might want to make it more
-                    # verbose if an image fails to select.
-                    success = True
-                else:
-                    self.log.warning(_("Could not select image %s") % image)
+        elif self.cfg.image_numbers or self.cfg.image_filenames:
+            # Select images by number
+            if self.cfg.image_numbers:
+                for image_numstr in self.cfg.image_numbers:
+                    for image in pyjigdo.misc.image_numstr_to_list(image_numstr):
+                        if self.select_image(image):
+                            # At least one image was able to be selected,
+                            # return successfully. We might want to make it more
+                            # verbose if an image fails to select.
+                            success = True
+                        else:
+                            self.log.warning(_("Could not select image %s") % image)
+            # Select images by whole filename or glob pattern
+            import re, fnmatch
+            if self.cfg.image_filenames:
+                for image_filestr in self.cfg.image_filenames:     # -f "*i386*,*ppc*" -f "file"
+                    for image_file in image_filestr.replace(',',' ').split(): # [*i386*,*ppc*], [file]
+                        regex = re.compile(fnmatch.translate(image_file))
+                        for jignum, jigimg in self.jigdo_definition.images.iteritems():
+                            #print jignum, jigimg.filename
+                            if regex.match(jigimg.filename):
+                                self.log.debug(_("%s MATCHED: %d: %s") % (image_file, jignum, jigimg.filename), level = 4)
+                                if self.select_image(jignum):
+                                    success = True
+                                else:
+                                    self.log.warning(_("Could not select image %s") % image)
         return success
+
+    def selected_images(self, fullObjects=False):
+        """ Return a list of selected images. """
+        images = []
+        for image in self.jigdo_definition.images:
+            if self.jigdo_definition.images[image].selected:
+                if fullObjects:
+                    images.append(self.jigdo_definition.images[image])
+                else:
+                    images.append(str(image))
+        return images
 
     def progress_bar(self, title = "", parent = None, xml = None, callback = False):
         """This function should be used to determine the type of progress bar we need.
@@ -204,31 +246,6 @@ class PyJigdoBase:
                 return pyjigdo.progress.ProgressCallbackCLI(title = title)
             else:
                 return pyjigdo.progress.ProgressCLI(title = title)
-
-    def select_image(self, image_unique_id):
-        """ Flip the switch to set an image to download.
-            Return True if the action was successful. """
-        image_unique_id = int(image_unique_id)
-        self.log.debug(_("Selecting Image %d") % image_unique_id, level = 4)
-        success = True
-        # Find the image with unique_id
-        if self.jigdo_definition.images.has_key(image_unique_id):
-            self.jigdo_definition.images[image_unique_id].select()
-        else:
-            self.log.warning(_("Could not select image %s") % image_unique_id)
-            success = False
-        return success
-
-    def selected_images(self, fullObjects=False):
-        """ Return a list of selected images. """
-        images = []
-        for image in self.jigdo_definition.images:
-            if self.jigdo_definition.images[image].selected:
-                if fullObjects:
-                    images.append(self.jigdo_definition.images[image])
-                else:
-                    images.append(str(image))
-        return images
 
     def add_recompose(self, image):
         """ Add the template to be assembled. Generate the needed slice objects. """
