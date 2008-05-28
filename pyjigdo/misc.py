@@ -57,7 +57,7 @@ def get_mirror_list(mirror_list_urls, log):
             retrycodes = urlgrabber.grabber.URLGrabberOptions().retrycodes
             if not 12 in retrycodes: retrycodes.append(12) # 503 Service Unavailable
             if not 14 in retrycodes: retrycodes.append(14) # 502 Proxy Error
-            response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0, retrycodes = retrycodes)
+            response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0, retrycodes = retrycodes, keepalive = 0)
             for line in response_data.readlines():
                 if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
         except urlgrabber.grabber.URLGrabError:
@@ -104,7 +104,8 @@ def download_file(url, file_name, title=None, timeout = 30, fatality = 0):
                                progress_obj = urlgrabber.progress.TextMeter(),
                                user_agent = URLGRABBER_USER_AGENT,
                                text = title,
-                               timeout = float(timeout))
+                               timeout = float(timeout),
+                               keepalive = 0)
             return file_name
         except URLGrabError, e:
             if fatality > 1:
