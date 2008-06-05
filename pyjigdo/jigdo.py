@@ -18,7 +18,7 @@
 Implementation of Jigdo concepts, calling jigdo-file when needed.
 """
 
-import os, urlparse, sys
+import os, urlparse, sys, gzip
 import pyjigdo.misc
 from ConfigParser import RawConfigParser
 
@@ -67,7 +67,17 @@ class JigdoDefinition:
         e = None                                  # None, or an exception
         self._sections = []
 
-        fp = open(self.file_name, "r")
+#        fp = open(self.file_name, "r")
+#       Handle gzip files here
+        try:
+            # if you try to read a non-gzip file with this class, it will throw an IOError
+            fp=gzip.GzipFile(self.file_name,"rb")
+            line = fp.readline()
+            fp.rewind()
+            self.log.debug("Jigdo file is Gzipped.")
+        except IOError:
+            fp = open(self.file_name,"r")
+            
         while True:
             line = fp.readline()
             if not line:
