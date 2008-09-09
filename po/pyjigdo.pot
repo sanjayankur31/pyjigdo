@@ -1,46 +1,47 @@
-# German translation of pyJigdo.
-# Copyright (C) 2008 pyJigdo
-# This file is distributed under the same license as the pyJigdo package.
-# Fabian Affolter <fab@fedoraproject.org>, 2008.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: pyjigdo\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-04 19:23+0000\n"
-"PO-Revision-Date: 2008-09-09 13:02+0100\n"
-"Last-Translator: Fabian Affolter <fab@fedoraproject.org>\n"
-"Language-Team: German <fedora-trans-de@redhat.com>\n"
+"POT-Creation-Date: 2008-09-04 11:55+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Poedit-Language: German\n"
 
 #. #
 #. # Runtime Options
 #. #
 #: ../pyjigdo.py:66
 msgid "Runtime Options"
-msgstr "Laufzeit-Optionen"
+msgstr ""
 
 #: ../pyjigdo.py:71
 msgid "Use the CLI rather than GUI (default)"
-msgstr "Benutze die CLI eher als das GUI (Standard)"
+msgstr ""
 
 #. TODO: when the GUI is ready, a pyjigdo-gui symlink should default to --gui (by checking argv[0])
 #. help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors. (pyjigdo-gui default)"))
 #: ../pyjigdo.py:78
-msgid "Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors"
-msgstr "Forciere die GUI-Benutzung von pyJigdo. Geht nicht zum CLI zurück und zeigt daher GUI-bezogene Fehler an "
+msgid ""
+"Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI "
+"related errors"
+msgstr ""
 
 #: ../pyjigdo.py:83
 msgid "List available images for a given Jigdo file."
-msgstr "Liste der verfügbaren Abbilder für ein vorgegebene Jigdo-Datei."
+msgstr ""
 
 #: ../pyjigdo.py:92
 msgid "Set debugging level (0 by default)"
-msgstr "Setze Debugging-Stufe (Standard 0)"
+msgstr ""
 
 #. #
 #. # Redundant Options
@@ -55,68 +56,69 @@ msgstr "Setze Debugging-Stufe (Standard 0)"
 #. #
 #: ../pyjigdo.py:106
 msgid "Configuration Options"
-msgstr "Konfigurationsoptionen"
+msgstr ""
 
 #: ../pyjigdo.py:111
 msgid "PyJigdo configuration file to use"
-msgstr "PyJigdo-Konfigurationsdatei, die verwendet werden soll"
+msgstr ""
 
 #: ../pyjigdo.py:112
 msgid "[config file]"
-msgstr "[Konfigurationsdatei]"
+msgstr ""
 
 #: ../pyjigdo.py:117
 #, python-format
 msgid "Destination directory for products. (Default: %s)"
-msgstr "Ziel-Verzeichnis für Produkt. (Standard: %s)"
+msgstr ""
 
-#: ../pyjigdo.py:118
-#: ../pyjigdo.py:124
-#: ../pyjigdo.py:226
+#: ../pyjigdo.py:118 ../pyjigdo.py:124 ../pyjigdo.py:226
 msgid "[directory]"
-msgstr "[Verzeichnis]"
+msgstr ""
 
 #: ../pyjigdo.py:123
 #, python-format
 msgid "Working directory. (Default: %s)"
-msgstr "Arbeitsverzeichnis. (Standard: %s)"
+msgstr ""
 
 #. # Information Options
 #. # Purpose: We should allow a user to query a jigdo and get lots-o-info from just
 #. #          downloading the jigdo file.
 #: ../pyjigdo.py:129
 msgid "General Options"
-msgstr "Allgemeine Optionen"
+msgstr ""
 
 #: ../pyjigdo.py:134
 msgid "Location of jigdo file."
-msgstr "Ort der jigdo-Datei."
+msgstr ""
 
 #: ../pyjigdo.py:135
 msgid "[url]"
-msgstr "[url]"
+msgstr ""
 
 #: ../pyjigdo.py:140
 msgid "Print information about the jigdo image and exit."
-msgstr "Zeige Informationen über jigdo-Abbild an und beende."
+msgstr ""
 
 #: ../pyjigdo.py:146
 #, python-format
-msgid "Number of public mirrors to try before using a fallback mirror. (Default: %s)"
-msgstr "Anzahl der öffentlichen Spiegelserver zum Prüfen vor der Benutzung des Ausweichspiegelservers. (Standard: %s)"
+msgid ""
+"Number of public mirrors to try before using a fallback mirror. (Default: %s)"
+msgstr ""
 
 #: ../pyjigdo.py:147
 msgid "[number of tries]"
-msgstr "[Anzahl Versuche]"
+msgstr ""
 
 #: ../pyjigdo.py:153
 #, python-format
-msgid "Number of seconds to wait before switching to different slice source. (Default: %s)"
-msgstr "Anzahl der Sekunden zum Warten vor dem Wechseln zu einer anderen Slice-Quelle. (Standard: %s)"
+msgid ""
+"Number of seconds to wait before switching to different slice source. "
+"(Default: %s)"
+msgstr ""
 
 #: ../pyjigdo.py:154
 msgid "[number of seconds]"
-msgstr "[Anzahl Sekunden]"
+msgstr ""
 
 #. # Downloading Options
 #. # Purpose: Allow a user to non-interactively download a defined image or images.
@@ -124,27 +126,31 @@ msgstr "[Anzahl Sekunden]"
 #. #          This is also for download options, like how many threads to use, to cache or not, etc.
 #: ../pyjigdo.py:160
 msgid "Download Options"
-msgstr "Optionen für das Herunterladen:"
+msgstr ""
 
 #: ../pyjigdo.py:166
-msgid "Download or Host a given comma-separated list of image number(s) or range(s). e.g.: \"7,15,23,8-13\""
-msgstr "Läde herunter oder hostet eine gegebene kommagetrennte Liste von Abbildsnummer(n) oder Bereich(en). Beispielsweise:  \"7,15,23,8-13\""
+msgid ""
+"Download or Host a given comma-separated list of image number(s) or range"
+"(s). e.g.: \"7,15,23,8-13\""
+msgstr ""
 
 #: ../pyjigdo.py:167
 msgid "[image numbers]"
-msgstr "[Abbild-Nummer]"
+msgstr ""
 
 #: ../pyjigdo.py:173
-msgid "Download or Host a given comma-separated list of image filenames or file glob patterns. e.g.: \"*i386*CD*,foo.iso\""
-msgstr "Läde herunter oder hostet ein gegebene kommagetrennte Liste von Abbildsdateinamen oder globalem Muster. Beispielsweise: \"*i386*CD*,foo.iso\""
+msgid ""
+"Download or Host a given comma-separated list of image filenames or file "
+"glob patterns. e.g.: \"*i386*CD*,foo.iso\""
+msgstr ""
 
 #: ../pyjigdo.py:174
 msgid "[image filenames]"
-msgstr "[Abbild-Dateinamen]"
+msgstr ""
 
 #: ../pyjigdo.py:179
 msgid "Download or Host all images defined in jigdo. Same as -f \"*\""
-msgstr "Herunterladen oder hosten von allen in jigdo definierten Abbildern. Gleich wie  -f \"*\""
+msgstr ""
 
 #. # FIXME: Any creative ways to take this data and not limit to just two repos?
 #. download_group.add_option(  "--download-mirror-base",
@@ -184,147 +190,144 @@ msgstr "Herunterladen oder hosten von allen in jigdo definierten Abbildern. Glei
 #.
 #: ../pyjigdo.py:220
 msgid "Scan Options"
-msgstr "Durchsuch-Optionen"
+msgstr ""
 
 #: ../pyjigdo.py:225
 msgid "Scan given directory for files needed by selected image(s)."
-msgstr "Durchsuche angegebenes Verzeichnis nach benötigten Dateien für gewählte(s) Abbild(er). "
+msgstr ""
 
 #: ../pyjigdo.py:231
-msgid "Mount and then scan existing ISO images for files needed by selected image(s)."
-msgstr "Hänge ein und durchsuche dann vorhandenes ISO-Abbild nach Dateien, welche vom gewählten Abbild(ern) benötigt werden."
+msgid ""
+"Mount and then scan existing ISO images for files needed by selected image"
+"(s)."
+msgstr ""
 
 #: ../pyjigdo.py:232
 msgid "[iso image]"
-msgstr "[ISO-Abbild]"
+msgstr ""
 
 #: ../pyjigdo/base.py:78
 msgid "Running PyJigdo in CLI mode..."
-msgstr "Lasse PyJigdo in CLI-Modus laufen..."
+msgstr ""
 
 #: ../pyjigdo/base.py:89
 msgid "Running PyJigdo in GUI mode..."
-msgstr "Lasse PyJigdo in GUI-Modus laufen..."
+msgstr ""
 
 #: ../pyjigdo/base.py:136
 #, python-format
 msgid "Loading Jigdo file %s"
-msgstr "Lade Jigdo-Datei %s"
+msgstr ""
 
 #: ../pyjigdo/base.py:159
 #, python-format
 msgid "Selecting Image %d"
-msgstr "Gewähltes Abbild %d"
+msgstr ""
 
-#: ../pyjigdo/base.py:165
-#: ../pyjigdo/base.py:190
-#: ../pyjigdo/base.py:204
+#: ../pyjigdo/base.py:165 ../pyjigdo/base.py:190 ../pyjigdo/base.py:204
 #, python-format
 msgid "Could not select image %s"
-msgstr "Abbild konnte nicht ausgewählt werden %s"
+msgstr ""
 
 #: ../pyjigdo/base.py:172
 msgid "Selecting Images"
-msgstr "Gewählte Abbilder"
+msgstr ""
 
 #: ../pyjigdo/base.py:200
 #, python-format
 msgid "%s MATCHED: %d: %s"
-msgstr "%s STIMMEN ÜBEREIN: %d: %s"
+msgstr ""
 
 #: ../pyjigdo/base.py:227
 msgid "Initting progress bar for "
-msgstr "Initialisiere Fortschrittsbalken für"
+msgstr ""
 
 #: ../pyjigdo/base.py:252
 #, python-format
 msgid "Adding image %s to our queue."
-msgstr "Füge Abbild %s zur Warteschlange hinzu."
+msgstr ""
 
 #: ../pyjigdo/base.py:258
 #, python-format
 msgid "Creating download tasks for %s"
-msgstr "Erzeuge Herunterlade-Aufgaben für %s"
+msgstr ""
 
 #: ../pyjigdo/base.py:264
 #, python-format
 msgid "Adding source %s to be scanned for data."
-msgstr "Füge Quelle %s hinzu zum Durchsuchen nach Daten."
+msgstr ""
 
 #: ../pyjigdo/base.py:294
 msgid "Something failed to finish...\n"
-msgstr "Etwas schlug bei der Fertigstellung fehl...\n"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:63
 msgid "Running from CLI but no .jigdo file specified"
-msgstr "Starte von CLI, aber keine .jigdo-Datei angegeben"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:66
 msgid "Info requested from a .jigdo file but no .jigdo file specified"
-msgstr "Informationen von .jigdo-Datei angefordert, aber keine jigdo-Datei angegeben"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:73
 msgid "Setting options from configuration file"
-msgstr "Einstellungsoptionen aus Konfigurationsdatei"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:92
 #, python-format
 msgid "Configuration file %s not readable, continuing without"
-msgstr "Konfigurationsdatei %s nicht lesbar, setze fort ohne"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:96
 #, python-format
 msgid "Reading configuration file %s"
-msgstr "Lesen Konfigurationsdatei %s"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:100
 #, python-format
 msgid "Invalid configuration file %s"
-msgstr "Ungültige Konfigurationsdatei %s"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:139
 #, python-format
 msgid "Setting %s to %r (from configuration file)"
-msgstr "Setze %s auf %r (von Konfigurationsdatei)"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:143
 msgid "Setting options from command-line"
-msgstr "Setze Optionen von der Kommandozeile"
+msgstr ""
 
-#: ../pyjigdo/cfg.py:157
-#: ../pyjigdo/cfg.py:161
-#: ../pyjigdo/cfg.py:163
+#: ../pyjigdo/cfg.py:157 ../pyjigdo/cfg.py:161 ../pyjigdo/cfg.py:163
 #, python-format
 msgid "Setting %s to %r (from command line)"
-msgstr "Setze %s auf %r (von Kommandozeile)"
+msgstr ""
 
 #: ../pyjigdo/cfg.py:159
 #, python-format
 msgid "No check_setting_%s()"
-msgstr "Keine check_setting_%s()"
+msgstr ""
 
 #: ../pyjigdo/cli.py:90
 msgid "Invalid selection."
-msgstr "Ungültige Auswahl."
+msgstr ""
 
 #: ../pyjigdo/cli.py:115
 msgid "All images have reported as complete. Nothing to do."
-msgstr "Alle Abbilder sind als komplett vermerkt. Nicht zu tun."
+msgstr ""
 
 #: ../pyjigdo/cli.py:132
 #, python-format
 msgid "Image %s successfully downloaded to: %s"
-msgstr "Abbild %s erfolgreich heruntergeladen nach: %s"
+msgstr ""
 
 #: ../pyjigdo/cli.py:136
 #, python-format
 msgid "Image %s failed to complete. Try running pyjigdo again."
-msgstr "Abbild %s komplettieren fehlgeschlagen. Versuche pyjigdo erneut auszuführen."
+msgstr ""
 
-#: ../pyjigdo/jigdo.py:45
-#: ../pyjigdo/jigdo.py:55
+#: ../pyjigdo/jigdo.py:45 ../pyjigdo/jigdo.py:55
 msgid "==== Images defined in Jigdo ===="
-msgstr "==== Definierte Abbilder in Jigdo ===="
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:47
 #, python-format
@@ -332,16 +335,14 @@ msgid ""
 "Image Number %s:\n"
 "\t %s"
 msgstr ""
-"Abbild-Nummerr %s:\n"
-"\t %s"
 
 #: ../pyjigdo/jigdo.py:51
 msgid "==== Servers listed in Jigdo ===="
-msgstr "==== Aufgeführte Server in Jigdo ===="
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:53
 msgid "==== Mirror list sources listed in Jigdo ===="
-msgstr "==== Aufgeführte Spiegel-Quellenlisten in Jigdo ===="
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:57
 #, python-format
@@ -349,111 +350,108 @@ msgid ""
 "Number %s:\n"
 "\t %s"
 msgstr ""
-"Nummer %s:\n"
-"\t %s"
 
 #: ../pyjigdo/jigdo.py:58
 msgid "==== Parts defined in Jigdo ===="
-msgstr "==== Definierte Teile in Jigdo ===="
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:176
 msgid "[Servers] section is not present or can't be parsed. Abort!"
-msgstr "[Servers]-Bereich ist nicht verfügbar oder kann nicht geparsert werden. Beende!"
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:248
 #, python-format
 msgid "Server ID '%s' does not have a matching matching mirrorlist."
-msgstr "Server-ID '%s' hat keine passende Spiegelliste."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:367
 #, python-format
 msgid "Temporary template found at %s"
-msgstr "Temporäre Vorlage gefunden in %s"
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:383
 #, python-format
 msgid "%s exists, checking..."
-msgstr "%s existiert, prüfe..."
+msgstr ""
 
-#: ../pyjigdo/jigdo.py:386
-#: ../pyjigdo/jigdo.py:431
+#: ../pyjigdo/jigdo.py:386 ../pyjigdo/jigdo.py:431
 #, python-format
 msgid "%s is complete."
-msgstr "%s ist vollständig."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:429
 #, python-format
 msgid "Checking image %s ..."
-msgstr "Prüfe Abbild %s ..."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:483
 #, python-format
 msgid "Trying to download %s"
-msgstr "Versuche herunterzuladen %s"
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:484
 #, python-format
 msgid "Trying %s for %s"
-msgstr "Versuche %s für %s"
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:503
 #, python-format
 msgid "%s exists and checksum matches."
-msgstr "%s existiert und Checksumme stimmt überein."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:524
 #, python-format
 msgid "Scanning %s for needed files..."
-msgstr "Durchsuche %s nach den benötigten Dateien..."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:528
 #, python-format
 msgid "Looking for file %s ..."
-msgstr "suche nach Datei %s..."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:532
 #, python-format
 msgid "Found file %s, marking location."
-msgstr "Datei %s gefunden, markiere Ort."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:548
 #, python-format
 msgid "Mounting %s at %s ..."
-msgstr "Einhängen von %s unter %s ..."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:581
 #, python-format
 msgid "Adding a job for %s: %s"
-msgstr "Füge Auftrag für %s hinzu: %s"
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:631
 #, python-format
 msgid "Download failed: %s"
-msgstr "Herunterladen fehlgeschlagen: %s"
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:641
 msgid "The following downloads failed:"
-msgstr "Die folgenden Downloads sind fehlgeschlagen:"
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:643
 #, python-format
 msgid "Download of %s failed."
-msgstr "Herunterladen von %s fehlgeschlagen."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:645
 #, python-format
 msgid "Re-queuing %s ..."
-msgstr "Erneuerung der Warteschlange %s ..."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:657
 #, python-format
 msgid "Stuffing bits into Jigdo image %s..."
-msgstr "Stopfe Bits in Jigdo-Abbild %s..."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:682
 #, python-format
 msgid "Stuffing %s into %s ..."
-msgstr "Stopfe %s in %s..."
+msgstr ""
 
 #: ../pyjigdo/jigdo.py:711
 #, python-format
@@ -461,65 +459,59 @@ msgid ""
 "Running %s for:\n"
 " %s"
 msgstr ""
-"Führe %s aus für:\n"
-" %s"
 
 #: ../pyjigdo/logger.py:87
 msgid "Error"
-msgstr "Fehler"
+msgstr ""
 
 #: ../pyjigdo/logger.py:102
 msgid "Warning"
-msgstr "Warnung"
+msgstr ""
 
 #. and not self.cfg.answer_yes:
-#: ../pyjigdo/logger.py:115
-#: ../pyjigdo/logger.py:124
+#: ../pyjigdo/logger.py:115 ../pyjigdo/logger.py:124
 msgid "Do you want to continue? [Y/n]"
-msgstr "Wollen Sie fortfahren? [J/n]"
+msgstr ""
 
-#: ../pyjigdo/logger.py:118
-#: ../pyjigdo/logger.py:127
+#: ../pyjigdo/logger.py:118 ../pyjigdo/logger.py:127
 msgid "Abort! Abort! Abort!"
-msgstr "Abbruch! Abruch! Abbruch!"
+msgstr ""
 
 #: ../pyjigdo/misc.py:64
 #, python-format
 msgid "Mirrorlist %s was unable to be fetched."
-msgstr "Spiegelliste %s konnte nicht bezogen werden."
+msgstr ""
 
 #: ../pyjigdo/misc.py:112
 #, python-format
 msgid "Could not find URL %s: %s"
-msgstr "Kann URL %s nicht finden: %s"
+msgstr ""
 
-#: ../pyjigdo/misc.py:119
-#: ../pyjigdo/misc.py:122
+#: ../pyjigdo/misc.py:119 ../pyjigdo/misc.py:122
 #, python-format
 msgid "Unable to write to %s, aborting."
-msgstr "Kann nicht nach %s schreiben, Abbruch."
+msgstr ""
 
 #: ../pyjigdo/misc.py:231
 #, python-format
 msgid "Failed to allocate loop device for '%s'"
-msgstr "Zuweisen des Loop-Geräts für '%s' fehlgeschlagen"
+msgstr ""
 
 #: ../pyjigdo/misc.py:246
 #, python-format
 msgid "Failed to find loop device associated with '%s' from '/sbin/losetup -a'"
-msgstr "Finden des Loop-Gerätes zugeweisen mit '%s' von  '/sbin/losetup -a' fehlgeschlagen"
+msgstr ""
 
 #: ../pyjigdo/misc.py:266
 #, python-format
 msgid "Failed to mount '%s' to '%s'"
-msgstr "Fehler beim Einhängen von '%s' auf '%s'"
+msgstr ""
 
 #: ../pyjigdo/misc.py:320
 #, python-format
 msgid "Directory %s could not be created. Aborting"
-msgstr "Verzeichnis %s konnte nicht erzeugt werden. Abbruch"
+msgstr ""
 
 #: ../pyjigdo/misc.py:379
 msgid "Invalid range selection."
-msgstr "Ungültige Bereichsauswahl."
-
+msgstr ""
