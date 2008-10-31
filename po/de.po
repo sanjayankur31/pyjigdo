@@ -1,4 +1,4 @@
-# German translation of pyJigdo.
+# German translation of pyJigdo
 # Copyright (C) 2008 pyJigdo
 # This file is distributed under the same license as the pyJigdo package.
 # Fabian Affolter <fab@fedoraproject.org>, 2008.
