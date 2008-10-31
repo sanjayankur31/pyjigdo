@@ -1,0 +1,543 @@
+# translation of pl.po to Polish
+# Piotr Drąg <piotrdrag@gmail.com>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-09-04 11:55+0200\n"
+"PO-Revision-Date: 2008-10-31 19:53+0100\n"
+"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
+"Language-Team: Polish <pl@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. #
+#. # Runtime Options
+#. #
+#: ../pyjigdo.py:66
+msgid "Runtime Options"
+msgstr "Opcje wykonawcze"
+
+#: ../pyjigdo.py:71
+msgid "Use the CLI rather than GUI (default)"
+msgstr "Użyj CLI zamiast GUI (domyślne)"
+
+#. TODO: when the GUI is ready, a pyjigdo-gui symlink should default to --gui (by checking argv[0])
+#. help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors. (pyjigdo-gui default)"))
+#: ../pyjigdo.py:78
+msgid ""
+"Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI "
+"related errors"
+msgstr ""
+"Wymuś, aby pyJigdo używało GUI. Nie wraca do CLI w razie niepowodzenia, więc "
+"wyświetla błędy związane z GUI"
+
+#: ../pyjigdo.py:83
+msgid "List available images for a given Jigdo file."
+msgstr "Wyświetla listę dostępnych obrazów dla podanego pliku Jigdo."
+
+#: ../pyjigdo.py:92
+msgid "Set debugging level (0 by default)"
+msgstr "Ustawia poziom debugowania (domyślnie 0)"
+
+#. #
+#. # Redundant Options
+#. #
+#. runtime_group.add_option(   "-y", "--yes",
+#. dest    = "answer_yes",
+#. action  = "store_true",
+#. default = False,
+#. help    = _("Answer all questions as 'yes'"))
+#. #
+#. # Configuration Options
+#. #
+#: ../pyjigdo.py:106
+msgid "Configuration Options"
+msgstr "Opcje konfiguracji"
+
+#: ../pyjigdo.py:111
+msgid "PyJigdo configuration file to use"
+msgstr "Używany plik konfiguracji pyJigdo"
+
+#: ../pyjigdo.py:112
+msgid "[config file]"
+msgstr "[plik konfiguracji]"
+
+#: ../pyjigdo.py:117
+#, python-format
+msgid "Destination directory for products. (Default: %s)"
+msgstr "Folder docelowy dla produktów (domyślnie: %s)."
+
+#: ../pyjigdo.py:118 ../pyjigdo.py:124 ../pyjigdo.py:226
+msgid "[directory]"
+msgstr "[folder]"
+
+#: ../pyjigdo.py:123
+#, python-format
+msgid "Working directory. (Default: %s)"
+msgstr "Folder roboczy (domyślnie: %s)"
+
+#. # Information Options
+#. # Purpose: We should allow a user to query a jigdo and get lots-o-info from just
+#. #          downloading the jigdo file.
+#: ../pyjigdo.py:129
+msgid "General Options"
+msgstr "Ogólne opcje"
+
+#: ../pyjigdo.py:134
+msgid "Location of jigdo file."
+msgstr "Położenie pliku Jigdo."
+
+#: ../pyjigdo.py:135
+msgid "[url]"
+msgstr "[URL]"
+
+#: ../pyjigdo.py:140
+msgid "Print information about the jigdo image and exit."
+msgstr "Wyświetl informacje o obrazie Jigdo i zakończ."
+
+#: ../pyjigdo.py:146
+#, python-format
+msgid ""
+"Number of public mirrors to try before using a fallback mirror. (Default: %s)"
+msgstr ""
+"Liczba publicznych serwerów lustrzanych do wypróbowania przed użyciem "
+"serwera zapasowego (domyślnie: %s)"
+
+#: ../pyjigdo.py:147
+msgid "[number of tries]"
+msgstr "[liczba prób]"
+
+#: ../pyjigdo.py:153
+#, python-format
+msgid ""
+"Number of seconds to wait before switching to different slice source. "
+"(Default: %s)"
+msgstr ""
+"Liczba sekund oczekiwania przed przełączeniem na inne źródło fragmentów "
+"(domyślnie: %s)."
+
+#: ../pyjigdo.py:154
+msgid "[number of seconds]"
+msgstr "[liczba sekund]"
+
+#. # Downloading Options
+#. # Purpose: Allow a user to non-interactively download a defined image or images.
+#. #          This should include being able to download all images with one command.
+#. #          This is also for download options, like how many threads to use, to cache or not, etc.
+#: ../pyjigdo.py:160
+msgid "Download Options"
+msgstr "Opcje pobierania"
+
+#: ../pyjigdo.py:166
+msgid ""
+"Download or Host a given comma-separated list of image number(s) or range"
+"(s). e.g.: \"7,15,23,8-13\""
+msgstr ""
+"Pobierz lub hostuj podaną listę oddzielonych przecinkami numerów obrazów lub "
+"zakresów, np. \"7,15,23,8-13\"."
+
+#: ../pyjigdo.py:167
+msgid "[image numbers]"
+msgstr "[liczba obrazów]"
+
+#: ../pyjigdo.py:173
+msgid ""
+"Download or Host a given comma-separated list of image filenames or file "
+"glob patterns. e.g.: \"*i386*CD*,foo.iso\""
+msgstr ""
+"Pobierz lub hostuj podaną listę oddzielonych przecinkami nazw plików obrazów "
+"lub wyrażeń regularnych, np. \"*i386*CD*,foo.iso\"."
+
+#: ../pyjigdo.py:174
+msgid "[image filenames]"
+msgstr "[nazwy plików obrazów]"
+
+#: ../pyjigdo.py:179
+msgid "Download or Host all images defined in jigdo. Same as -f \"*\""
+msgstr ""
+"Pobierz lub hostuj wszystkie obrazy określone w Jigdo. To samo co -f \"*\""
+
+#. # FIXME: Any creative ways to take this data and not limit to just two repos?
+#. download_group.add_option(  "--download-mirror-base",
+#. dest    = "base_download_mirror",
+#. action  = "store",
+#. default = "",
+#. help    = "Download base files from given mirror.",
+#. metavar = "[mirror url to file root]")
+#. download_group.add_option(  "--download-mirror-updates",
+#. dest    = "updates_download_mirror",
+#. action  = "store",
+#. default = "",
+#. help    = "Download updates files from given mirror.",
+#. metavar = "[mirror url to file root]")
+#. FIXME: We might make it not a choice to cache. It *will* use more space, but much less bandwidth
+#. ate least when building more then one image/set.
+#. download_group.add_option("--cache", dest="cache_files", action="store", default=True,
+#. help="Force caching files to be reused for multiple images. The max space used will be double the resulting image(s) size(s).")
+#. download_group.add_option("--nocache", dest="nocache_files", action="store", default=False,
+#. help="Force caching of files off. This might cause the same file to be downloaded more then once but will use less HDD space while running.")
+#. download_group.add_option(  "--threads",
+#. dest    = "download_threads",
+#. action  = "store",
+#. default = "2",
+#. help    = "Number of threads to use when downloading. (Not in use yet)",
+#. metavar = "[number]")
+#. download_group.add_option(  "--workdir",
+#. dest    = "download_workdir",
+#. action  = "store",
+#. default = "/var/tmp/pyjigdo",
+#. help    = "Directory to do work in.",
+#. metavar = "[directory]")
+#.
+#. # Scan Options
+#. # Purpose: Allow a user to specify directories to scan for files, including pointing
+#. # to existing ISO image(s)
+#.
+#: ../pyjigdo.py:220
+msgid "Scan Options"
+msgstr "Opcje skanowania"
+
+#: ../pyjigdo.py:225
+msgid "Scan given directory for files needed by selected image(s)."
+msgstr ""
+"Przeskanuj podany folder w poszukiwaniu plików wymaganych przez wybrane "
+"obrazy."
+
+#: ../pyjigdo.py:231
+msgid ""
+"Mount and then scan existing ISO images for files needed by selected image"
+"(s)."
+msgstr ""
+"Zamontuj, a następnie przeskanuj istniejące obrazy ISO w poszukiwaniu plików "
+"wymaganych przez wybrane obrazy."
+
+#: ../pyjigdo.py:232
+msgid "[iso image]"
+msgstr "[plik ISO]"
+
+#: ../pyjigdo/base.py:78
+msgid "Running PyJigdo in CLI mode..."
+msgstr "Uruchamianie pyJigdo w trybie CLI..."
+
+#: ../pyjigdo/base.py:89
+msgid "Running PyJigdo in GUI mode..."
+msgstr "Uruchamianie pyJigdo w trybie GUI..."
+
+#: ../pyjigdo/base.py:136
+#, python-format
+msgid "Loading Jigdo file %s"
+msgstr "Wczytywanie pliku Jigdo %s"
+
+#: ../pyjigdo/base.py:159
+#, python-format
+msgid "Selecting Image %d"
+msgstr "Wybieranie obrazu %d"
+
+#: ../pyjigdo/base.py:165 ../pyjigdo/base.py:190 ../pyjigdo/base.py:204
+#, python-format
+msgid "Could not select image %s"
+msgstr "Nie można wybrać obrazu %s"
+
+#: ../pyjigdo/base.py:172
+msgid "Selecting Images"
+msgstr "Wybieranie obrazów"
+
+#: ../pyjigdo/base.py:200
+#, python-format
+msgid "%s MATCHED: %d: %s"
+msgstr "%s ZGADZA SIĘ: %d: %s"
+
+#: ../pyjigdo/base.py:227
+msgid "Initting progress bar for "
+msgstr "Inicjowanie paska postępu dla "
+
+#: ../pyjigdo/base.py:252
+#, python-format
+msgid "Adding image %s to our queue."
+msgstr "Dodawanie obrazu %s do kolejki."
+
+#: ../pyjigdo/base.py:258
+#, python-format
+msgid "Creating download tasks for %s"
+msgstr "Tworzenie zadań pobierania dla %s"
+
+#: ../pyjigdo/base.py:264
+#, python-format
+msgid "Adding source %s to be scanned for data."
+msgstr "Dodawanie źródła %s do przeskanowania w poszukiwaniu danych."
+
+#: ../pyjigdo/base.py:294
+msgid "Something failed to finish...\n"
+msgstr "Zakończenie czegoś się nie powiodło...\n"
+
+#: ../pyjigdo/cfg.py:63
+msgid "Running from CLI but no .jigdo file specified"
+msgstr "Uruchamianie z CLI, ale nie podano pliku .jigdo"
+
+#: ../pyjigdo/cfg.py:66
+msgid "Info requested from a .jigdo file but no .jigdo file specified"
+msgstr "Zażądano informacji z pliku .jigdo, ale nie podano pliku .jigdo"
+
+#: ../pyjigdo/cfg.py:73
+msgid "Setting options from configuration file"
+msgstr "Ustawianie opcji z pliku konfiguracji"
+
+#: ../pyjigdo/cfg.py:92
+#, python-format
+msgid "Configuration file %s not readable, continuing without"
+msgstr "Plik konfiguracji %s jest nieczytelny, kontynuowanie bez niego"
+
+#: ../pyjigdo/cfg.py:96
+#, python-format
+msgid "Reading configuration file %s"
+msgstr "Odczytywanie pliku konfiguracji %s"
+
+#: ../pyjigdo/cfg.py:100
+#, python-format
+msgid "Invalid configuration file %s"
+msgstr "Nieprawidłowy plik konfiguracji %s"
+
+#: ../pyjigdo/cfg.py:139
+#, python-format
+msgid "Setting %s to %r (from configuration file)"
+msgstr "Ustawianie %s na %r (z pliku konfiguracji)"
+
+#: ../pyjigdo/cfg.py:143
+msgid "Setting options from command-line"
+msgstr "Ustawianie opcji z wiersza poleceń"
+
+#: ../pyjigdo/cfg.py:157 ../pyjigdo/cfg.py:161 ../pyjigdo/cfg.py:163
+#, python-format
+msgid "Setting %s to %r (from command line)"
+msgstr "Ustawianie %s na %r (z wiersza poleceń)"
+
+#: ../pyjigdo/cfg.py:159
+#, python-format
+msgid "No check_setting_%s()"
+msgstr "Brak check_setting_%s()"
+
+#: ../pyjigdo/cli.py:90
+msgid "Invalid selection."
+msgstr "Nieprawidłowy wybór."
+
+#: ../pyjigdo/cli.py:115
+msgid "All images have reported as complete. Nothing to do."
+msgstr ""
+"Wszystkie obrazy zostały zgłoszone jako zakończone. Nie ma nic do zrobienia."
+
+#: ../pyjigdo/cli.py:132
+#, python-format
+msgid "Image %s successfully downloaded to: %s"
+msgstr "Obraz %s został pomyślnie pobrany do: %s"
+
+#: ../pyjigdo/cli.py:136
+#, python-format
+msgid "Image %s failed to complete. Try running pyjigdo again."
+msgstr ""
+"Zakończenie obrazu %s nie powiodło się. Spróbuj uruchomić pyJigdo ponownie."
+
+#: ../pyjigdo/jigdo.py:45 ../pyjigdo/jigdo.py:55
+msgid "==== Images defined in Jigdo ===="
+msgstr "==== Obrazy określone w Jigdo ===="
+
+#: ../pyjigdo/jigdo.py:47
+#, python-format
+msgid ""
+"Image Number %s:\n"
+"\t %s"
+msgstr ""
+"Obraz numer %s:\n"
+"\t %s"
+
+#: ../pyjigdo/jigdo.py:51
+msgid "==== Servers listed in Jigdo ===="
+msgstr "==== Serwery na liście w Jigdo ===="
+
+#: ../pyjigdo/jigdo.py:53
+msgid "==== Mirror list sources listed in Jigdo ===="
+msgstr "==== Źródła listy serwerów lustrzanych na liście w Jigdo ===="
+
+#: ../pyjigdo/jigdo.py:57
+#, python-format
+msgid ""
+"Number %s:\n"
+"\t %s"
+msgstr ""
+"Numer %s:\n"
+"\t %s"
+
+#: ../pyjigdo/jigdo.py:58
+msgid "==== Parts defined in Jigdo ===="
+msgstr "==== Fragmenty określone w Jigdo ===="
+
+#: ../pyjigdo/jigdo.py:176
+msgid "[Servers] section is not present or can't be parsed. Abort!"
+msgstr ""
+"Sekcja [Servers] nie jest obecna lub nie może zostać przeanalizowana. "
+"Przerwij!"
+
+#: ../pyjigdo/jigdo.py:248
+#, python-format
+msgid "Server ID '%s' does not have a matching matching mirrorlist."
+msgstr ""
+"Identyfikator serwera \"%s\" nie posiada pasującej listy serwerów "
+"lustrzanych."
+
+#: ../pyjigdo/jigdo.py:367
+#, python-format
+msgid "Temporary template found at %s"
+msgstr "Znaleziono tymczasowy szablon na %s"
+
+#: ../pyjigdo/jigdo.py:383
+#, python-format
+msgid "%s exists, checking..."
+msgstr "%s istnieje, sprawdzanie..."
+
+#: ../pyjigdo/jigdo.py:386 ../pyjigdo/jigdo.py:431
+#, python-format
+msgid "%s is complete."
+msgstr "%s jest zakończone."
+
+#: ../pyjigdo/jigdo.py:429
+#, python-format
+msgid "Checking image %s ..."
+msgstr "Sprawdzanie obrazu %s..."
+
+#: ../pyjigdo/jigdo.py:483
+#, python-format
+msgid "Trying to download %s"
+msgstr "Próbowanie pobrania %s"
+
+#: ../pyjigdo/jigdo.py:484
+#, python-format
+msgid "Trying %s for %s"
+msgstr "Próbowanie %s dla %s"
+
+#: ../pyjigdo/jigdo.py:503
+#, python-format
+msgid "%s exists and checksum matches."
+msgstr "%s istnieje, a suma kontrolna się zgadza."
+
+#: ../pyjigdo/jigdo.py:524
+#, python-format
+msgid "Scanning %s for needed files..."
+msgstr "Skanowanie %s w poszukiwaniu wymaganych plików..."
+
+#: ../pyjigdo/jigdo.py:528
+#, python-format
+msgid "Looking for file %s ..."
+msgstr "Wyszukiwanie pliku %s..."
+
+#: ../pyjigdo/jigdo.py:532
+#, python-format
+msgid "Found file %s, marking location."
+msgstr "Znaleziono plik %s, zaznaczanie położenia."
+
+#: ../pyjigdo/jigdo.py:548
+#, python-format
+msgid "Mounting %s at %s ..."
+msgstr "Montowanie %s na %s..."
+
+#: ../pyjigdo/jigdo.py:581
+#, python-format
+msgid "Adding a job for %s: %s"
+msgstr "Dodawanie zadania dla %s: %s"
+
+#: ../pyjigdo/jigdo.py:631
+#, python-format
+msgid "Download failed: %s"
+msgstr "Pobranie nie powiodło się: %s"
+
+#: ../pyjigdo/jigdo.py:641
+msgid "The following downloads failed:"
+msgstr "Następujące pobrania nie powiodły się:"
+
+#: ../pyjigdo/jigdo.py:643
+#, python-format
+msgid "Download of %s failed."
+msgstr "Pobranie %s nie powiodło się."
+
+#: ../pyjigdo/jigdo.py:645
+#, python-format
+msgid "Re-queuing %s ..."
+msgstr "Ponowne dodawanie %s do kolejki..."
+
+#: ../pyjigdo/jigdo.py:657
+#, python-format
+msgid "Stuffing bits into Jigdo image %s..."
+msgstr "Wrzucanie bitów do obrazu Jigdo %s..."
+
+#: ../pyjigdo/jigdo.py:682
+#, python-format
+msgid "Stuffing %s into %s ..."
+msgstr "Wrzucanie %s do %s..."
+
+#: ../pyjigdo/jigdo.py:711
+#, python-format
+msgid ""
+"Running %s for:\n"
+" %s"
+msgstr ""
+"Uruchamianie %s dla:\n"
+" %s"
+
+#: ../pyjigdo/logger.py:87
+msgid "Error"
+msgstr "Błąd"
+
+#: ../pyjigdo/logger.py:102
+msgid "Warning"
+msgstr "Ostrzeżenie"
+
+#. and not self.cfg.answer_yes:
+#: ../pyjigdo/logger.py:115 ../pyjigdo/logger.py:124
+msgid "Do you want to continue? [Y/n]"
+msgstr "Czy chcesz kontynuować? [Y/n]"
+
+#: ../pyjigdo/logger.py:118 ../pyjigdo/logger.py:127
+msgid "Abort! Abort! Abort!"
+msgstr "Przerwij! Przerwij! Przerwij!"
+
+#: ../pyjigdo/misc.py:64
+#, python-format
+msgid "Mirrorlist %s was unable to be fetched."
+msgstr "Nie można pobrać listy serwerów lustrzanych %s."
+
+#: ../pyjigdo/misc.py:112
+#, python-format
+msgid "Could not find URL %s: %s"
+msgstr "Nie można znaleźć URL %s: %s"
+
+#: ../pyjigdo/misc.py:119 ../pyjigdo/misc.py:122
+#, python-format
+msgid "Unable to write to %s, aborting."
+msgstr "Nie można zapisać do %s, przerywanie."
+
+#: ../pyjigdo/misc.py:231
+#, python-format
+msgid "Failed to allocate loop device for '%s'"
+msgstr "Przydzielenie urządzenia loop dla \"%s\" nie powiodło się"
+
+#: ../pyjigdo/misc.py:246
+#, python-format
+msgid "Failed to find loop device associated with '%s' from '/sbin/losetup -a'"
+msgstr ""
+"Znalezienie urządzenie loop powiązanego z \"%s\" z \"/sbin/losetup -a\" nie "
+"powiodło się"
+
+#: ../pyjigdo/misc.py:266
+#, python-format
+msgid "Failed to mount '%s' to '%s'"
+msgstr "Zamontowanie \"%s\" do \"%s\" nie powiodło się"
+
+#: ../pyjigdo/misc.py:320
+#, python-format
+msgid "Directory %s could not be created. Aborting"
+msgstr "Nie można utworzyć folderu %s. Przerywanie"
+
+#: ../pyjigdo/misc.py:379
+msgid "Invalid range selection."
+msgstr "Nieprawidłowy wybór zakresu."
