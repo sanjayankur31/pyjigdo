@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pyjigdo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-04 19:23+0000\n"
-"PO-Revision-Date: 2008-09-09 13:02+0100\n"
+"POT-Creation-Date: 2008-11-01 13:35+0000\n"
+"PO-Revision-Date: 2008-12-08 23:13+0100\n"
 "Last-Translator: Fabian Affolter <fab@fedoraproject.org>\n"
 "Language-Team: German <fedora-trans-de@redhat.com>\n"
 "MIME-Version: 1.0\n"
@@ -128,7 +128,7 @@ msgstr "Optionen für das Herunterladen:"
 
 #: ../pyjigdo.py:166
 msgid "Download or Host a given comma-separated list of image number(s) or range(s). e.g.: \"7,15,23,8-13\""
-msgstr "Läde herunter oder hostet eine gegebene kommagetrennte Liste von Abbildsnummer(n) oder Bereich(en). Beispielsweise:  \"7,15,23,8-13\""
+msgstr "Läd herunter oder hostet eine gegebene kommagetrennte Liste von Abbildsnummer(n) oder Bereich(en). Beispielsweise:  \"7,15,23,8-13\""
 
 #: ../pyjigdo.py:167
 msgid "[image numbers]"
@@ -136,7 +136,7 @@ msgstr "[Abbild-Nummer]"
 
 #: ../pyjigdo.py:173
 msgid "Download or Host a given comma-separated list of image filenames or file glob patterns. e.g.: \"*i386*CD*,foo.iso\""
-msgstr "Läde herunter oder hostet ein gegebene kommagetrennte Liste von Abbildsdateinamen oder globalem Muster. Beispielsweise: \"*i386*CD*,foo.iso\""
+msgstr "Läd herunter oder hostet ein gegebene kommagetrennte Liste von Abbildsdateinamen oder globalem Muster. Beispielsweise: \"*i386*CD*,foo.iso\""
 
 #: ../pyjigdo.py:174
 msgid "[image filenames]"
@@ -332,7 +332,7 @@ msgid ""
 "Image Number %s:\n"
 "\t %s"
 msgstr ""
-"Abbild-Nummerr %s:\n"
+"Abbild-Nummer %s:\n"
 "\t %s"
 
 #: ../pyjigdo/jigdo.py:51
@@ -409,7 +409,7 @@ msgstr "Durchsuche %s nach den benötigten Dateien..."
 #: ../pyjigdo/jigdo.py:528
 #, python-format
 msgid "Looking for file %s ..."
-msgstr "suche nach Datei %s..."
+msgstr "suche nach Datei %s ..."
 
 #: ../pyjigdo/jigdo.py:532
 #, python-format
@@ -453,7 +453,7 @@ msgstr "Stopfe Bits in Jigdo-Abbild %s..."
 #: ../pyjigdo/jigdo.py:682
 #, python-format
 msgid "Stuffing %s into %s ..."
-msgstr "Stopfe %s in %s..."
+msgstr "Stopfe %s in %s ..."
 
 #: ../pyjigdo/jigdo.py:711
 #, python-format
@@ -481,7 +481,7 @@ msgstr "Wollen Sie fortfahren? [J/n]"
 #: ../pyjigdo/logger.py:118
 #: ../pyjigdo/logger.py:127
 msgid "Abort! Abort! Abort!"
-msgstr "Abbruch! Abruch! Abbruch!"
+msgstr "Abbruch! Abbruch! Abbruch!"
 
 #: ../pyjigdo/misc.py:64
 #, python-format
