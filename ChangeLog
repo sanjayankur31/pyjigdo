@@ -1,3 +1,7 @@
+2009-01-18 Jonathan Steffan <jon@fedoraunity.org>
+     * Start work on implementing async downloading
+     * Use the twisted framework
+
 2007-11-27 Stewart Adam <s.adam@diffingo.com>
      * Update spec file
      * Fix rpmlint warnings/errors
