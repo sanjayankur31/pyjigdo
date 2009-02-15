@@ -17,4 +17,4 @@
 
 BASE_CONF_DIR = "/etc/pyjigdo"
 VERSION = "Git Development Hacking"
-URLGRABBER_USER_AGENT = "pyJigdo/" + VERSION
+PYJIGDO_USER_AGENT = "pyJigdo/" + VERSION

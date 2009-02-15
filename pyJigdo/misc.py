@@ -17,9 +17,14 @@
 
 import base64, os, re, shutil, subprocess, sys, types, time, urlparse
 import pyJigdo.progress, pyJigdo.jigdo
+from pyJigdo.constants import PYJIGDO_USER_AGENT
+
+# FIXME: These three imports (urlgrabber) are no longer allowed.
+# Factor out all of the code that uses it and replace
+# it with hooks to our twisted reactor.
+
 import urlgrabber.grabber, urlgrabber.progress
 from urlgrabber.grabber import URLGrabError
-from pyJigdo.constants import URLGRABBER_USER_AGENT
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -57,7 +62,7 @@ def get_mirror_list(mirror_list_urls, log):
             retrycodes = urlgrabber.grabber.URLGrabberOptions().retrycodes
             if not 12 in retrycodes: retrycodes.append(12) # 503 Service Unavailable
             if not 14 in retrycodes: retrycodes.append(14) # 502 Proxy Error
-            response_data = urlgrabber.urlopen(mirror_list_url, user_agent = URLGRABBER_USER_AGENT, retry = 0, retrycodes = retrycodes, keepalive = 0)
+            response_data = urlgrabber.urlopen(mirror_list_url, user_agent = PYJIGDO_USER_AGENT, retry = 0, retrycodes = retrycodes, keepalive = 0)
             for line in response_data.readlines():
                 if not line.startswith("#"): mirror_list_data.append(line.rstrip('\n'))
         except urlgrabber.grabber.URLGrabError:
@@ -102,7 +107,7 @@ def download_file(url, file_name, title=None, timeout = 30, fatality = 0):
                                file_name,
                                copy_local=1,
                                progress_obj = urlgrabber.progress.TextMeter(),
-                               user_agent = URLGRABBER_USER_AGENT,
+                               user_agent = PYJIGDO_USER_AGENT,
                                text = title,
                                timeout = float(timeout),
                                keepalive = 0)

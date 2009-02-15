@@ -16,6 +16,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import logging, math, os, rpm, sys, time, urllib2
+
+# FIXME: These two imports (urlgrabber) are no longer allowed.
+# Factor out all of the code that uses it and replace
+# it with hooks to our twisted reactor.
 import urlgrabber, urlgrabber.progress
 
 # Import constants
