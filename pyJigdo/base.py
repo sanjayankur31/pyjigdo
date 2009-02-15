@@ -18,17 +18,17 @@
 import logging, sys, os
 from urllib import unquote
 
-import pyjigdo.cfg
-import pyjigdo.jigdo
-import pyjigdo.logger
-from pyjigdo.jigdo import JigdoJobPool
+import pyJigdo.cfg
+import pyJigdo.jigdo
+import pyJigdo.logger
+from pyJigdo.jigdo import JigdoJobPool
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
 
 class PyJigdoBase:
     """PyJigdoBase holds common functions shared amongst our CLI and GUI mode"""
-    def __init__(self, pyjigdo):
+    def __init__(self, pyjigdo_entry):
         """
         Initializes the PyJigdoBase class with the options specified from the command line.
         - Creates a logger instance
@@ -38,11 +38,15 @@ class PyJigdoBase:
         - Sets up the final configuration store
         """
 
+        # Get our exit points
+        self.abort = pyjigdo_entry.abort
+        self.done = pyjigdo_entry.done
+
         # Get the options parser, it's valuable ;-)
-        self.parser = pyjigdo.parser
+        self.parser = pyjigdo_entry.parser
 
         # The options it has defined are valuable too
-        self.cli_options = pyjigdo.cli_options
+        self.cli_options = pyjigdo_entry.cli_options
 
         # At this point, 'self' isn't much yet, so:
         # first create a simple logger instance that won't do much,
@@ -73,27 +77,29 @@ class PyJigdoBase:
 
     def run(self):
         """ Split into either running CLI, or GUI. """
-        if self.cfg.cli_mode:
-            import pyjigdo.cli
-            self.log.debug(_("Running PyJigdo in CLI mode..."), level = 1)
-            self.cli = pyjigdo.cli.PyJigdoCLI(self)
-            try:
-                self.cli.run()
-            except KeyboardInterrupt:
-                print ""
-                print ""
-                sys.exit(1)
+        #if self.cfg.cli_mode:
+        #    import pyJigdo.cli
+        #    self.log.debug(_("Running PyJigdo in CLI mode..."), level = 1)
+        #    self.cli = pyJigdo.cli.PyJigdoCLI(self)
+        #    try:
+        #        return self.cli.run()
+        #    except KeyboardInterrupt:
+        #        print ""
+        #        print ""
+        #        return self.abort()
 
-        elif self.cfg.gui_mode:
-            import pyjigdo.gui
-            self.log.debug(_("Running PyJigdo in GUI mode..."), level = 1)
-            self.gui = pyjigdo.gui.PyJigdoGUI(self)
-            try:
-                self.gui.run()
-            except KeyboardInterrupt:
-                print ""
-                print ""
-                sys.exit(1)
+        #elif self.cfg.gui_mode:
+        #    import pyJigdo.gui
+        #    self.log.debug(_("Running PyJigdo in GUI mode..."), level = 1)
+        #    self.gui = pyJigdo.gui.PyJigdoGUI(self)
+        #    try:
+        #        self.gui.run()
+        #    except KeyboardInterrupt:
+        #        print ""
+        #        print ""
+        #        return self.abort()
+        
+        return self.done()
 
     def create_logger(self):
         """ Create a logger instance using cli_options.debuglevel """
@@ -104,39 +110,37 @@ class PyJigdoBase:
             self.cli_options.debuglevel = 0
 
         # Initialize logger
-        self.log = pyjigdo.logger.Logger(loglevel = loglevel, debuglevel = self.cli_options.debuglevel)
+        self.log = pyJigdo.logger.Logger(loglevel = loglevel, debuglevel = self.cli_options.debuglevel)
 
     def create_configstore(self):
         """ Initialize Configuration Store. """
-        self.cfg = pyjigdo.cfg.ConfigStore(self)
+        self.cfg = pyJigdo.cfg.ConfigStore(self)
 
     def detect_mode(self):
-        """ Detect whether we run in CLI or in GUI mode. (GUI is default) """
-        if self.cli_options.gui_mode:
-            self.cfg._set_gui_mode()
-        elif self.cli_options.cli_mode:
+        """ Detect if we are to run in CLI or in GUI mode. """
+        # FIXME: GUI is disabled, we are going to get the CLI awesome first.
+        #if self.cli_options.gui_mode:
+        #    self.cfg._set_gui_mode()
+        #elif self.cli_options.cli_mode:
+        if self.cli_options.cli_mode:
             self.cfg._set_cli_mode()
         else:
-
-##
-## FIXME: GUI is disabled
-##
-#            try:
-#                import gtk
-#                import gtk.glade
-#                import gobject
-#                import gtk.gdk as gdk
-#                self.cfg._set_gui_mode()
-#            except:
+            #try:
+            #    import gtk
+            #    import gtk.glade
+            #    import gobject
+            #    import gtk.gdk as gdk
+            #    self.cfg._set_gui_mode()
+            #except ImportError:
             self.cfg._set_cli_mode()
 
     def load_jigdo(self, url):
-        """ Load a jigdo from a given URL using pyjigdo.misc.get_file. """
+        """ Load a jigdo from a given URL using pyJigdo.misc.get_file. """
 
         self.log.debug(_("Loading Jigdo file %s") % url, level=2)
-        file_name = pyjigdo.misc.get_file(url, working_directory = self.cfg.destination_directory, log = self.log, fatality = 666)
+        file_name = pyJigdo.misc.get_file(url, working_directory = self.cfg.destination_directory, log = self.log, fatality = 666)
 
-        self.jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, self.log, self.cfg)
+        self.jigdo_definition = pyJigdo.jigdo.JigdoDefinition(file_name, self.log, self.cfg)
 
     def create_job_pool(self):
         """ Create the job pool. """
@@ -180,7 +184,7 @@ class PyJigdoBase:
             # Select images by number
             if self.cfg.image_numbers:
                 for image_numstr in self.cfg.image_numbers:
-                    for image in pyjigdo.misc.image_numstr_to_list(image_numstr):
+                    for image in pyJigdo.misc.image_numstr_to_list(image_numstr):
                         if self.select_image(image):
                             # At least one image was able to be selected,
                             # return successfully. We might want to make it more
@@ -229,23 +233,23 @@ class PyJigdoBase:
         if self.cfg.gui_mode:
             if callback:
                 if not self.gui.frame_xml.get_widget("part_progress") == None:
-                    return pyjigdo.progress.ProgressCallbackGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
+                    return pyJigdo.progress.ProgressCallbackGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
                 elif not self.gui.main_window == None:
-                    return pyjigdo.progress.ProgressCallbackGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
+                    return pyJigdo.progress.ProgressCallbackGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
                 else:
-                    return pyjigdo.progress.ProgressCallbackGUI(title = title, parent = parent, xml = xml)
+                    return pyJigdo.progress.ProgressCallbackGUI(title = title, parent = parent, xml = xml)
             else:
                 if not self.gui.frame_xml.get_widget("part_progress") == None:
                     return revisor.progress.ProgressGUI(title = title, parent = self.gui, xml = self.gui.frame_xml)
                 elif not self.gui.main_window == None:
-                    return pyjigdo.progress.ProgressGUI(title = title, parent = self.gui, xml = xml)
+                    return pyJigdo.progress.ProgressGUI(title = title, parent = self.gui, xml = xml)
                 else:
-                    return pyjigdo.progress.ProgressGUI(title = title, parent = parent, xml = xml)
+                    return pyJigdo.progress.ProgressGUI(title = title, parent = parent, xml = xml)
         else:
             if callback:
-                return pyjigdo.progress.ProgressCallbackCLI(title = title)
+                return pyJigdo.progress.ProgressCallbackCLI(title = title)
             else:
-                return pyjigdo.progress.ProgressCLI(title = title)
+                return pyJigdo.progress.ProgressCLI(title = title)
 
     def add_recompose(self, image):
         """ Add the template to be assembled. Generate the needed slice objects. """
@@ -264,13 +268,13 @@ class PyJigdoBase:
         self.log.debug(_("Adding source %s to be scanned for data." % location), level=3)
         scan_object = False
         if is_iso:
-            scan_object = pyjigdo.jigdo.JigdoScanTarget(location,
+            scan_object = pyJigdo.jigdo.JigdoScanTarget(location,
                                                         self.cfg,
                                                         self.log,
                                                         self.needed_files,
                                                         is_iso=is_iso)
         else:
-            scan_object = pyjigdo.jigdo.JigdoScanTarget(location,
+            scan_object = pyJigdo.jigdo.JigdoScanTarget(location,
                                                         self.cfg,
                                                         self.log,
                                                         self.needed_files)
@@ -297,9 +301,4 @@ class PyJigdoBase:
         # Cleanup Mounts, if any
         for scan_target in self.scan_targets:
             scan_target.unmount()
-
-
-
-
-
 

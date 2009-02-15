@@ -19,10 +19,10 @@ import logging, math, os, rpm, sys, time, urllib2
 import urlgrabber, urlgrabber.progress
 
 # Import constants
-from pyjigdo.constants import *
+from pyJigdo.constants import *
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
 
 ##
 ##

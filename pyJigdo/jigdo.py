@@ -19,11 +19,11 @@ Implementation of Jigdo concepts, calling jigdo-file when needed.
 """
 
 import os, urlparse, sys, gzip
-import pyjigdo.misc
+import pyJigdo.misc
 from ConfigParser import RawConfigParser
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
 
 class JigdoDefinition:
     """ A Jigdo Definition File.
@@ -242,7 +242,7 @@ class JigdoMirrorlistsDefinition:
         """ Find the JigdoRepoDefinition and inject the mirrorlists into it. """
         for (repo_id, repo) in servers.objects.iteritems():
             try:
-                repo.mirrorlist = pyjigdo.misc.get_mirror_list(self.i[repo_id], self.log)
+                repo.mirrorlist = pyJigdo.misc.get_mirror_list(self.i[repo_id], self.log)
                 self.log.debug(repo, level = 5)
             except KeyError:
                 self.log.debug(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id, level = 2)
@@ -366,7 +366,7 @@ class JigdoImage:
             template_target = self.tmp_location
             self.log.debug(_("Temporary template found at %s" % template_target), level = 4)
             # FIXME: Need a test to see if this tmp image is usable.
-        template_data = pyjigdo.misc.run_command(["jigdo-file", "ls", "--template", template_target], inshell=True)
+        template_data = pyJigdo.misc.run_command(["jigdo-file", "ls", "--template", template_target], inshell=True)
         if os.access(self.location, os.R_OK): iso_exists = True
         for line in template_data:
             if line.startswith('need-file'):
@@ -382,7 +382,7 @@ class JigdoImage:
                 if iso_exists:
                     self.log.info(_("%s exists, checking..." % self.filename))
                     # FIXME: Duplicate check_file!! (See misc.py:120 and pyjigdo.py:416)
-                    if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
+                    if pyJigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
                         self.log.info(_("%s is complete." % self.filename))
                         self.finished = True
                         self.selected = False
@@ -413,12 +413,12 @@ class JigdoImage:
 
     def get_template(self, work_dir):
         """ Make sure we have the template and it checks out, or fetch it again. """
-        self.template_file = pyjigdo.misc.url_to_file_name(self.template, work_dir)
-        if pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
+        self.template_file = pyJigdo.misc.url_to_file_name(self.template, work_dir)
+        if pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
             self.log.info("Template %s exists and checksum matches." % self.template_file)
         else:
-            self.template_file = pyjigdo.misc.get_file(self.template, working_directory = work_dir)
-            if not pyjigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
+            self.template_file = pyJigdo.misc.get_file(self.template, working_directory = work_dir)
+            if not pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
                 # FIXME: Prompt user asking if we should clear this data, try again?
                 self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
                 self.unselect()
@@ -427,7 +427,7 @@ class JigdoImage:
     def check_self(self):
         """ Run checks on self to see if we are sane. """
         self.log.info(_("Checking image %s ..." % self.filename))
-        if pyjigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
+        if pyJigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
             self.log.info(_("%s is complete." % self.filename))
             self.finished = True
             self.cleanup_template()
@@ -484,7 +484,7 @@ class JigdoImageSlice:
             self.log.status(_("Trying %s for %s" % (url_data.netloc,
                                                     base_name)
                                                     ))
-            pyjigdo.misc.get_file(url,
+            pyJigdo.misc.get_file(url,
                                   file_target = self.file_name,
                                   working_directory = self.target_location,
                                   title = title,
@@ -499,7 +499,7 @@ class JigdoImageSlice:
         if not self.location:
             local_file = os.path.join(self.target_location, self.file_name)
         if not title: title = local_file
-        if pyjigdo.misc.check_file(local_file, checksum = self.slice_sum):
+        if pyJigdo.misc.check_file(local_file, checksum = self.slice_sum):
             if announce: self.log.info(_("%s exists and checksum matches." % title))
             self.location = local_file
             self.finished = True
@@ -540,13 +540,13 @@ class JigdoScanTarget:
         self.mount_location = os.path.join(self.cfg.working_directory,
                                            "mounts",
                                            os.path.basename(self.location))
-        pyjigdo.misc.check_directory(self.mount_location)
+        pyJigdo.misc.check_directory(self.mount_location)
         mount_command = ["fuseiso",
                          "-p",
                          self.location,
                          self.mount_location]
         self.log.debug(_("Mounting %s at %s ..." % (self.location, self.mount_location)), level=3)
-        pyjigdo.misc.run_command(mount_command)
+        pyJigdo.misc.run_command(mount_command)
         self.mounted = True
         self.location = self.mount_location
 
@@ -554,7 +554,7 @@ class JigdoScanTarget:
         """ Un-Mount the ISO. """
         if not self.mounted: return
         umount_command = ["fusermount", "-u", self.mount_location]
-        pyjigdo.misc.run_command(umount_command)
+        pyJigdo.misc.run_command(umount_command)
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs.
@@ -689,7 +689,7 @@ class JigdoJobPool:
                     "-r", "quiet",
                     "--force",
                     file ]
-        pyjigdo.misc.run_command(command, inshell=True)
+        pyJigdo.misc.run_command(command, inshell=True)
         if destroy: os.remove(file)
 
     def do_last_queue(self):

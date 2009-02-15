@@ -17,9 +17,9 @@
 
 import os, sys, urlparse
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
-import pyjigdo.misc
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
+import pyJigdo.misc
 
 class PyJigdoCLI:
     """ The pyJigdo Command Line Interface. """
@@ -81,7 +81,7 @@ class PyJigdoCLI:
                 pass
 
             # convert "1,2  3-5, 8" to [1,2,3,4,5,8]
-            expanded_image_choices = pyjigdo.misc.image_numstr_to_list(image_choice)
+            expanded_image_choices = pyJigdo.misc.image_numstr_to_list(image_choice)
 
             for choice in expanded_image_choices:
                 try:

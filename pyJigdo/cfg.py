@@ -18,8 +18,8 @@
 from ConfigParser import SafeConfigParser
 import os
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
 
 class ConfigStore:
     def __init__(self, base):

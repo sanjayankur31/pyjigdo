@@ -15,11 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import pyjigdo.base
-
-class PyJigdoGUI(pyjigdo.base.PyJigdoBase):
-    def __init__(self, base):
-        print "Launching GUI"
-
-    def run(self):
-        pass
+BASE_CONF_DIR = "/etc/pyjigdo"
+VERSION = "Git Development Hacking"
+URLGRABBER_USER_AGENT = "pyJigdo/" + VERSION

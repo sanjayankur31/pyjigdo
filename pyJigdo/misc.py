@@ -16,13 +16,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import base64, os, re, shutil, subprocess, sys, types, time, urlparse
-import pyjigdo.progress, pyjigdo.jigdo
+import pyJigdo.progress, pyJigdo.jigdo
 import urlgrabber.grabber, urlgrabber.progress
 from urlgrabber.grabber import URLGrabError
-from pyjigdo.constants import URLGRABBER_USER_AGENT
+from pyJigdo.constants import URLGRABBER_USER_AGENT
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
 
 try:
     # new versions of python. Use hashlib
@@ -34,14 +34,14 @@ except ImportError:
 def jigdo_info(url, working_directory, log, cfg):
     """ Prints out information about a .jigdo file located at the given URL. """
     file_name = get_file(url, working_directory = working_directory)
-    jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, log, cfg, just_print = True)
+    jigdo_definition = pyJigdo.jigdo.JigdoDefinition(file_name, log, cfg, just_print = True)
     jigdo_definition.print_information()
     sys.exit(1)
 
 def list_images(url, working_directory, log, cfg):
     """ Print out information on all the [Images] defined .jigdo file located at given URL. """
     file_name = get_file(url, working_directory = working_directory)
-    jigdo_definition = pyjigdo.jigdo.JigdoDefinition(file_name, log, cfg, just_print = True)
+    jigdo_definition = pyJigdo.jigdo.JigdoDefinition(file_name, log, cfg, just_print = True)
     jigdo_definition.list_images()
     sys.exit(1)
 

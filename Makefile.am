@@ -10,7 +10,7 @@ EXTRA_DIST =               \
     COPYING                \
     AUTHORS                \
     README                 \
-    pyjigdo.py
+    pyjigdo_interface.py
 
 DISTCLEANFILES =           \
     intltool-extract       \
@@ -26,7 +26,7 @@ SUBDIRS =                  \
 execdir = $(sbindir)
 install-exec-local:
 	mkdir -p $(DESTDIR)$(bindir)
-	$(INSTALL) -m 755 pyjigdo.py $(DESTDIR)$(bindir)/pyjigdo
+	$(INSTALL) -m 755 pyjigdo_interface.py $(DESTDIR)$(bindir)/pyjigdo
 
 uninstall-local:
 	rm -f $(DESTDIR)$(pkgdatadir)/pixmaps/*.png

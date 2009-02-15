@@ -19,8 +19,8 @@ import logging
 import logging.handlers
 import sys
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
 
 class Logger:
     def __init__(self, loglevel = logging.INFO, debuglevel = 0):

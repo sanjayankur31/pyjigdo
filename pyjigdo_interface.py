@@ -19,22 +19,25 @@
 from optparse import OptionParser
 import os, sys
 
-import pyjigdo.base
-from pyjigdo.constants import *
+# Add a hack to allow running from a git clone.
+sys.path.append(os.getcwd())
+
+import pyJigdo.base
+from pyJigdo.constants import *
 
 """
-pyjigdo interface - Jigdo at its finest
+pyJigdo interface - Jigdo at its finest
 """
 
-import pyjigdo.translate as translate
-from pyjigdo.translate import _, N_
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
 
 class PyJigdo(object):
     def __init__(self):
         # Create the command line options
         self.parse_options()
 
-        self.base = pyjigdo.base.PyJigdoBase(self)
+        self.base = pyJigdo.base.PyJigdoBase(self)
 
         # Answer questions
         self.answer_questions()
@@ -299,13 +302,13 @@ class PyJigdo(object):
     def answer_questions(self):
         """Answers questions such as when --jigdo --info has been specified"""
         if self.cli_options.jigdo_info:
-            sys.exit(pyjigdo.misc.jigdo_info(self.cli_options.jigdo_url,
+            sys.exit(pyJigdo.misc.jigdo_info(self.cli_options.jigdo_url,
                                              self.cli_options.working_directory,
                                              self.base.log,
                                              self.base.cfg))
 
         if self.cli_options.list_images:
-            sys.exit(pyjigdo.misc.list_images(self.cli_options.jigdo_url,
+            sys.exit(pyJigdo.misc.list_images(self.cli_options.jigdo_url,
                                               self.cli_options.working_directory,
                                               self.base.log,
                                               self.base.cfg))
@@ -313,9 +316,20 @@ class PyJigdo(object):
     def run(self):
         return self.base.run()
 
+    def abort(self):
+        """ Something has gone wrong. Try to shutdown and exit. """
+        # FIXME: Add proper return codes and shutdown procedures for
+        # the reactor and any other oprations that might be running.
+        return 1
+
+    def done(self):
+        """ Make sure we are done and then exit. """
+        # FIXME: Add checks for any last minute things and exit.
+        return 0
+
 # If we are being run interactively,
 # it's time to start up.
 if __name__ == "__main__":
-    pyjigdo = PyJigdo()
-    return_code = pyjigdo.run()
+    pyJigdo_interface = PyJigdo()
+    return_code = pyJigdo_interface.run()
     sys.exit(return_code)
