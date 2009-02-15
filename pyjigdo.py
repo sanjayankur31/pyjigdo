@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2007, 2008 Fedora Unity Project (http://fedoraunity.org)
+# Copyright 2007-2009 Fedora Unity Project (http://fedoraunity.org)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,15 +39,13 @@ class PyJigdo(object):
         # Answer questions
         self.answer_questions()
 
-        # Run
-        self.run()
-
     def parse_options(self):
         epilog = """pyJigdo is a Fedora Unity product. For more information about pyJigdo, visit
                 http://pyjigdo.org/"""
 
         try:
             parser = OptionParser(epilog=epilog, version="%prog " + VERSION)
+        # FIXME: No bare excepts
         except:
             parser = OptionParser()
 
@@ -68,14 +66,7 @@ class PyJigdo(object):
                                     dest    = "cli_mode",
                                     action  = "store_true",
                                     default = True,
-                                    help    = _("Use the CLI rather than GUI (default)"))
-        runtime_group.add_option(   "--gui",
-                                    dest    = "gui_mode",
-                                    action  = "store_true",
-                                    default = False,
-                                    #TODO: when the GUI is ready, a pyjigdo-gui symlink should default to --gui (by checking argv[0])
-                                    #help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors. (pyjigdo-gui default)"))
-                                    help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors"))
+                                    help    = _("Use the CLI rather than GUI (doesn't exist yet.)"))
         runtime_group.add_option(   "--list-images",
                                     dest    = "list_images",
                                     action  = "store_true",
@@ -90,15 +81,6 @@ class PyJigdo(object):
                                     default = 0,
                                     type    = 'int',
                                     help    = _("Set debugging level (0 by default)"))
-
-        ##
-        ## Redundant Options
-        ##
-        #runtime_group.add_option(   "-y", "--yes",
-        #                            dest    = "answer_yes",
-        #                            action  = "store_true",
-        #                            default = False,
-        #                            help    = _("Answer all questions as 'yes'"))
 
         ##
         ## Configuration Options
@@ -177,40 +159,22 @@ class PyJigdo(object):
                                     action  = "store_true",
                                     default = False,
                                     help    = _("Download or Host all images defined in jigdo. Same as -f \"*\""))
+        download_group.add_option(  "--threads",
+                                    dest    = "download_threads",
+                                    action  = "store",
+                                    default = "2",
+                                    help    = _("Number of threads to use when downloading."),
+                                    metavar = _("[number]"))
+        download_group.add_option(  "--download-storage",
+                                    dest    = "download_storage",
+                                    action  = "store",
+                                    default = default_work,
+                                    help    = _("Directory to store any temporary data for downloads."),
+                                    metavar = _("[directory]"))
 
-        ## FIXME: Any creative ways to take this data and not limit to just two repos?
-        #download_group.add_option(  "--download-mirror-base",
-                                    #dest    = "base_download_mirror",
-                                    #action  = "store",
-                                    #default = "",
-                                    #help    = "Download base files from given mirror.",
-                                    #metavar = "[mirror url to file root]")
-        #download_group.add_option(  "--download-mirror-updates",
-                                    #dest    = "updates_download_mirror",
-                                    #action  = "store",
-                                    #default = "",
-                                    #help    = "Download updates files from given mirror.",
-                                    #metavar = "[mirror url to file root]")
-
-        # FIXME: We might make it not a choice to cache. It *will* use more space, but much less bandwidth
-        #        ate least when building more then one image/set.
-        #download_group.add_option("--cache", dest="cache_files", action="store", default=True,
-        #                 help="Force caching files to be reused for multiple images. The max space used will be double the resulting image(s) size(s).")
-        #download_group.add_option("--nocache", dest="nocache_files", action="store", default=False,
-        #                 help="Force caching of files off. This might cause the same file to be downloaded more then once but will use less HDD space while running.")
-
-        #download_group.add_option(  "--threads",
-                                    #dest    = "download_threads",
-                                    #action  = "store",
-                                    #default = "2",
-                                    #help    = "Number of threads to use when downloading. (Not in use yet)",
-                                    #metavar = "[number]")
-        #download_group.add_option(  "--workdir",
-                                    #dest    = "download_workdir",
-                                    #action  = "store",
-                                    #default = "/var/tmp/pyjigdo",
-                                    #help    = "Directory to do work in.",
-                                    #metavar = "[directory]")
+        # FIXME: We need to figure out a way to take a list of mirror sources to try for a given
+        # Jigdo key (as defined in the jigdo) and add then as slice sources (and allow them to be
+        # used exclusively/priority, as in the case of a local mirror.)
 
         #
         ## Scan Options
@@ -236,6 +200,8 @@ class PyJigdo(object):
         ## Purpose: Allow a user to easily setup a location that contains all the needed
         ##          data defined in the jigdo. Preserve/create directory structure based
         ##          on defined [servers] path data.
+        # FIXME: Status update: After the downloading engine is done, this will be the next
+        #        priority for us.
         #
         #hosting_group = parser.add_option_group(_("Hosting Options (EXPERIMENTAL)"))
         #hosting_group.add_option(   "--host-image",
@@ -251,17 +217,17 @@ class PyJigdo(object):
         #                            default = False,
         #                            help    = "Host all images defined in jigdo.")
         #hosting_group.add_option(   "--host-data-dir",
-                                    #dest    = "host_data_directory",
-                                    #action  = "store",
-                                    #default = "",
-                                    #help    = "Directory to download data to.",
-                                    #metavar = "[directory]")
+        #                            dest    = "host_data_directory",
+        #                            action  = "store",
+        #                            default = "",
+        #                            help    = "Directory to download data to.",
+        #                            metavar = "[directory]")
         #hosting_group.add_option(   "--host-templates-dir",
-                                    #dest    = "host_templates_directory",
-                                    #action  = "store",
-                                    #default = "",
-                                    #help    = "Directory to download templates to.",
-                                    #metavar = "[directory]")
+        #                            dest    = "host_templates_directory",
+        #                            action  = "store",
+        #                            default = "",
+        #                            help    = "Directory to download templates to.",
+        #                            metavar = "[directory]")
 
         ##
         ### Generation Options
@@ -324,10 +290,11 @@ class PyJigdo(object):
             except IndexError:
                 pass
 
-        # No GUI, yet ;-)
-        if self.cli_options.gui_mode:
-            print "No GUI, yet ;-) Running CLI..."
-            self.cli_options.gui_mode = False
+        # No GUI, yet ;-) This time we are going to make the CLI very nice and bug free
+        # and _then_ add a GUI.
+        #if self.cli_options.gui_mode:
+        #    print "No GUI, yet ;-) Running CLI..."
+        #    self.cli_options.gui_mode = False
 
     def answer_questions(self):
         """Answers questions such as when --jigdo --info has been specified"""
@@ -344,9 +311,11 @@ class PyJigdo(object):
                                               self.base.cfg))
 
     def run(self):
-        self.base.run()
+        return self.base.run()
 
-# This is where the fun begins
+# If we are being run interactively,
+# it's time to start up.
 if __name__ == "__main__":
     pyjigdo = PyJigdo()
-
+    return_code = pyjigdo.run()
+    sys.exit(return_code)
