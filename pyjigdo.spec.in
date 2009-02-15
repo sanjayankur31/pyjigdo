@@ -37,7 +37,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_mandir}/man1/*
 %doc %{_mandir}/man5/*
 %doc %{_mandir}/man8/*
-%{python_sitelib}/pyjigdo/
+%{python_sitelib}/pyJigdo/
 %{_bindir}/*
 %dir %{_sysconfdir}/pyjigdo
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
