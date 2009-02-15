@@ -110,7 +110,9 @@ class PyJigdoBase:
             self.cli_options.debuglevel = 0
 
         # Initialize logger
-        self.log = pyJigdo.logger.Logger(loglevel = loglevel, debuglevel = self.cli_options.debuglevel)
+        self.log = pyJigdo.logger.Logger( self, 
+                                          loglevel = loglevel,
+                                          debuglevel = self.cli_options.debuglevel )
 
     def create_configstore(self):
         """ Initialize Configuration Store. """

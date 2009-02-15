@@ -43,11 +43,15 @@ class PyJigdo(object):
         self.answer_questions()
 
     def parse_options(self):
-        epilog = """pyJigdo is a Fedora Unity product. For more information about pyJigdo, visit
-                http://pyjigdo.org/"""
+        epilog = """pyJigdo is a Fedora Unity product. """ + \
+                 """For more information about pyJigdo, visit http://pyjigdo.org/ """
+
+        usage = "Usage: %prog [options] jigdofile"
 
         try:
-            parser = OptionParser(epilog=epilog, version="%prog " + VERSION)
+            parser = OptionParser( epilog = epilog,
+                                   version = "%prog " + VERSION,
+                                   usage = usage)
         # FIXME: No bare excepts
         except:
             parser = OptionParser()
@@ -69,7 +73,7 @@ class PyJigdo(object):
                                     dest    = "cli_mode",
                                     action  = "store_true",
                                     default = True,
-                                    help    = _("Use the CLI rather than GUI (doesn't exist yet.)"))
+                                    help    = _("Use the command line interface. (Default)"))
         runtime_group.add_option(   "--list-images",
                                     dest    = "list_images",
                                     action  = "store_true",
@@ -237,59 +241,61 @@ class PyJigdo(object):
         ### Purpose: Allow a user to generate jigdo configs and templates.
         #generation_group = parser.add_option_group(_("Generation Options (EXPERIMENTAL)"))
         #generation_group.add_option("--iso-image",
-                                    #dest    = "iso_image_locations",
-                                    #default = [],
-                                    #action  = "append",
-                                    #type    = "str",
-                                    #help    = "Build jigdo for given ISO image.",
-                                    #metavar = "[image location]")
+        #                            dest    = "iso_image_locations",
+        #                            default = [],
+        #                            action  = "append",
+        #                            type    = "str",
+        #                            help    = "Build jigdo for given ISO image.",
+        #                            metavar = "[image location]")
         ## FIXME: Any creative ways to take this data and not limit to just two repos?
         ## We need a way to be able to say "ISO 1 needs repo 1 and repo 2 found here and there with labels 1 and 2"
         ## What I've done here will require a command to pyjigdo per arch, kinda clunky
         #generation_group.add_option("--local-mirror-base",
-                                    #dest    = "base_local_mirror",
-                                    #action  = "store",
-                                    #default = "",
-                                    #help    = "Find base files from given local mirror.",
-                                    #metavar = "[local location for base files]")
+        #                            dest    = "base_local_mirror",
+        #                            action  = "store",
+        #                            default = "",
+        #                            help    = "Find base files from given local mirror.",
+        #                            metavar = "[local location for base files]")
         #generation_group.add_option("--local-mirror-updates",
-                                    #dest    = "updates_local_mirror",
-                                    #action  = "store",
-                                    #default = "",
-                                    #help    = "Find updates files from given local mirror.",
-                                    #metavar = "[local location for updates files]")
+        #                            dest    = "updates_local_mirror",
+        #                            action  = "store",
+        #                            default = "",
+        #                            help    = "Find updates files from given local mirror.",
+        #                            metavar = "[local location for updates files]")
         #generation_group.add_option("--mirror-base-label",
-                                    #dest    = "base_local_label",
-                                    #action  = "store",
-                                    #default = "Base",
-                                    #help    = "Label for local mirror source 'base'. Default 'Base'",
-                                    #metavar = "[label]")
+        #                            dest    = "base_local_label",
+        #                            action  = "store",
+        #                            default = "Base",
+        #                            help    = "Label for local mirror source 'base'. Default 'Base'",
+        #                            metavar = "[label]")
         #generation_group.add_option("--mirror-updates-label",
-                                    #dest    = "updates_local_label",
-                                    #action  = "store",
-                                    #default = "Updates",
-                                    #help    = "Label for local mirror source 'updates'. Default 'Updates'",
-                                    #metavar = "[label]")
+        #                            dest    = "updates_local_label",
+        #                            action  = "store",
+        #                            default = "Updates",
+        #                            help    = "Label for local mirror source 'updates'. Default 'Updates'",
+        #                            metavar = "[label]")
         #generation_group.add_option("--generation-dir",
-                                    #dest    = "generation_directory",
-                                    #action  = "store",
-                                    #default = "",
-                                    #help    = "Directory to dump generated jigdo(s) into.",
-                                    #metavar = "[directory]")
+        #                            dest    = "generation_directory",
+        #                            action  = "store",
+        #                            default = "",
+        #                            help    = "Directory to dump generated jigdo(s) into.",
+        #                            metavar = "[directory]")
         #generation_group.add_option("--jigdo-name",
-                                    #dest    = "jigdo_name",
-                                    #action  = "store",
-                                    #default = "pyjigdo-generated",
-                                    #help    = "Name to give this jigdo. Result will be 'name'.jigdo",
-                                    #metavar = "[name]")
+        #                            dest    = "jigdo_name",
+        #                            action  = "store",
+        #                            default = "pyjigdo-generated",
+        #                            help    = "Name to give this jigdo. Result will be 'name'.jigdo",
+        #                            metavar = "[name]")
 
+        # Parse Options, preserve the object for later use
         self.parser = parser
-        # Parse Options
-        (self.cli_options, self.args) = parser.parse_args()
+        (self.cli_options, self.jigdo_files) = parser.parse_args()
 
         if not self.cli_options.jigdo_url:
             try:
-                self.cli_options.jigdo_url = self.args[0]
+                # FIXME: We currently only support one jigdo definition at
+                # runtime. We should support as many as the user gives us.
+                self.cli_options.jigdo_url = self.jigdo_files[0]
             except IndexError:
                 pass
 

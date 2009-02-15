@@ -57,13 +57,15 @@ class ConfigStore:
         self.check_options()
 
     def check_options(self):
-        """Check the CLI options specified"""
+        """ Check the CLI options specified are enough for us to run.
+            In the future, we should have this attempt to be interactive. """
 
-        if self.cli_options.jigdo_url == "" and self.cli_mode:
-            self.log.error(_("Running from CLI but no .jigdo file specified"), recoverable = False)
-
-        if ( self.cli_options.jigdo_info and self.cli_options.jigdo_url == self.defaults.jigdo_url ):
-            self.log.error(_("Info requested from a .jigdo file but no .jigdo file specified"), recoverable = False)
+        if self.cli_mode:
+            # Check we have what we need to run from the CLI
+            if not self.cli_options.jigdo_url:
+                self.base.parser.print_help()
+                self.log.error(_("Running from CLI but no .jigdo file specified!"),
+                                 recoverable = False)
 
     def options_set_from_config(self):
         """Sets the default configuration options for pyjigdo from a

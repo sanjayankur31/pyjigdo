@@ -23,17 +23,20 @@ import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 class Logger:
-    def __init__(self, loglevel = logging.INFO, debuglevel = 0):
+    def __init__(self, base, loglevel = logging.INFO, debuglevel = 0):
+        """ Our main way to log data and report errors. """
         self.loglevel = loglevel
         self.debuglevel = debuglevel
+        self.base = base
 
-        plaintextformatter = logging.Formatter("%(message)s")
+        console_logging = logging.Formatter("\n%(message)s\n")
+        file_logging = logging.Formatter("%(message)s")
 
         console_stdout = logging.StreamHandler(sys.stdout)
-        console_stdout.setFormatter(plaintextformatter)
+        console_stdout.setFormatter(console_logging)
 
         filelog_handler = logging.FileHandler(filename = "pyjigdo.log")
-        filelog_handler.setFormatter(plaintextformatter)
+        filelog_handler.setFormatter(file_logging)
 
         self.log = logging.getLogger()
         self.log.addHandler(console_stdout)
@@ -42,9 +45,9 @@ class Logger:
         self.log.setLevel(self.loglevel)
 
     def set_config(self, cfg):
-        """Let the Logger instance know what our configuration is and she might
+        """ Let the Logger instance know what our configuration is and she might
         be able to distinct between CLI and GUI mode, or even give more details
-        about what goes wrong"""
+        about what goes wrong. """
         self.cfg = cfg
     
     def status(self, msg):
@@ -63,21 +66,23 @@ class Logger:
 
     def error(self, msg, recoverable = True):
         self.log.error(msg)
-# FIXME: Add OK/Cancel box for recoverable in GUI mode
-        if self.cfg.gui_mode:
-            self.error_box(msg)
-        elif self.cfg.cli_mode:
+        # FIXME: No GUI mode
+        #if self.cfg.gui_mode:
+        #    self.error_box(msg)
+        #elif self.cfg.cli_mode:
+        if self.cfg.cli_mode:
             if recoverable:
                 self.error_prompt(msg)
             else:
-                sys.exit(1)
+                self.base.abort()
 
     def warning(self, msg):
         self.log.warning(msg)
-        if self.cfg.gui_mode:
-# FIXME: Add OK/Cancel box for recoverable in GUI mode
-            self.warning_box(msg)
-        elif self.cfg.cli_mode:
+        # FIXME: No GUI mode
+        #if self.cfg.gui_mode:
+        #    self.warning_box(msg)
+        #elif self.cfg.cli_mode:
+        if self.cfg.cli_mode:
             self.warning_prompt(msg)
 
     def error_box(self, text):
@@ -96,38 +101,44 @@ class Logger:
 
     def warning_box(self, text):
         """Display an Error Message Box"""
-        if not self.cfg.answer_yes:
-            import gtk
-            dlg = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, text)
-            dlg.set_title(_("Warning"))
-            dlg.set_default_size(100, 100)
-            dlg.set_position (gtk.WIN_POS_CENTER)
-            dlg.set_border_width(2)
-            dlg.set_modal(True)
-            dlg.run()
-            dlg.hide()
-            dlg.destroy()
-            self._runGtkMain()
+        import gtk
+        dlg = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, text)
+        dlg.set_title(_("Warning"))
+        dlg.set_default_size(100, 100)
+        dlg.set_position (gtk.WIN_POS_CENTER)
+        dlg.set_border_width(2)
+        dlg.set_modal(True)
+        dlg.run()
+        dlg.hide()
+        dlg.destroy()
+        self._runGtkMain()
 
     def error_prompt(self, text):
-        """The error has already been logged to the console, try and catch some input"""
-        if self.cfg.cli_mode: # and not self.cfg.answer_yes:
-            sys.stderr.write(_("Do you want to continue? [Y/n]") + " ")
+        """ The error has already been logged to the console, ask the user what they
+            would like to do now. """
+        sys.stderr.write(_("Do you want to continue? [Y/n]") + " ")
+        try:
             answer = sys.stdin.readline()[:-1]
-            if answer.lower() == "n":
-                self.error(_("Abort! Abort! Abort!"), recoverable = False)
-                sys.exit(1)
+            if answer.lower() in ("n", "no"):
+               self.error(_("Abort due to user request."), recoverable = False)
+        except KeyboardInterrupt:
+            self.error(_("Abort due to user interupt."), recoverable = False)
 
     def warning_prompt(self, text):
-        """The error has already been logged to the console, try and catch some input"""
-        if self.cfg.cli_mode: #and not self.cfg.answer_yes:
-            sys.stdout.write(_("Do you want to continue? [Y/n]") + " ")
+        """ The error has already been logged to the console, ask the user what they
+            would like to do now. """
+        sys.stdout.write(_("Do you want to continue? [Y/n]") + " ")
+        try:
             answer = sys.stdin.readline()[:-1]
-            if answer.lower() == "n":
-                self.error(_("Abort! Abort! Abort!"), recoverable = False)
-                sys.exit(1)
+            if answer.lower() in ("n", "no"):
+                self.error(_("Abort due to user request."), recoverable = False)
+        except KeyboardInterrupt:
+            self.error(_("Abort due to user interupt."), recoverable = False)
 
     # Master GTK Interface update routine
+    # This is a hack that should be replaced with twisted bindings for event driven
+    # user interface. We will try to design the upcoming download gears around
+    # conditional callbacks, for when we are in GUI mode or CLI mode.
     def _runGtkMain(*args):
         import gtk
         while gtk.events_pending():
