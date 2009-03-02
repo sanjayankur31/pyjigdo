@@ -15,19 +15,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-# Yes, this is just a teaser. I don't have code ready to transplant into
-# pyJigdo... just example code that allows me to download objects. Hopefully
-# next week we'll get to hacking out everything.
-
 from twisted.internet import reactor as treactor
-from twisted.internet import defer
+from twisted.internet import defer, task
 import twisted.web.client
+from constants import PYJIGDO_USER_AGENT
 import os, types
-
-test_http_agent = "pyJigdo Test Reactor/Twisted"
-test_storage_location = os.getcwd()
-
-# DISCLAIMER: This is example/placeholder code.
 
 # FIXME: the jigdoHTTPDownloader is a super hack.
 # This hack requires us to depend on a very specific version
@@ -64,90 +56,87 @@ class jigdoHTTPDownloader(twisted.web.client.HTTPDownloader):
         self.deferred = defer.Deferred()
         self.waiting = 1
 
-class ExampleSlice:
-    """ An example slice object. """
-
-    def __init__(self, name, remote_targets):
-        self.urls = remote_targets
-        # Base on user input/settings
-        self.location = os.path.join(test_storage_location, name)
-
-    def try_download(self, reactor):
-        """ Inject ourself into the reactor with the needed callbacks. """
-        target_url = self.get_pending_url()
-        if target_url:
-            job = reactor.downloadData(self.location, target_url)
-            reactor.actions.append(job)
-        else:
-            # FIXME: Catch DownloadFailed() exception
-            return False
-
-    def get_pending_url(self):
-        """ Get an url that we have not already tried.
-            Return false if we have nothing. """
-        try:
-            return self.urls[0]
-        except IndexError:
-            # FIXME: Raise DownloadFailed() exception
-            return False
-
-    def verify(self):
-        """ Verify we got the expected data. """
-        return True
-
 class PyJigdoReactor:
     """ The pyJigdo Reactor. Used for async operations. """
 
-    def __init__(self, threads=1):
+    def __init__(self, threads=1, timeout=10):
+        """ Our main async gears for connecting to remote sites
+            and downloading the data that we need. """
         self.reactor = treactor
         self.threads = threads
-        self.actions = []
-        self.objects = {}
+        self.timeout = timeout
+        self.pending_actions = []
 
-    def addTask(self, task_object):
-        """ Add an object to the pending tasks. """
-        self.objects[task_object.location] = task_object
-        task_object.try_download(self)
+    def add_task(self, task_object):
+        """ Add an object to the pending actions.
+            This object must have a run(reactor) function we can
+            call when the reactor is ready to run it. """
+        self.pending_actions.append(task_object)
 
-    def clearActions(self):
-        """ Clear our actions list. """
-        self.actions = []
+    def get_tasks(self):
+        """ Get all of the pending tasks. """
+        if not self.pending_actions: 
+            self.finish()
+        for t in self.pending_actions:
+            yield t.run(self)
+        self.clear_pending_actions()
 
-    def generateTasks(self):
-        """ Generate a deffered list to hand off to the reactor. """
-        self.deferred = defer.DeferredList(self.actions, consumeErrors=1)
-        self.deferred.addCallback(self.finish_run)
-        self.clearActions()
+    def checkpoint(self, ign):
+        """ Check to see if we have anything to do. """
+        pending_tasks = self.get_tasks()
+        if pending_tasks:
+            d = []
+            c = task.Cooperator()
+            for i in xrange(self.threads):
+                dc = c.coiterate(pending_tasks)
+                d.append(dc)
+            dl = defer.DeferredList(d)
+            dl.addCallback(self.checkpoint)
+        else:
+            print "Nothing pending, moving to finish. "
+            self.finish()
 
-    def checkpoint(self):
-        """ Check that we don't have any more pending jobs,
-            specifically outside of our reactor. """
-        return False
+    def run(self):
+        """ Start the reactor, first checking to see if we have
+            anything to do. """
+        if self.pending_actions:
+            self.checkpoint(None)
+            self.reactor.run()
+        else:
+            pass # FIXME
 
-    def finish_run(self, ign):
-        # Verify objects are done and set status,
-        # removing them as needed.
-        for target, slice in self.objects.items():
-            if slice.verify(): del self.objects[target]
-        if not self.checkpoint(): self.reactor.stop()
+    def finish(self):
+        """ Check to see if we are done. If not, checkpoint().
+            If so, stop the reactor. """
+        if self.pending_actions:
+            self.checkpoint(None)
+        else:
+            try:
+                self.reactor.stop()
+            except RuntimeError, e:
+                pass
 
-    def downloadComplete(self, r, url):
+    def clear_pending_actions(self):
+        """ Clear pening actions. """
+        self.pending_actions = []
+
+    def download_complete(self, r, url):
         """ The reactor reports a successful download. """
         print "complete"
         #print r, url
 
-    def downloadFailure(self, e, url):
+    def download_failure(self, e, url):
         """ The reactor reports something went wrong. """
         print  "failed"
         #print e, url
 
-    def downloadData(self, storage_location, remote_target):
+    def download_data(self, storage_location, remote_target):
         """ Try to download the data from remote_target to 
             given storage_location. """
         d = self.getFile(remote_target, storage_location,
-                         agent=test_http_agent, timeout=10)
-        d.addCallback(self.downloadComplete, remote_target)
-        d.addErrback(self.downloadFailure, remote_target)
+                         agent=PYJIGDO_USER_AGENT, timeout=self.timeout)
+        d.addCallback(self.download_complete, remote_target)
+        d.addErrback(self.download_failure, remote_target)
         return d
 
     def getFile(self, url, file, contextFactory=None, *args, **kwargs):
@@ -165,20 +154,4 @@ class PyJigdoReactor:
         else:
             self.reactor.connectTCP(host, port, factory)
         return factory.deferred
-
-
-targets = {'google.homepage.html': ['http://www.google.com'],
-           'yahoo.homepage.html':  ['http://yahoo.com']}
-
-pyjigdo_downloader = PyJigdoReactor()
-
-# Inject the test objects
-for (name, remote_target) in targets.iteritems():
-    jigdo_slice = ExampleSlice(name, remote_target)
-    pyjigdo_downloader.addTask(jigdo_slice)
-
-pyjigdo_downloader.generateTasks()
-pyjigdo_downloader.reactor.run()
-
-print "Done?!"
 
