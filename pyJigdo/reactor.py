@@ -155,16 +155,3 @@ class PyJigdoReactor:
             self.reactor.connectTCP(host, port, factory)
         return factory.deferred
 
-    def init_jigdo_file(self, storage_location, remote_target):
-        """ Fetch a jigdo file and parse it's data. """
-        d = self.download_data(storage_location, remote_target)
-        d.addCallback(self.parse_jigdo, storage_location)
-
-    def parse_jigdo(self, storage_location):
-        # FIXME, call the jigdo parser.
-        # We should have a valid storage_location for this
-        # data now.
-        pass
-
-
-
