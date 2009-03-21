@@ -14,6 +14,11 @@ class GetFile:
         """ Return what we want to do. """
         return reactor.download_data(self.target_location, self.url)
 
+class GetJigdo(GetFile):
+    def run(self, reactor):
+        """ Call a jigdo init in the reactor. """
+        return reactor.init_jigdo_file(self.target_location, self.url)
+
 http_downloader = PyJigdoReactor()
 
 urls = { "googlehome.html" : "http://google.com",
