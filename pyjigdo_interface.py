@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/bin/env python
 #
 # Copyright 2007-2009 Fedora Unity Project (http://fedoraunity.org)
 #
@@ -33,28 +33,29 @@ pyJigdo interface - Jigdo at its finest
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
-class PyJigdo(object):
+class PyJigdo:
+    """ The main interface to configuring pyJigdo.
+        Providing runtime options and defaults for population
+        of a PyJigdoBase() object that will further setup objects
+        in preparation of creating a PyJigdoReactor() for downloading
+        all of the requested data. """ 
     def __init__(self):
-        # Create the command line options
+        """ Parse runtime options and setup the PyJigdoBase(). """
         self.parse_options()
 
         self.base = pyJigdo.base.PyJigdoBase(self)
-
-        # Answer questions
-        self.answer_questions()
 
     def parse_options(self):
         epilog = """pyJigdo is a Fedora Unity product. """ + \
                  """For more information about pyJigdo, visit http://pyjigdo.org/ """
 
-        usage = "Usage: %prog [options] jigdofile"
+        usage = "Usage: %prog [options] jigdofile [jigdofile]"
 
         try:
             parser = OptionParser( epilog = epilog,
-                                   version = "%prog " + VERSION,
+                                   version = "%prog " + PYJIGDO_VERSION,
                                    usage = usage)
-        # FIXME: No bare excepts
-        except:
+        except TypeError:
             parser = OptionParser()
 
         ##
@@ -63,6 +64,7 @@ class PyJigdo(object):
         default_base_path = os.getcwd()
         default_dest = default_base_path
         default_work = os.path.join(default_base_path, 'pyjigdo-data')
+        default_logfile = os.path.join(default_base_path, 'pyjigdo.log')
         default_fallback = 5
         default_timeout = 15
 
@@ -70,59 +72,33 @@ class PyJigdo(object):
         ## Runtime Options
         ##
         runtime_group = parser.add_option_group(_("Runtime Options"))
-        runtime_group.add_option(   "--cli",
-                                    dest    = "cli_mode",
-                                    action  = "store_true",
-                                    default = True,
-                                    help    = _("Use the command line interface. (Default)"))
-        runtime_group.add_option(   "--list-images",
-                                    dest    = "list_images",
-                                    action  = "store_true",
-                                    default = False,
-                                    help    = _("List available images for a given Jigdo file."))
+        runtime_group.add_option( "--list-images",
+                                  dest    = "list_images",
+                                  action  = "store_true",
+                                  default = False,
+                                  help    = _("List available images for given Jigdo files and exit."))
 
         ##
         ## Logging Options
         ##
-        runtime_group.add_option(   "-d", "--debug",
-                                    dest    = "debuglevel",
-                                    default = 0,
-                                    type    = 'int',
-                                    help    = _("Set debugging level (0 by default)"))
-
-        ##
-        ## Configuration Options
-        ##
-        config_group = parser.add_option_group(_("Configuration Options"))
-        config_group.add_option(    "-c", "--config",
-                                    dest    = "config",
-                                    action  = "store",
-                                    default = os.path.join(BASE_CONF_DIR,"pyjigdo.conf"),
-                                    help    = _("PyJigdo configuration file to use"),
-                                    metavar = _("[config file]"))
-        config_group.add_option(    "--dest-dir", "--destination-directory",
-                                    dest    = "destination_directory",
-                                    action  = "store",
-                                    default = default_dest,
-                                    help    = _("Destination directory for products. (Default: %s)" % default_dest),
-                                    metavar = _("[directory]"))
-        config_group.add_option(    "--work-dir", "--working-directory",
-                                    dest    = "working_directory",
-                                    action  = "store",
-                                    default = default_work,
-                                    help    = _("Working directory. (Default: %s)" % default_work),
-                                    metavar = _("[directory]"))
+        runtime_group.add_option( "-d", "--debug",
+                                  dest    = "debug",
+                                  action  = "store_true",
+                                  default = False,
+                                  help    = _("Set debugging to on."))
+        runtime_group.add_option( "-v", "--verbose",
+                                  dest    = "verbose",
+                                  default = 0,
+                                  type    = 'count',
+                                  help    = _("Increase verbosity."))
+        runtime_group.add_option( "--logfile",
+                                  dest    = "logfile",
+                                  action  = "store",
+                                  default = default_logfile,
+                                  help    = _("Logfile location. (Default: %s)" % default_logfile))
 
         ## Information Options
-        ## Purpose: We should allow a user to query a jigdo and get lots-o-info from just
-        ##          downloading the jigdo file.
         general_group = parser.add_option_group(_("General Options"))
-        general_group.add_option(   "-j", "--jigdo",
-                                    dest    = "jigdo_url",
-                                    action  = "store",
-                                    default = "",
-                                    help    = _("Location of jigdo file."),
-                                    metavar = _("[url]"))
         general_group.add_option(   "--info",
                                     dest    = "jigdo_info",
                                     action  = "store_true",
@@ -136,7 +112,7 @@ class PyJigdo(object):
                                     help    = _("Number of public mirrors to try before using a fallback mirror. (Default: %s)" % default_fallback),
                                     metavar = _("[number of tries]"))
         general_group.add_option(   "-t", "--timeout",
-                                    dest    = "urlgrab_timeout",
+                                    dest    = "download_timeout",
                                     action  = "store",
                                     default = default_timeout,
                                     type    = 'float',
@@ -183,6 +159,10 @@ class PyJigdo(object):
         # FIXME: We need to figure out a way to take a list of mirror sources to try for a given
         # Jigdo key (as defined in the jigdo) and add then as slice sources (and allow them to be
         # used exclusively/priority, as in the case of a local mirror.)
+        
+        # Possible solution is to use an append action option and ask for something like:
+        # --local-mirror Updates-i386-key,http://ourserver/path/to/updates/
+        # We would then inject all the members specified into our pool for slice data.
 
         #
         ## Scan Options
@@ -203,122 +183,9 @@ class PyJigdo(object):
                                     help    = _("Mount and then scan existing ISO images for files needed by selected image(s)."),
                                     metavar = _("[iso image]"))
 
-        #
-        ## Hosting Options
-        ## Purpose: Allow a user to easily setup a location that contains all the needed
-        ##          data defined in the jigdo. Preserve/create directory structure based
-        ##          on defined [servers] path data.
-        # FIXME: Status update: After the downloading engine is done, this will be the next
-        #        priority for us.
-        #
-        #hosting_group = parser.add_option_group(_("Hosting Options (EXPERIMENTAL)"))
-        #hosting_group.add_option(   "--host-image",
-        #                            dest    = "host_image_numbers",
-        #                            default = [],
-        #                            action  = "append",
-        #                            type    = "str",
-        #                            help    = "Host given image number. (Not supported yet)",
-        #                            metavar = "[image number]")
-        #hosting_group.add_option(   "--host-all",
-        #                            dest    = "host_all",
-        #                            action  = "store_true",
-        #                            default = False,
-        #                            help    = "Host all images defined in jigdo.")
-        #hosting_group.add_option(   "--host-data-dir",
-        #                            dest    = "host_data_directory",
-        #                            action  = "store",
-        #                            default = "",
-        #                            help    = "Directory to download data to.",
-        #                            metavar = "[directory]")
-        #hosting_group.add_option(   "--host-templates-dir",
-        #                            dest    = "host_templates_directory",
-        #                            action  = "store",
-        #                            default = "",
-        #                            help    = "Directory to download templates to.",
-        #                            metavar = "[directory]")
-
-        ##
-        ### Generation Options
-        ### Purpose: Allow a user to generate jigdo configs and templates.
-        #generation_group = parser.add_option_group(_("Generation Options (EXPERIMENTAL)"))
-        #generation_group.add_option("--iso-image",
-        #                            dest    = "iso_image_locations",
-        #                            default = [],
-        #                            action  = "append",
-        #                            type    = "str",
-        #                            help    = "Build jigdo for given ISO image.",
-        #                            metavar = "[image location]")
-        ## FIXME: Any creative ways to take this data and not limit to just two repos?
-        ## We need a way to be able to say "ISO 1 needs repo 1 and repo 2 found here and there with labels 1 and 2"
-        ## What I've done here will require a command to pyjigdo per arch, kinda clunky
-        #generation_group.add_option("--local-mirror-base",
-        #                            dest    = "base_local_mirror",
-        #                            action  = "store",
-        #                            default = "",
-        #                            help    = "Find base files from given local mirror.",
-        #                            metavar = "[local location for base files]")
-        #generation_group.add_option("--local-mirror-updates",
-        #                            dest    = "updates_local_mirror",
-        #                            action  = "store",
-        #                            default = "",
-        #                            help    = "Find updates files from given local mirror.",
-        #                            metavar = "[local location for updates files]")
-        #generation_group.add_option("--mirror-base-label",
-        #                            dest    = "base_local_label",
-        #                            action  = "store",
-        #                            default = "Base",
-        #                            help    = "Label for local mirror source 'base'. Default 'Base'",
-        #                            metavar = "[label]")
-        #generation_group.add_option("--mirror-updates-label",
-        #                            dest    = "updates_local_label",
-        #                            action  = "store",
-        #                            default = "Updates",
-        #                            help    = "Label for local mirror source 'updates'. Default 'Updates'",
-        #                            metavar = "[label]")
-        #generation_group.add_option("--generation-dir",
-        #                            dest    = "generation_directory",
-        #                            action  = "store",
-        #                            default = "",
-        #                            help    = "Directory to dump generated jigdo(s) into.",
-        #                            metavar = "[directory]")
-        #generation_group.add_option("--jigdo-name",
-        #                            dest    = "jigdo_name",
-        #                            action  = "store",
-        #                            default = "pyjigdo-generated",
-        #                            help    = "Name to give this jigdo. Result will be 'name'.jigdo",
-        #                            metavar = "[name]")
-
         # Parse Options, preserve the object for later use
         self.parser = parser
         (self.cli_options, self.jigdo_files) = parser.parse_args()
-
-        if not self.cli_options.jigdo_url:
-            try:
-                # FIXME: We currently only support one jigdo definition at
-                # runtime. We should support as many as the user gives us.
-                self.cli_options.jigdo_url = self.jigdo_files[0]
-            except IndexError:
-                pass
-
-        # No GUI, yet ;-) This time we are going to make the CLI very nice and bug free
-        # and _then_ add a GUI.
-        #if self.cli_options.gui_mode:
-        #    print "No GUI, yet ;-) Running CLI..."
-        #    self.cli_options.gui_mode = False
-
-    def answer_questions(self):
-        """Answers questions such as when --jigdo --info has been specified"""
-        if self.cli_options.jigdo_info:
-            sys.exit(pyJigdo.misc.jigdo_info(self.cli_options.jigdo_url,
-                                             self.cli_options.working_directory,
-                                             self.base.log,
-                                             self.base.cfg))
-
-        if self.cli_options.list_images:
-            sys.exit(pyJigdo.misc.list_images(self.cli_options.jigdo_url,
-                                              self.cli_options.working_directory,
-                                              self.base.log,
-                                              self.base.cfg))
 
     def run(self):
         return self.base.run()
@@ -326,7 +193,7 @@ class PyJigdo(object):
     def abort(self):
         """ Something has gone wrong. Try to shutdown and exit. """
         # FIXME: Add proper return codes and shutdown procedures for
-        # the reactor and any other oprations that might be running.
+        # the reactor and any other operations that might be running.
         return 1
 
     def done(self):

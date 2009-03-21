@@ -57,9 +57,6 @@ class PyJigdoBase:
         # Prepare Jigdo
         self.prep_jigdo_files()
 
-        # Start up the reactor
-        self.run()
-
     def run(self):
         """ Start up the reactor and start performing operations to
             put the Jigdo together. """
