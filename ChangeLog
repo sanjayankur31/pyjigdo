@@ -1,3 +1,7 @@
+2009-03-21 Jonathan Steffan <jon@fedoraunity.org>
+     * Start the task of ripping everything out and switching to twisted
+     * Update layout and build a new skeleton
+
 2009-01-18 Jonathan Steffan <jon@fedoraunity.org>
      * Start work on implementing async downloading
      * Use the twisted framework
