@@ -49,10 +49,13 @@ class PyJigdo:
         epilog = """pyJigdo is a Fedora Unity product. """ + \
                  """For more information about pyJigdo, visit http://pyjigdo.org/ """
 
+        description = "Python Interface to Jigdo."
+
         usage = "Usage: %prog [options] jigdofile [jigdofile]"
 
         try:
             parser = OptionParser( epilog = epilog,
+                                   description = description,
                                    version = "%prog " + PYJIGDO_VERSION,
                                    usage = usage)
         except TypeError:
@@ -67,6 +70,7 @@ class PyJigdo:
         default_logfile = os.path.join(default_base_path, 'pyjigdo.log')
         default_fallback = 5
         default_timeout = 15
+        default_threads = 2
 
         ##
         ## Runtime Options
@@ -129,31 +133,31 @@ class PyJigdo:
                                     default = [],
                                     action  = "append",
                                     type    = "str",
-                                    help    = _("Download or Host a given comma-separated list of image number(s) or range(s). e.g.: \"7,15,23,8-13\""),
+                                    help    = _("Download a given comma-separated list of image number(s) or range(s). e.g.: \"7,15,23,8-13\""),
                                     metavar = _("[image numbers]"))
         download_group.add_option(  "-f", "--image-filenames",
                                     dest    = "image_filenames",
                                     default = [],
                                     action  = "append",
                                     type    = "str",
-                                    help    = _("Download or Host a given comma-separated list of image filenames or file glob patterns. e.g.: \"*i386*CD*,foo.iso\""),
+                                    help    = _("Download a given comma-separated list of image filenames or file glob patterns. e.g.: \"*i386*CD*,foo.iso\""),
                                     metavar = _("[image filenames]"))
         download_group.add_option(  "-a", "--all",
                                     dest    = "image_all",
                                     action  = "store_true",
                                     default = False,
-                                    help    = _("Download or Host all images defined in jigdo. Same as -f \"*\""))
+                                    help    = _("Download all images defined in jigdo. Same as -f \"*\""))
         download_group.add_option(  "--threads",
                                     dest    = "download_threads",
                                     action  = "store",
-                                    default = "2",
-                                    help    = _("Number of threads to use when downloading."),
+                                    default = default_threads,
+                                    help    = _("Number of threads to use when downloading. (Default: %s)" % default_threads),
                                     metavar = _("[number]"))
         download_group.add_option(  "--download-storage",
                                     dest    = "download_storage",
                                     action  = "store",
                                     default = default_work,
-                                    help    = _("Directory to store any temporary data for downloads."),
+                                    help    = _("Directory to store any temporary data for downloads. (Default: %s)" % default_work),
                                     metavar = _("[directory]"))
 
         # FIXME: We need to figure out a way to take a list of mirror sources to try for a given
@@ -188,7 +192,7 @@ class PyJigdo:
         (self.cli_options, self.jigdo_files) = parser.parse_args()
 
         if not self.check_options():
-            self.parser.print_help()
+            self.show_help()
             print "\nMissing required option!\n"
             sys.exit(1)
 
@@ -196,6 +200,11 @@ class PyJigdo:
         """ Check if we have the bare minimum needed options. """
         if not self.jigdo_files: return False
         return True
+
+    def show_help(self):
+        """ Show the help, with a logo. """
+        print PYJIGDO_LOGO+"\n"
+        self.parser.print_help()
 
     def run(self):
         return self.base.run()
