@@ -26,9 +26,29 @@ from pyJigdo.translate import _, N_
 
 class JigdoFile:
     """ A Jigdo file that has been requested to be downloaded. """
-    def __init__(self, jigdo_location, log):
+    def __init__(self, log, jigdo_location, jigdo_storage_location):
         self.jigdo_location = jigdo_location
+        self.jigdo_storage_location = jigdo_storage_location
+        self.id = jigdo_location
         self.log = log
+        self.have_data = False
+
+    def get(self, reactor):
+        """ Download the Jigdo file using the given reactor.
+            Return the reactor task. """
+        return reactor.download_data( self.jigdo_location,
+                                      self.jigdo_storage_location )
+
+    def parse(self, reactor):
+        """ Parse the jigdo file.
+            Return needed jobs to put into the reactor. """
+        if os.path.isfile(self.jigdo_storage_location):
+            self.log.debug(_("Successfully downloaded %s to %s" % ( self.id,
+                                                                    self.jigdo_storage_location )))
+            # FIXME: Pass/Fail parsing and call functions as expected.
+            self.log.debug(_("Attempting to parse %s ..." % self.id))
+            self.jigdo_data = None # JigdoDefinition()
+        return None
 
 class JigdoDefinition:
     """ A Jigdo Definition File.

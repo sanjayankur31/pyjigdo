@@ -21,6 +21,10 @@ import twisted.web.client
 from constants import PYJIGDO_USER_AGENT
 import os, types
 
+import pyJigdo.translate as translate
+from pyJigdo.translate import _, N_
+
+
 # FIXME: the jigdoHTTPDownloader is a super hack.
 # This hack requires us to depend on a very specific version
 # of twisted, which sucks. It might be worth the time to
@@ -59,9 +63,10 @@ class jigdoHTTPDownloader(twisted.web.client.HTTPDownloader):
 class PyJigdoReactor:
     """ The pyJigdo Reactor. Used for async operations. """
 
-    def __init__(self, threads=1, timeout=10):
+    def __init__(self, log, threads=1, timeout=10):
         """ Our main async gears for connecting to remote sites
             and downloading the data that we need. """
+        self.log = log
         self.reactor = treactor
         self.threads = threads
         self.timeout = timeout
@@ -73,9 +78,11 @@ class PyJigdoReactor:
             then using data from this object to setup the first
             needed actions to kick everything off. """
         self.base = base
-        # FIXME: Setup the JigdoFile() objects for download with
-        # the proper callbacks to do something after a successfull
-        # download and parsing of the jigdo information.
+        self.log.debug(_("Seeding the reactor with requested jigdo resources."))
+        for jigdo_file in self.base.jigdo_files.values():
+            self.log.debug(_("Adding %s download task." % jigdo_file.id))
+            self.add_task(jigdo_file.get(self))
+            self.add_task(jigdo_file.parse(self))
 
     def add_task(self, task_object):
         """ Add an object to the pending actions.
@@ -140,7 +147,7 @@ class PyJigdoReactor:
         print  "failed"
         #print e, url
 
-    def download_data(self, storage_location, remote_target):
+    def download_data(self, remote_target, storage_location):
         """ Try to download the data from remote_target to 
             given storage_location. """
         d = self.getFile(remote_target, storage_location,

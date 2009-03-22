@@ -159,6 +159,12 @@ class PyJigdo:
                                     default = default_work,
                                     help    = _("Directory to store any temporary data for downloads. (Default: %s)" % default_work),
                                     metavar = _("[directory]"))
+        download_group.add_option(  "--download-target",
+                                    dest    = "download_target",
+                                    action  = "store",
+                                    default = default_dest,
+                                    help    = _("Directory to final download data. (Default: %s)" % default_dest),
+                                    metavar = _("[directory]"))
 
         # FIXME: We need to figure out a way to take a list of mirror sources to try for a given
         # Jigdo key (as defined in the jigdo) and add then as slice sources (and allow them to be

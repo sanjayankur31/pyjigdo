@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys, os
+from urlparse import urlparse
 import pyJigdo.logger
 import pyJigdo.reactor
 from pyJigdo.jigdo import JigdoFile
@@ -50,7 +51,7 @@ class PyJigdoBase:
         # Get the options parser, and bring it's options
         # and args into this namespace.
         self.parser = pyjigdo_entry.parser
-        self.cli_options = pyjigdo_entry.cli_options
+        self.settings = pyjigdo_entry.cli_options
         self.args_jigdo_files = pyjigdo_entry.jigdo_files
 
         # Setup Logging.
@@ -63,7 +64,9 @@ class PyJigdoBase:
         """ Start up the reactor and start performing operations to
             put the Jigdo together. """
         try:
-            self.reactor = pyJigdo.reactor.PyJigdoReactor()
+            self.reactor = pyJigdo.reactor.PyJigdoReactor( self.log,
+                           threads = self.settings.download_threads,
+                           timeout = self.settings.download_timeout )
             self.reactor.seed(self)
             return self.reactor.run()
         except KeyboardInterrupt:
@@ -74,22 +77,37 @@ class PyJigdoBase:
         """ Create a logger instance setting an appropriate loglevel
             based on runtime options. """
         loglevel = pyJigdo.logger.CRITICAL
-        if self.cli_options.verbose >= 3:
+        if self.settings.verbose >= 3:
             loglevel = pyJigdo.logger.DEBUG
-        elif self.cli_options.verbose == 2:
+        elif self.settings.verbose == 2:
             loglevel = pyJigdo.logger.INFO
-        elif self.cli_options.verbose == 1:
+        elif self.settings.verbose == 1:
             loglevel = pyJigdo.logger.WARNING
-        if self.cli_options.debug:
+        if self.settings.debug:
             loglevel = pyJigdo.logger.DEBUG
 
         # Initialize the logging object
-        self.log = pyJigdo.logger.pyJigdoLogger( self.cli_options.log_file,
+        self.log = pyJigdo.logger.pyJigdoLogger( self.settings.log_file,
                                                  loglevel = loglevel )
 
     def prep_jigdo_files(self):
         """ Prepare selected Jigdo downloads for injection into our reactor. """
         for jigdo in self.args_jigdo_files:
             self.log.info(_("Prepping Jigdo file %s ") % jigdo)
-            self.jigdo_files[jigdo] = JigdoFile(jigdo, self.log)
+            jigdo_url = urlparse(jigdo)
+            jigdo_filename = os.path.basename(jigdo_url.path)
+            if jigdo_url.scheme or \
+               (not jigdo_url.scheme and os.path.isfile(jigdo_url.path)):
+                jigdo_storage_location = os.path.join( self.settings.download_target,
+                                                       jigdo_filename )
+                self.log.debug(_("Adding Jigdo file %s" % jigdo_url.geturl()))
+                self.log.debug(_("Storing Jigdo %s at %s" % ( jigdo_filename,
+                                                                  jigdo_storage_location )))
+                self.jigdo_files[jigdo] = JigdoFile( self.log,
+                                                     jigdo_url.geturl(),
+                                                     jigdo_storage_location )
+            else:
+                self.log.error(_("Jigdo file %s seems to not be valid." % jigdo))
+                self.log.error(_("Cowardly refusing to use/download."))
+        if not self.jigdo_files: self.log.critical(_("Nothing given to download!"))
 

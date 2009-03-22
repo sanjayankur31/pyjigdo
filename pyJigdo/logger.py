@@ -57,7 +57,7 @@ class pyJigdoLogger:
 
     def error(self, msg):
         """ Log an error level event. """
-        self.log.error("\nError: %s\n" % msg)
+        self.log.error("Error: %s" % msg)
 
     def critical(self, msg):
         """ Log a critical level event. """
