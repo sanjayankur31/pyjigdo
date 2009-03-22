@@ -70,12 +70,13 @@ class PyJigdoBase:
                 # Seed Reactor
                 self.reactor.seed(self)
                 # Get the party started...
-                return self.reactor.run()
+                self.reactor.run()
             else:
                 self.log.critical(_("Seems there is nothing to do!"))
         except KeyboardInterrupt:
             print "\n\n"
-        return self.abort()
+            return self.abort()
+        return self.done()
 
     def create_logger(self):
         """ Create a logger instance setting an appropriate loglevel

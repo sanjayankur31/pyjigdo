@@ -94,17 +94,17 @@ class PyJigdoReactor:
     def finish_task(self):
         """ Reduce pending_tasks by one. """
         self.pending_tasks -= 1
+        self.checkpoint(None)
 
     def get_tasks(self):
         """ Get all of the pending tasks. """
-        if not self.pending_actions: 
-            self.finish()
-        for t in self.pending_actions:
-            try:
-                yield t.run(self)
-            except AttributeError:
-                pass
-        self.clear_pending_actions()
+        if self.pending_actions:
+            for t in self.pending_actions:
+                try:
+                    yield t.run(self)
+                except AttributeError:
+                    pass
+            self.clear_pending_actions()
 
     def checkpoint(self, ign, relax=False):
         """ Check to see if we have anything to do.
@@ -115,8 +115,8 @@ class PyJigdoReactor:
             except KeyboardInterrupt:
                 self.log.critical(_("Shutting down on user request!"))
                 self.stop()
-        pending_tasks = self.get_tasks()
-        if pending_tasks:
+        if self.pending_actions:
+            pending_tasks = self.get_tasks()
             d = []
             c = task.Cooperator()
             for i in xrange(self.threads):
@@ -124,7 +124,7 @@ class PyJigdoReactor:
                 d.append(dc)
             dl = defer.DeferredList(d)
             dl.addCallback(self.checkpoint)
-        elif not self.pending_tasks:
+        elif not self.pending_tasks > 0:
             self.finish()
 
     def run(self):
