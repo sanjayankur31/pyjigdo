@@ -57,18 +57,22 @@ class PyJigdoBase:
         # Setup Logging.
         self.create_logger()
 
-        # Prepare Jigdo
-        self.prep_jigdo_files()
-
     def run(self):
         """ Start up the reactor and start performing operations to
             put the Jigdo together. """
         try:
+            # Setup Reactor
             self.reactor = pyJigdo.reactor.PyJigdoReactor( self.log,
                            threads = self.settings.download_threads,
                            timeout = self.settings.download_timeout )
-            self.reactor.seed(self)
-            return self.reactor.run()
+            # Prepare Jigdo
+            if self.prep_jigdo_files():
+                # Seed Reactor
+                self.reactor.seed(self)
+                # Get the party started...
+                return self.reactor.run()
+            else:
+                self.log.critical(_("Seems there is nothing to do!"))
         except KeyboardInterrupt:
             print "\n\n"
         return self.abort()
@@ -103,11 +107,17 @@ class PyJigdoBase:
                 self.log.debug(_("Adding Jigdo file %s" % jigdo_url.geturl()))
                 self.log.debug(_("Storing Jigdo %s at %s" % ( jigdo_filename,
                                                                   jigdo_storage_location )))
-                self.jigdo_files[jigdo] = JigdoFile( self.log,
+                self.jigdo_files[jigdo] = JigdoFile( self.reactor,
+                                                     self.log,
+                                                     self.settings.max_download_attempts,
                                                      jigdo_url.geturl(),
                                                      jigdo_storage_location )
             else:
                 self.log.error(_("Jigdo file %s seems to not be valid." % jigdo))
                 self.log.error(_("Cowardly refusing to use/download."))
-        if not self.jigdo_files: self.log.critical(_("Nothing given to download!"))
+        if not self.jigdo_files:
+            self.log.critical(_("Nothing given to download!"))
+            return False
+        return True
+
 

@@ -68,7 +68,8 @@ class PyJigdo:
         default_dest = default_base_path
         default_work = os.path.join(default_base_path, 'pyjigdo-data')
         default_logfile = os.path.join(default_base_path, 'pyjigdo.log')
-        default_fallback = 5
+        default_fallback = 3
+        default_max_attempts = 6
         default_timeout = 15
         default_threads = 2
 
@@ -114,6 +115,13 @@ class PyJigdo:
                                     default = default_fallback,
                                     type    = 'int',
                                     help    = _("Number of public mirrors to try before using a fallback mirror. (Default: %s)" % default_fallback),
+                                    metavar = _("[number of tries]"))
+        general_group.add_option(   "--max-attempts",
+                                    dest    = "max_download_attempts",
+                                    action  = "store",
+                                    default = default_max_attempts,
+                                    type    = 'int',
+                                    help    = _("Max number of tries to get a file before giving up. (Default: %s)" % default_max_attempts),
                                     metavar = _("[number of tries]"))
         general_group.add_option(   "-t", "--timeout",
                                     dest    = "download_timeout",

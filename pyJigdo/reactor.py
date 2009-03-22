@@ -19,7 +19,7 @@ from twisted.internet import reactor as treactor
 from twisted.internet import defer, task
 import twisted.web.client
 from constants import PYJIGDO_USER_AGENT
-import os, types
+import os, types, time
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -71,6 +71,7 @@ class PyJigdoReactor:
         self.threads = threads
         self.timeout = timeout
         self.pending_actions = []
+        self.pending_tasks = 0
         self.base = None # PyJigdoBase()
 
     def seed(self, base):
@@ -81,25 +82,39 @@ class PyJigdoReactor:
         self.log.debug(_("Seeding the reactor with requested jigdo resources."))
         for jigdo_file in self.base.jigdo_files.values():
             self.log.debug(_("Adding %s download task." % jigdo_file.id))
-            self.add_task(jigdo_file.get(self))
-            self.add_task(jigdo_file.parse(self))
+            self.add_task(jigdo_file.get())
 
     def add_task(self, task_object):
         """ Add an object to the pending actions.
             This object must have a run(reactor) function we can
             call when the reactor is ready to run it. """
         self.pending_actions.append(task_object)
+        self.pending_tasks += 1
+
+    def finish_task(self):
+        """ Reduce pending_tasks by one. """
+        self.pending_tasks -= 1
 
     def get_tasks(self):
         """ Get all of the pending tasks. """
         if not self.pending_actions: 
             self.finish()
         for t in self.pending_actions:
-            yield t.run(self)
+            try:
+                yield t.run(self)
+            except AttributeError:
+                pass
         self.clear_pending_actions()
 
-    def checkpoint(self, ign):
-        """ Check to see if we have anything to do. """
+    def checkpoint(self, ign, relax=False):
+        """ Check to see if we have anything to do.
+            Conditionally, sleep. """
+        if relax:
+            try:
+                time.sleep(5)
+            except KeyboardInterrupt:
+                self.log.critical(_("Shutting down on user request!"))
+                self.stop()
         pending_tasks = self.get_tasks()
         if pending_tasks:
             d = []
@@ -109,8 +124,7 @@ class PyJigdoReactor:
                 d.append(dc)
             dl = defer.DeferredList(d)
             dl.addCallback(self.checkpoint)
-        else:
-            print "Nothing pending, moving to finish. "
+        elif not self.pending_tasks:
             self.finish()
 
     def run(self):
@@ -120,18 +134,29 @@ class PyJigdoReactor:
             self.checkpoint(None)
             self.reactor.run()
         else:
-            pass # FIXME
+            self.log.critical(_("Reactor started with nothing to do!"))
+
+    def stop(self):
+        """ Stop the reactor. """
+        try:
+            self.reactor.stop()
+        except RuntimeError, e:
+            self.log.critical(_("Reactor reported: %s" % e))
+        self.base.done()
 
     def finish(self):
         """ Check to see if we are done. If not, checkpoint().
-            If so, stop the reactor. """
+            If so, attempt to stop() the reactor. It is possible
+            there are still pending items, and if so checkpoint(). """
+        self.log.debug(_("finish() has been called, checking for pending actions..."))
         if self.pending_actions:
+            self.log.debug(_("Still pending items, checkpointing..."))
             self.checkpoint(None)
+        elif self.pending_tasks > 0:
+            self.log.debug(_("Still pending tasks, relaxed checkpointing..."))
+            self.checkpoint(None, relax=True)
         else:
-            try:
-                self.reactor.stop()
-            except RuntimeError, e:
-                pass
+            self.stop()
 
     def clear_pending_actions(self):
         """ Clear pening actions. """
@@ -139,13 +164,23 @@ class PyJigdoReactor:
 
     def download_complete(self, r, url):
         """ The reactor reports a successful download. """
-        print "complete"
-        #print r, url
+        self.log.info(_("%s downloaded successfully." % url))
 
     def download_failure(self, e, url):
         """ The reactor reports something went wrong. """
-        print  "failed"
-        #print e, url
+        self.log.error(_("%s failed to download." % url))
+
+    def download_object(self, jigdo_object):
+        """ Try to download the data from jigdo_object.source()
+            to jigdo_object.target() and call
+            jigdo_object.download_callback() when done. """
+        d = self.getFile( jigdo_object.source(),
+                          jigdo_object.target(),
+                          agent = PYJIGDO_USER_AGENT,
+                          timeout = self.timeout )
+        d.addCallback(jigdo_object.download_callback_success)
+        d.addErrback(jigdo_object.download_callback_failure)
+        return d
 
     def download_data(self, remote_target, storage_location):
         """ Try to download the data from remote_target to 

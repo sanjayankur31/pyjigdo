@@ -26,20 +26,51 @@ from pyJigdo.translate import _, N_
 
 class JigdoFile:
     """ A Jigdo file that has been requested to be downloaded. """
-    def __init__(self, log, jigdo_location, jigdo_storage_location):
+    def __init__(self, reactor, log, max_tries, jigdo_location, jigdo_storage_location):
         self.jigdo_location = jigdo_location
         self.jigdo_storage_location = jigdo_storage_location
+        self.jigdo_data = None # JigdoDefinition()
         self.id = jigdo_location
         self.log = log
+        self.reactor = reactor
+        self.max_download_tries = max_tries
+        self.download_tries = 0
         self.have_data = False
 
-    def get(self, reactor):
-        """ Download the Jigdo file using the given reactor.
-            Return the reactor task. """
-        return reactor.download_data( self.jigdo_location,
-                                      self.jigdo_storage_location )
+    def source(self):
+        """ Return the source location for this jigdo file. """
+        return self.jigdo_location
 
-    def parse(self, reactor):
+    def target(self):
+        """ Return the target location for this jigdo file. """
+        return self.jigdo_storage_location
+
+    def download_callback_success(self, ign):
+        """ Callback entry point for when self.get() is successful. """
+        self.download_tries += 1
+        self.log.info(_("Successfully downloaded %s" % self.id))
+        self.reactor.finish_task()
+
+    def download_callback_failure(self, ign):
+        """ Callback entry point for when self.get() fails. """
+        self.download_tries += 1
+        self.log.warning(_("Failed to download %s." % self.id))
+        if self.download_tries >= self.max_download_tries:
+            self.log.error(_("Max tries for %s reached. Not downloading." % self.id))
+        self.reactor.finish_task()
+
+    def get(self):
+        """ Download the Jigdo file using the reactor.
+            Return the reactor task. """
+        return self.reactor.download_object(self)
+
+    def get_templates(self):
+        """ Download the Jigdo file's defined templates. """
+        # FIXME: Iterate JigdoDefinition().images{} and download
+        # the needed templates.
+        pass
+
+    def parse(self):
         """ Parse the jigdo file.
             Return needed jobs to put into the reactor. """
         if os.path.isfile(self.jigdo_storage_location):
