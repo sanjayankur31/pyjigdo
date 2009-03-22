@@ -19,11 +19,16 @@ Implementation of Jigdo concepts, calling jigdo-file when needed.
 """
 
 import os, urlparse, sys, gzip
-import pyJigdo.misc
 from ConfigParser import RawConfigParser
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
+
+class JigdoFile:
+    """ A Jigdo file that has been requested to be downloaded. """
+    def __init__(self, jigdo_location, log):
+        self.jigdo_location = jigdo_location
+        self.log = log
 
 class JigdoDefinition:
     """ A Jigdo Definition File.

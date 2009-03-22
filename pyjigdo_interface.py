@@ -88,11 +88,11 @@ class PyJigdo:
                                   help    = _("Set debugging to on."))
         runtime_group.add_option( "-v", "--verbose",
                                   dest    = "verbose",
+                                  action  = "count",
                                   default = 0,
-                                  type    = 'count',
                                   help    = _("Increase verbosity."))
         runtime_group.add_option( "--logfile",
-                                  dest    = "logfile",
+                                  dest    = "log_file",
                                   action  = "store",
                                   default = default_logfile,
                                   help    = _("Logfile location. (Default: %s)" % default_logfile))
@@ -186,6 +186,16 @@ class PyJigdo:
         # Parse Options, preserve the object for later use
         self.parser = parser
         (self.cli_options, self.jigdo_files) = parser.parse_args()
+
+        if not self.check_options():
+            self.parser.print_help()
+            print "\nMissing required option!\n"
+            sys.exit(1)
+
+    def check_options(self):
+        """ Check if we have the bare minimum needed options. """
+        if not self.jigdo_files: return False
+        return True
 
     def run(self):
         return self.base.run()

@@ -17,6 +17,8 @@
 
 import sys, os
 import pyJigdo.logger
+import pyJigdo.reactor
+from pyJigdo.jigdo import JigdoFile
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -61,7 +63,7 @@ class PyJigdoBase:
         """ Start up the reactor and start performing operations to
             put the Jigdo together. """
         try:
-            self.reactor = pyJigdo.reactor.pyJigdoReactor()
+            self.reactor = pyJigdo.reactor.PyJigdoReactor()
             self.reactor.seed(self)
             return self.reactor.run()
         except KeyboardInterrupt:
@@ -74,9 +76,9 @@ class PyJigdoBase:
         loglevel = pyJigdo.logger.CRITICAL
         if self.cli_options.verbose >= 3:
             loglevel = pyJigdo.logger.DEBUG
-        elif self.cli_options.verbose = 2:
+        elif self.cli_options.verbose == 2:
             loglevel = pyJigdo.logger.INFO
-        elif self.cli_options.verbose = 1:
+        elif self.cli_options.verbose == 1:
             loglevel = pyJigdo.logger.WARNING
         if self.cli_options.debug:
             loglevel = pyJigdo.logger.DEBUG
@@ -89,5 +91,5 @@ class PyJigdoBase:
         """ Prepare selected Jigdo downloads for injection into our reactor. """
         for jigdo in self.args_jigdo_files:
             self.log.debug(_("Prepping Jigdo file %s ") % jigdo)
-            self.jigdo_files[jigdo].append( pyJigdo.jigdo.JigdoFile(jigdo, self.log) )
+            self.jigdo_files[jigdo] = JigdoFile(jigdo, self.log)
 

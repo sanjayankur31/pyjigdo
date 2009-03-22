@@ -66,6 +66,16 @@ class PyJigdoReactor:
         self.threads = threads
         self.timeout = timeout
         self.pending_actions = []
+        self.base = None # PyJigdoBase()
+
+    def seed(self, base):
+        """ Seed the reactor, assigning the PyJigdoBase() and
+            then using data from this object to setup the first
+            needed actions to kick everything off. """
+        self.base = base
+        # FIXME: Setup the JigdoFile() objects for download with
+        # the proper callbacks to do something after a successfull
+        # download and parsing of the jigdo information.
 
     def add_task(self, task_object):
         """ Add an object to the pending actions.

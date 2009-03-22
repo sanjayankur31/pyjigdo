@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import logging, sys
+from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 class pyJigdoLogger:
     def __init__(self, logfile, loglevel=logging.WARNING, file_loglevel=logging.INFO):
