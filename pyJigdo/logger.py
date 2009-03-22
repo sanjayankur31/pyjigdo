@@ -27,7 +27,7 @@ class pyJigdoLogger:
         self.loglevel = loglevel
         self.file_loglevel = file_loglevel
 
-        console_logging = logging.Formatter("\n%(message)s\n")
+        console_logging = logging.Formatter("%(message)s")
         file_logging = logging.Formatter("%(asctime)s - %(message)s")
 
         console_stdout = logging.StreamHandler(sys.stdout)
@@ -53,13 +53,13 @@ class pyJigdoLogger:
 
     def warning(self, msg):
         """ Log a warning level event. """
-        self.log.warning(msg)
+        self.log.warning("Warning: %s" % msg)
 
     def error(self, msg):
         """ Log an error level event. """
-        self.log.error(msg)
+        self.log.error("\nError: %s\n" % msg)
 
     def critical(self, msg):
         """ Log a critical level event. """
-        self.log.critical(msg)
+        self.log.critical("\nCRITICAL: %s\n" % msg)
 
