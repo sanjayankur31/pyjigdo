@@ -90,6 +90,6 @@ class PyJigdoBase:
     def prep_jigdo_files(self):
         """ Prepare selected Jigdo downloads for injection into our reactor. """
         for jigdo in self.args_jigdo_files:
-            self.log.debug(_("Prepping Jigdo file %s ") % jigdo)
+            self.log.info(_("Prepping Jigdo file %s ") % jigdo)
             self.jigdo_files[jigdo] = JigdoFile(jigdo, self.log)
 

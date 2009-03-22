@@ -19,7 +19,7 @@ import logging, sys
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 class pyJigdoLogger:
-    def __init__(self, logfile, loglevel=logging.WARNING, file_loglevel=logging.INFO):
+    def __init__(self, logfile, loglevel=WARNING, file_loglevel=INFO):
         """ pyJigdoLogger is used to log to the interface and to a file.
             Default is to prefer logging more data to a file and less to
             to console. """
@@ -39,6 +39,7 @@ class pyJigdoLogger:
         filelog_handler.setLevel(self.file_loglevel)
 
         self.log = logging.getLogger()
+        self.log.setLevel(DEBUG)
         self.log.addHandler(console_stdout)
         self.log.addHandler(filelog_handler)
 
