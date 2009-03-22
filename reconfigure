@@ -1,8 +1,27 @@
-#!/bin/sh
-# Reconfigure automake
-autoreconf -v
+#!/bin/env bash
+# Reconfigure automake scripts/files
 
-echo -n Run configure? 
+function need_deps {
+  echo "Some dependencies might be missing. Install them."
+  echo "On Fedora: yum install automake autoconf gettext intltool glib glib2-devel"
+  exit 1
+}
+
+
+if command -v autoreconf >/dev/null; then
+  autoreconf -v
+else
+  echo "autoreconf/automake is missing. Install it..."
+  need_deps
+fi
+
+if [ "$?" -ne "0" ]; then
+  echo -e "\nWas not able to reconfigure!"
+  echo -e "See above output for the reason.\n\n"
+  need_deps
+fi
+
+echo -n "Run configure? [y/N] " 
 read -n 2 INPUT
 echo ""
 if [ "$INPUT" != "y" ]; then
@@ -10,7 +29,7 @@ if [ "$INPUT" != "y" ]; then
 fi
 ./configure
 
-echo -n Run make srpm? 
+echo -n "Run make srpm? [y/N] " 
 read -n 2 INPUT
 echo ""
 if [ "$INPUT" != "y" ]; then
@@ -18,7 +37,7 @@ if [ "$INPUT" != "y" ]; then
 fi
 make srpm
 
-echo -n Run make rpm? 
+echo -n "Run make rpm? [y/N] "
 read -n 2 INPUT
 echo ""
 if [ "$INPUT" != "y" ]; then

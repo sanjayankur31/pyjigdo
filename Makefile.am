@@ -20,7 +20,7 @@ DISTCLEANFILES =           \
 SUBDIRS =                  \
     conf                   \
     doc                    \
-    pyjigdo                \
+    pyJigdo                \
     po
 
 execdir = $(sbindir)
