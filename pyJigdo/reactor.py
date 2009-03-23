@@ -132,7 +132,12 @@ class PyJigdoReactor:
             anything to do. """
         if self.pending_actions:
             self.checkpoint(None)
-            self.reactor.run()
+            try:
+                self.reactor.run()
+            except KeyboardInterrupt:
+                print "\n\n"
+                self.log.status(_("Exiting on user request.\n"))
+                return self.base.abort()
         else:
             self.log.critical(_("Reactor started with nothing to do!"))
 

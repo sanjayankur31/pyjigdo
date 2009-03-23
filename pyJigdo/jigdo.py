@@ -22,6 +22,7 @@ import os, urlparse, sys, gzip
 from ConfigParser import RawConfigParser
 
 from pyJigdo.userinterface import SelectImages
+from pyJigdo.util import url_to_file_name
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -54,6 +55,7 @@ class JigdoFile:
         self.log.info(_("Successfully downloaded %s" % self.id))
         self.parse()
         self.select_images()
+        self.get_templates()
         self.reactor.finish_task()
 
     def download_callback_failure(self, ign):
@@ -70,14 +72,20 @@ class JigdoFile:
     def get(self):
         """ Download the Jigdo file using the reactor.
             Return the reactor task. """
-        self.log.status(_("Attempting to download Jigdo file: %s" % self.id))
+        self.log.status(_("Attempting to download Jigdo file: %s (attempt: %s)" % \
+                          (self.id, self.download_tries + 1)))
         return self.reactor.download_object(self)
 
     def get_templates(self):
-        """ Download the Jigdo file's defined templates. """
-        # FIXME: Iterate JigdoDefinition().images{} and download
-        # the needed templates.
-        pass
+        """ Download the Jigdo file's defined templates that
+            have been selected by the user. Here is where all
+            the real magic starts. Don't get lost.
+            These calls start their own event driven calls and
+            we now leave the first callback from the Jigdo file
+            download request. """
+        for jigdo_template in self.jigdo_data.images.values():
+            if jigdo_template.selected:
+                self.reactor.add_task(jigdo_template.get())
 
     def select_images(self):
         """ Interact with the user to select what images we want. """
@@ -176,7 +184,7 @@ class JigdoDefinition:
                         self.image_unique_id += 1
                         section = JigdoImage( self.reactor,
                                               self.log,
-                                              self.settings.download_target,
+                                              self.settings,
                                               unique_id = self.image_unique_id )
                         self.images[self.image_unique_id] = section
                     # Here we have found the [Parts] section and need to create
@@ -201,7 +209,6 @@ class JigdoDefinition:
                         section = JigdoDefinitionSection(sectname)
                     cursect = section
                     self._sections.append(section)
-#                    print "Found section with name %s" % sectname
                     # So sections can't start with a continuation line
                     optname = None
                 # no section header in the file?
@@ -222,7 +229,6 @@ class JigdoDefinition:
                         # allow empty values
                         if optval == '""':
                             optval = ''
-                        # XXX: So, isinstance() is useful here, but should we use it?!
                         if not (isinstance(cursect, JigdoPartsDefinition) or \
                                 isinstance(cursect, JigdoServersDefinition) or \
                                 isinstance(cursect, JigdoMirrorlistsDefinition)):
@@ -404,20 +410,22 @@ class JigdoRepoDefinition:
 
 class JigdoImage:
     """ An Image in the Jigdo Definition File, defining JigdoTemplate and JigdoImageSlices. """
-    def __init__(self, reactor, log, destination_dir, unique_id = 0):
+    def __init__(self, reactor, log, settings, unique_id = 0):
         self.reactor = reactor
         self.log = log
+        self.settings = settings
         self.selected = False
         self.finished = False
         self.unique_id = unique_id
         self.slices = {}
+        self.download_tries = 0
         # These are filled in when parsing the .jigdo definition
         self.filename = ''
         self.filename_md5sum = ''
         self.template = ''
         self.template_md5sum = ''
         self.template_file = ''
-        self.target_location = destination_dir
+        self.target_location = self.settings.download_target
         self.location = ''
         self.tmp_location = ''
 
@@ -426,6 +434,38 @@ class JigdoImage:
         return "Filename: %s Template: %s Template MD5SUM: %s" % (self.filename,
                                                                    self.template,
                                                                    self.template_md5sum)
+    def source(self):
+        """ Return the source location for this jigdo template. """
+        return self.template
+
+    def target(self):
+        """ Return the target location for this jigdo template. """
+        # FIXME: This should already be populated somewhere:
+        return url_to_file_name(self.template, self.target_location)
+
+    def download_callback_success(self, ign):
+        """ Callback entry point for when self.get() is successful. """
+        self.download_tries += 1
+        self.log.info(_("Successfully downloaded %s" % self.template))
+        self.reactor.finish_task()
+
+    def download_callback_failure(self, ign):
+        """ Callback entry point for when self.get() fails. """
+        self.download_tries += 1
+        self.log.warning(_("Failed to download %s: \n%s" % ( self.filename,
+                                                             ign )))
+        if self.download_tries >= self.settings.max_download_attempts:
+            self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
+        else:
+            self.reactor.add_task(self.get())
+        self.reactor.finish_task()
+
+    def get(self):
+        """ Download the Jigdo file using the reactor.
+            Return the reactor task. """
+        self.log.status(_("Attempting to download Jigdo template: %s (attempt: %s)" % \
+                       (self.filename, self.download_tries + 1)))
+        return self.reactor.download_object(self)
 
     def add_option(self,name, val = None):
         setattr(self,name,val)

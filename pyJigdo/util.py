@@ -19,6 +19,10 @@
 Utility functions, shared across classes.
 """
 
+import os
+
+from urlparse import urlparse
+
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
@@ -48,4 +52,11 @@ def image_numstr_to_list(image_numstr):
         else:
             expanded_image_numstrs.append(choice)
     return expanded_image_numstrs
+
+def url_to_file_name(url, target_directory):
+    """ Take an URL and a directory we want to put the file in
+        and return an absolute path to the target filename. """
+    file_basename = os.path.basename(urlparse(url).path)
+    file_name = os.path.join(target_directory, file_basename)
+    return file_name
 

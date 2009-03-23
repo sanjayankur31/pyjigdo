@@ -75,6 +75,7 @@ class PyJigdoBase:
                 self.log.critical(_("Seems there is nothing to do!"))
         except KeyboardInterrupt:
             print "\n\n"
+            self.log.status(_("Exiting on user request.\n"))
             return self.abort()
         return self.done()
 
