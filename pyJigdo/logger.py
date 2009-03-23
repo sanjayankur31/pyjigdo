@@ -43,6 +43,12 @@ class pyJigdoLogger:
         self.log.addHandler(console_stdout)
         self.log.addHandler(filelog_handler)
 
+    def status(self, msg):
+        """ Log a status message.
+            This is just a hack right now and will
+            need to be factored out to a UI class. """
+        print msg
+
     def debug(self, msg):
         """ Log a debug level event. """
         self.log.debug(msg)

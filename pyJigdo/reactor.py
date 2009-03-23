@@ -92,7 +92,7 @@ class PyJigdoReactor:
         self.pending_tasks += 1
 
     def finish_task(self):
-        """ Reduce pending_tasks by one. """
+        """ Reduce pending_tasks by one and then checkpoint. """
         self.pending_tasks -= 1
         self.checkpoint(None)
 

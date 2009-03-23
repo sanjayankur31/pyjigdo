@@ -171,7 +171,7 @@ class PyJigdo:
                                     dest    = "download_target",
                                     action  = "store",
                                     default = default_dest,
-                                    help    = _("Directory to final download data. (Default: %s)" % default_dest),
+                                    help    = _("Directory to store final download data. (Default: %s)" % default_dest),
                                     metavar = _("[directory]"))
 
         # FIXME: We need to figure out a way to take a list of mirror sources to try for a given

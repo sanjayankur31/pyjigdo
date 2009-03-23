@@ -5,6 +5,8 @@ PYTHON_FILES = \
     jigdo.py \
     logger.py \
     reactor.py \
+    userinterface.py \
+    util.py \
     translate.py
 
 EXTRA_DIST = \

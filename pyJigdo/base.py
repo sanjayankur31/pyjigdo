@@ -110,7 +110,7 @@ class PyJigdoBase:
                                                                   jigdo_storage_location )))
                 self.jigdo_files[jigdo] = JigdoFile( self.reactor,
                                                      self.log,
-                                                     self.settings.max_download_attempts,
+                                                     self.settings,
                                                      jigdo_url.geturl(),
                                                      jigdo_storage_location )
             else:

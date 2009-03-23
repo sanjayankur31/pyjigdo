@@ -21,19 +21,22 @@ Implementation of Jigdo concepts, calling jigdo-file when needed.
 import os, urlparse, sys, gzip
 from ConfigParser import RawConfigParser
 
+from pyJigdo.userinterface import SelectImages
+
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 class JigdoFile:
     """ A Jigdo file that has been requested to be downloaded. """
-    def __init__(self, reactor, log, max_tries, jigdo_location, jigdo_storage_location):
+    def __init__(self, reactor, log, settings, jigdo_location, jigdo_storage_location):
         self.jigdo_location = jigdo_location
         self.jigdo_storage_location = jigdo_storage_location
         self.jigdo_data = None # JigdoDefinition()
+        self.image_selection = None # SelectImages()
         self.id = jigdo_location
         self.log = log
         self.reactor = reactor
-        self.max_download_tries = max_tries
+        self.settings = settings
         self.download_tries = 0
         self.have_data = False
 
@@ -49,19 +52,25 @@ class JigdoFile:
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.id))
+        self.parse()
+        self.select_images()
         self.reactor.finish_task()
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
         self.download_tries += 1
-        self.log.warning(_("Failed to download %s." % self.id))
-        if self.download_tries >= self.max_download_tries:
+        self.log.warning(_("Failed to download %s: \n%s" % ( self.id,
+                                                             ign )))
+        if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.id))
+        else:
+            self.reactor.add_task(self.get())
         self.reactor.finish_task()
 
     def get(self):
         """ Download the Jigdo file using the reactor.
             Return the reactor task. """
+        self.log.status(_("Attempting to download Jigdo file: %s" % self.id))
         return self.reactor.download_object(self)
 
     def get_templates(self):
@@ -70,24 +79,31 @@ class JigdoFile:
         # the needed templates.
         pass
 
+    def select_images(self):
+        """ Interact with the user to select what images we want. """
+        self.image_selection = SelectImages( self.log,
+                                             self.settings,
+                                             self.jigdo_data )
+
     def parse(self):
-        """ Parse the jigdo file.
-            Return needed jobs to put into the reactor. """
+        """ Parse the jigdo file. """
         if os.path.isfile(self.jigdo_storage_location):
             self.log.debug(_("Successfully downloaded %s to %s" % ( self.id,
                                                                     self.jigdo_storage_location )))
-            # FIXME: Pass/Fail parsing and call functions as expected.
             self.log.debug(_("Attempting to parse %s ..." % self.id))
-            self.jigdo_data = None # JigdoDefinition()
-        return None
+            self.jigdo_data = JigdoDefinition( self.reactor,
+                                               self.log,
+                                               self.settings,
+                                               self.jigdo_storage_location )
 
 class JigdoDefinition:
     """ A Jigdo Definition File.
         just_print is used to suppress the creation of objects. """
-    def __init__(self, file_name, log, cfg, just_print = False):
-        self.file_name = file_name
+    def __init__(self, reactor, log, settings, file_name, just_print = False):
+        self.reactor = reactor
         self.log = log
-        self.cfg = cfg
+        self.settings = settings
+        self.file_name = file_name
         self.image_unique_id = 0
         self.images = {}
         self.parts = None
@@ -116,21 +132,19 @@ class JigdoDefinition:
 
 
     def parse(self):
-        """This parses the JigdoDefinition.file_name"""
+        """ This parses the JigdoDefinition.file_name """
         cursect = None                            # None, or a dictionary
         optname = None
         lineno = 0
         e = None                                  # None, or an exception
         self._sections = []
 
-#        fp = open(self.file_name, "r")
-#       Handle gzip files here
         try:
-            # if you try to read a non-gzip file with this class, it will throw an IOError
-            fp=gzip.GzipFile(self.file_name,"rb")
+            # If you try to read a non-gzip file with this class, it will throw an IOError
+            fp = gzip.GzipFile(self.file_name, "rb")
             line = fp.readline()
             fp.rewind()
-            self.log.debug("Jigdo file is Gzipped.")
+            self.log.debug(_("Jigdo file is Gzipped."))
         except IOError:
             fp = open(self.file_name,"r")
             
@@ -160,7 +174,10 @@ class JigdoDefinition:
                     # and now need to create our object to stuff data into.
                     if sectname == "Image":
                         self.image_unique_id += 1
-                        section = JigdoImage(self.log, self.cfg.destination_directory, unique_id = self.image_unique_id)
+                        section = JigdoImage( self.reactor,
+                                              self.log,
+                                              self.settings.download_target,
+                                              unique_id = self.image_unique_id )
                         self.images[self.image_unique_id] = section
                     # Here we have found the [Parts] section and need to create
                     # the object to stuff data into.
@@ -298,10 +315,10 @@ class JigdoMirrorlistsDefinition:
         """ Find the JigdoRepoDefinition and inject the mirrorlists into it. """
         for (repo_id, repo) in servers.objects.iteritems():
             try:
-                repo.mirrorlist = pyJigdo.misc.get_mirror_list(self.i[repo_id], self.log)
-                self.log.debug(repo, level = 5)
+                #repo.mirrorlist = pyJigdo.misc.get_mirror_list(self.i[repo_id], self.log)
+                self.log.debug(repo)
             except KeyError:
-                self.log.debug(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id, level = 2)
+                self.log.warning(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id)
 
 
 class JigdoPartsDefinition:
@@ -387,7 +404,8 @@ class JigdoRepoDefinition:
 
 class JigdoImage:
     """ An Image in the Jigdo Definition File, defining JigdoTemplate and JigdoImageSlices. """
-    def __init__(self, log, destination_dir, unique_id = 0):
+    def __init__(self, reactor, log, destination_dir, unique_id = 0):
+        self.reactor = reactor
         self.log = log
         self.selected = False
         self.finished = False
@@ -420,14 +438,15 @@ class JigdoImage:
         iso_exists = False
         if os.access(self.tmp_location, os.W_OK):
             template_target = self.tmp_location
-            self.log.debug(_("Temporary template found at %s" % template_target), level = 4)
+            self.log.info(_("Temporary template found at %s" % template_target))
             # FIXME: Need a test to see if this tmp image is usable.
-        template_data = pyJigdo.misc.run_command(["jigdo-file", "ls", "--template", template_target], inshell=True)
+        #template_data = pyJigdo.misc.run_command(["jigdo-file", "ls", "--template", template_target], inshell=True)
         if os.access(self.location, os.R_OK): iso_exists = True
         for line in template_data:
             if line.startswith('need-file'):
                 slice_hash = line.split()[3]
                 (slice_server_id, slice_file_name) = jigdo_definition.parts[slice_hash].split(':')
+                # FIXME: Need the reactor for net i/o on the JigdoImageSlice
                 if not iso_exists: self.slices[slice_hash] = JigdoImageSlice(slice_hash,
                                                           slice_file_name,
                                                           jigdo_definition.servers.objects[slice_server_id],
@@ -438,11 +457,11 @@ class JigdoImage:
                 if iso_exists:
                     self.log.info(_("%s exists, checking..." % self.filename))
                     # FIXME: Duplicate check_file!! (See misc.py:120 and pyjigdo.py:416)
-                    if pyJigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
-                        self.log.info(_("%s is complete." % self.filename))
-                        self.finished = True
-                        self.selected = False
-                        self.cleanup_template()
+                    #if pyJigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
+                    #    self.log.info(_("%s is complete." % self.filename))
+                    #    self.finished = True
+                    #    self.selected = False
+                    #    self.cleanup_template()
 
     def finished_slices(self):
         """ Returns a dictionary of slices that have been downloaded and marked as finished.
@@ -469,24 +488,25 @@ class JigdoImage:
 
     def get_template(self, work_dir):
         """ Make sure we have the template and it checks out, or fetch it again. """
-        self.template_file = pyJigdo.misc.url_to_file_name(self.template, work_dir)
-        if pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-            self.log.info("Template %s exists and checksum matches." % self.template_file)
-        else:
-            self.template_file = pyJigdo.misc.get_file(self.template, working_directory = work_dir)
-            if not pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-                # FIXME: Prompt user asking if we should clear this data, try again?
-                self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
-                self.unselect()
+        #self.template_file = pyJigdo.misc.url_to_file_name(self.template, work_dir)
+        #if pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
+        #    self.log.info("Template %s exists and checksum matches." % self.template_file)
+        #else:
+        #    self.template_file = pyJigdo.misc.get_file(self.template, working_directory = work_dir)
+        #    if not pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
+        #        # FIXME: Prompt user asking if we should clear this data, try again?
+        #        self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
+        #        self.unselect()
+        pass
 
     # FIXME: Duplicate check_file function!! (See misc.py:120)
     def check_self(self):
         """ Run checks on self to see if we are sane. """
         self.log.info(_("Checking image %s ..." % self.filename))
-        if pyJigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
-            self.log.info(_("%s is complete." % self.filename))
-            self.finished = True
-            self.cleanup_template()
+        #if pyJigdo.misc.check_file(self.location, checksum = self.filename_md5sum):
+        #    self.log.info(_("%s is complete." % self.filename))
+        #    self.finished = True
+        #    self.cleanup_template()
 
     def cleanup_template(self):
         """ Remove un-needed data. """
@@ -536,15 +556,15 @@ class JigdoImageSlice:
             if not url: return self.finished
             url_data = urlparse.urlparse(url)
             base_name = os.path.basename(self.file_name)
-            self.log.debug(_("Trying to download %s" % url), level = 4)
+            self.log.info(_("Trying to download %s" % url))
             self.log.status(_("Trying %s for %s" % (url_data.netloc,
                                                     base_name)
                                                     ))
-            pyJigdo.misc.get_file(url,
-                                  file_target = self.file_name,
-                                  working_directory = self.target_location,
-                                  title = title,
-                                  timeout = timeout)
+            #pyJigdo.misc.get_file(url,
+            #                      file_target = self.file_name,
+            #                      working_directory = self.target_location,
+            #                      title = title,
+            #                      timeout = timeout)
             self.check_self()
             attempt += 1
         return self.finished
@@ -555,10 +575,10 @@ class JigdoImageSlice:
         if not self.location:
             local_file = os.path.join(self.target_location, self.file_name)
         if not title: title = local_file
-        if pyJigdo.misc.check_file(local_file, checksum = self.slice_sum):
-            if announce: self.log.info(_("%s exists and checksum matches." % title))
-            self.location = local_file
-            self.finished = True
+        #if pyJigdo.misc.check_file(local_file, checksum = self.slice_sum):
+        #    if announce: self.log.info(_("%s exists and checksum matches." % title))
+        #    self.location = local_file
+        #    self.finished = True
 
 class JigdoScanTarget:
     """ A definition of where to look for existing bits. """
@@ -577,7 +597,7 @@ class JigdoScanTarget:
         """ Scan a given location for needed file names and update the slice
             object with the found location for later use. """
         if self.is_iso: self.mount()
-        self.log.debug(_("Scanning %s for needed files..." % self.location), level=3)
+        self.log.info(_("Scanning %s for needed files..." % self.location))
         for (path, directories, files) in os.walk(self.location):
             for name in files:
                 try:
@@ -585,7 +605,7 @@ class JigdoScanTarget:
                     target_slice = self.needed_files[name]
                     found_target = os.path.join(path, name)
                     target_slice.location = found_target
-                    self.log.debug(_("Found file %s, marking location." % name), level=3)
+                    self.log.debug(_("Found file %s, marking location." % name))
                 except KeyError:
                     # We don't need this file
                     pass
@@ -596,13 +616,13 @@ class JigdoScanTarget:
         self.mount_location = os.path.join(self.cfg.working_directory,
                                            "mounts",
                                            os.path.basename(self.location))
-        pyJigdo.misc.check_directory(self.mount_location)
+        #pyJigdo.misc.check_directory(self.mount_location)
         mount_command = ["fuseiso",
                          "-p",
                          self.location,
                          self.mount_location]
-        self.log.debug(_("Mounting %s at %s ..." % (self.location, self.mount_location)), level=3)
-        pyJigdo.misc.run_command(mount_command)
+        self.log.debug(_("Mounting %s at %s ..." % (self.location, self.mount_location)))
+        #pyJigdo.misc.run_command(mount_command)
         self.mounted = True
         self.location = self.mount_location
 
@@ -610,7 +630,7 @@ class JigdoScanTarget:
         """ Un-Mount the ISO. """
         if not self.mounted: return
         umount_command = ["fusermount", "-u", self.mount_location]
-        pyJigdo.misc.run_command(umount_command)
+        #pyJigdo.misc.run_command(umount_command)
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs.
@@ -634,7 +654,7 @@ class JigdoJobPool:
 
     def add_job(self, job_type, object):
         queue = self.jobs[job_type]
-        self.log.debug(_("Adding a job for %s: %s" % (job_type, object)), level = 7)
+        self.log.debug(_("Adding a job for %s: %s" % (job_type, object)))
         queue.append(object)
         self.pending_jobs += 1
         self.total_jobs += 1
@@ -684,7 +704,7 @@ class JigdoJobPool:
                                      self.cfg.fallback_number,
                                      total = self.total_jobs,
                                      pending = self.pending_jobs):
-                self.log.debug(_("Download failed: %s" % task), level = 4)
+                self.log.error(_("Download failed: %s" % task))
                 self.add_job('download_failures', task)
             number -= 1
             self.pending_jobs -= 1
@@ -698,7 +718,7 @@ class JigdoJobPool:
         for task in self.jobs['download_failures']:
             if report: self.log.info(_("Download of %s failed." % task))
             if requeue:
-                self.log.debug(_("Re-queuing %s ..." % task.file_name), level = 5)
+                self.log.debug(_("Re-queuing %s ..." % task.file_name))
                 self.add_job('download', task)
             self.pending_jobs -= 1
         if requeue and not final_run: self.jobs['download_failures'] = []
@@ -736,8 +756,7 @@ class JigdoJobPool:
             If destroy, the bits will be removed after being added to the
             target image. """
         self.log.debug(_("Stuffing %s into %s ..." % (file,
-                                                      os.path.basename(jigdo_image.location))),
-                                                      level=5)
+                                                      os.path.basename(jigdo_image.location))))
         command = [ "jigdo-file", "make-image",
                     "--image", jigdo_image.location,
                     "--template", jigdo_image.template_file,
@@ -745,7 +764,7 @@ class JigdoJobPool:
                     "-r", "quiet",
                     "--force",
                     file ]
-        pyJigdo.misc.run_command(command, inshell=True)
+        #pyJigdo.misc.run_command(command, inshell=True)
         if destroy: os.remove(file)
 
     def do_last_queue(self):
@@ -766,7 +785,7 @@ class JigdoJobPool:
             action = getattr(self, 'do_%s' % type)
             self.log.debug(_("Running %s for:\n %s" % (
                             "do_%s" % type,
-                            queue)), level = 5)
+                            queue)))
             if len(queue): action(number=len(queue), final_run=True)
         self.do_final_compose()
         for leftovers in self.jobs.itervalues():
