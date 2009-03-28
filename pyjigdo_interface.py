@@ -70,13 +70,19 @@ class PyJigdo:
         default_logfile = os.path.join(default_base_path, 'pyjigdo.log')
         default_fallback = 3
         default_max_attempts = 6
-        default_timeout = 15
+        default_timeout = 30
         default_threads = 2
+        default_jigdo_file_location = "/usr/bin/jigdo-file"
 
         ##
         ## Runtime Options
         ##
         runtime_group = parser.add_option_group(_("Runtime Options"))
+        runtime_group.add_option( "--jigdo-file-bin",
+                                  dest    = "jigdo_file_bin",
+                                  action  = "store",
+                                  default = default_jigdo_file_location,
+                                  help    = _("Use given jigdo-file binary. (Default: %s)" % default_jigdo_file_location))
         runtime_group.add_option( "--list-images",
                                   dest    = "list_images",
                                   action  = "store_true",
@@ -116,6 +122,11 @@ class PyJigdo:
                                     type    = 'int',
                                     help    = _("Number of public mirrors to try before using a fallback mirror. (Default: %s)" % default_fallback),
                                     metavar = _("[number of tries]"))
+        general_group.add_option(   "--servers-only",
+                                    dest    = "servers_only",
+                                    action  = "store_true",
+                                    default = False,
+                                    help    = _("Don't use mirrorlists, if present. (Default: False)"))
         general_group.add_option(   "--max-attempts",
                                     dest    = "max_download_attempts",
                                     action  = "store",
@@ -207,12 +218,19 @@ class PyJigdo:
 
         if not self.check_options():
             self.show_help()
-            print "\nMissing required option!\n"
+            print _("\nMissing required option!\n")
             sys.exit(1)
 
     def check_options(self):
         """ Check if we have the bare minimum needed options. """
-        if not self.jigdo_files: return False
+        if not self.jigdo_files: return Falsea
+        # FIXME: Don't restrict to just one source
+        # jigdo file. This is needed because we don't
+        # have a lockable UI yet.
+        if len(self.jigdo_files) > 1:
+            print _("Sorry, multiple jigdo files are not supported yet.")
+            print _("Soon!")
+            sys.exit(1)
         return True
 
     def show_help(self):

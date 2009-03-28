@@ -29,17 +29,18 @@ from pyJigdo.translate import _, N_
 
 class JigdoFile:
     """ A Jigdo file that has been requested to be downloaded. """
-    def __init__(self, reactor, log, settings, jigdo_location, jigdo_storage_location):
+    def __init__(self, log, reactor, settings, base, jigdo_location, jigdo_storage_location):
+        self.log = log
+        self.reactor = reactor
+        self.settings = settings
+        self.base = base
         self.jigdo_location = jigdo_location
         self.jigdo_storage_location = jigdo_storage_location
         self.jigdo_data = None # JigdoDefinition()
         self.image_selection = None # SelectImages()
         self.id = jigdo_location
-        self.log = log
-        self.reactor = reactor
-        self.settings = settings
-        self.download_tries = 0
         self.have_data = False
+        self.download_tries = 0
 
     def source(self):
         """ Return the source location for this jigdo file. """
@@ -72,17 +73,21 @@ class JigdoFile:
     def get(self):
         """ Download the Jigdo file using the reactor.
             Return the reactor task. """
-        self.log.status(_("Attempting to download Jigdo file: %s (attempt: %s)" % \
-                          (self.id, self.download_tries + 1)))
+        if self.download_tries >= self.settings.max_download_attempts:
+            attempt = "last"
+        else:
+            attempt = self.download_tries + 1
+        self.log.status(_("Attempting to download file: %s (attempt: %s)" % \
+                       (self.id, attempt)))
         return self.reactor.download_object(self)
 
     def get_templates(self):
         """ Download the Jigdo file's defined templates that
             have been selected by the user. Here is where all
-            the real magic starts. Don't get lost.
-            These calls start their own event driven calls and
-            we now leave the first callback from the Jigdo file
-            download request. """
+            the real magic starts. Don't get lost. """
+        # These calls start their own event driven calls and
+        # we now leave the first callback from the Jigdo file
+        # download request.
         for jigdo_template in self.jigdo_data.images.values():
             if jigdo_template.selected:
                 self.reactor.add_task(jigdo_template.get())
@@ -91,6 +96,7 @@ class JigdoFile:
         """ Interact with the user to select what images we want. """
         self.image_selection = SelectImages( self.log,
                                              self.settings,
+                                             self.base,
                                              self.jigdo_data )
 
     def parse(self):
@@ -182,9 +188,10 @@ class JigdoDefinition:
                     # and now need to create our object to stuff data into.
                     if sectname == "Image":
                         self.image_unique_id += 1
-                        section = JigdoImage( self.reactor,
-                                              self.log,
+                        section = JigdoImage( self.log,
+                                              self.reactor,
                                               self.settings,
+                                              self,
                                               unique_id = self.image_unique_id )
                         self.images[self.image_unique_id] = section
                     # Here we have found the [Parts] section and need to create
@@ -410,10 +417,12 @@ class JigdoRepoDefinition:
 
 class JigdoImage:
     """ An Image in the Jigdo Definition File, defining JigdoTemplate and JigdoImageSlices. """
-    def __init__(self, reactor, log, settings, unique_id = 0):
-        self.reactor = reactor
+    def __init__(self, log, reactor, settings, jigdo_definition, unique_id = 0):
+        """ Setup JigdoImage() with needed relations. """
         self.log = log
+        self.reactor = reactor
         self.settings = settings
+        self.jigdo_definition = jigdo_definition
         self.selected = False
         self.finished = False
         self.unique_id = unique_id
@@ -431,22 +440,24 @@ class JigdoImage:
 
     def __str__(self):
         """ Print information about the given image. """
-        return "Filename: %s Template: %s Template MD5SUM: %s" % (self.filename,
+        return "Filename: %s Template: %s Template MD5SUM: %s" % ( self.filename,
                                                                    self.template,
                                                                    self.template_md5sum)
     def source(self):
-        """ Return the source location for this jigdo template. """
+        """ Return the source location for this Jigdo template. """
         return self.template
 
     def target(self):
-        """ Return the target location for this jigdo template. """
-        # FIXME: This should already be populated somewhere:
-        return url_to_file_name(self.template, self.target_location)
+        """ Return the target location for this Jigdo template. """
+        self.template_file = url_to_file_name(self.template, self.target_location)
+        return self.template_file
 
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.template))
+        self.collect_slices()
+        self.get_slices()
         self.reactor.finish_task()
 
     def download_callback_failure(self, ign):
@@ -461,16 +472,28 @@ class JigdoImage:
         self.reactor.finish_task()
 
     def get(self):
-        """ Download the Jigdo file using the reactor.
+        """ Download the Jigdo template using the reactor.
             Return the reactor task. """
-        self.log.status(_("Attempting to download Jigdo template: %s (attempt: %s)" % \
-                       (self.filename, self.download_tries + 1)))
+        if self.download_tries >= self.settings.max_download_attempts:
+            attempt = "last"
+        else:
+            attempt = self.download_tries + 1
+        self.log.status(_("Attempting to download file: %s (attempt: %s)" % \
+                       (self.filename, attempt)))
         return self.reactor.download_object(self)
+
+    def get_slices(self):
+        """ Download the template file's defined slices. """
+        # These calls start their own event driven calls and
+        # we now leave the template object callback from the
+        # JigdoTemplate download request.
+        for jigdo_slice_hash,jigdo_slice in self.missing_slices().iteritems():
+            self.reactor.add_task(jigdo_slice.get())
 
     def add_option(self,name, val = None):
         setattr(self,name,val)
 
-    def collect_slices(self, jigdo_definition, work_dir):
+    def collect_slices(self):
         """ Collects the slices needed for this template. """
         self.location = os.path.join(self.target_location, self.filename)
         self.tmp_location = "%s.tmp" % self.location
@@ -480,18 +503,18 @@ class JigdoImage:
             template_target = self.tmp_location
             self.log.info(_("Temporary template found at %s" % template_target))
             # FIXME: Need a test to see if this tmp image is usable.
-        #template_data = pyJigdo.misc.run_command(["jigdo-file", "ls", "--template", template_target], inshell=True)
+        template_data = self.reactor.jigdo_file.get_template_data(template_target)
         if os.access(self.location, os.R_OK): iso_exists = True
         for line in template_data:
             if line.startswith('need-file'):
                 slice_hash = line.split()[3]
-                (slice_server_id, slice_file_name) = jigdo_definition.parts[slice_hash].split(':')
-                # FIXME: Need the reactor for net i/o on the JigdoImageSlice
-                if not iso_exists: self.slices[slice_hash] = JigdoImageSlice(slice_hash,
-                                                          slice_file_name,
-                                                          jigdo_definition.servers.objects[slice_server_id],
-                                                          work_dir,
-                                                          self.log)
+                (slice_server_id, slice_file_name) = self.jigdo_definition.parts[slice_hash].split(':')
+                if not iso_exists: self.slices[slice_hash] = JigdoImageSlice( self.log, self.reactor,
+                                                             self.settings,
+                                                             slice_hash,
+                                                             slice_file_name,
+                                                             self.jigdo_definition.servers.objects[slice_server_id],
+                                                             self.settings.download_storage )
             elif line.startswith('image-info'):
                 self.filename_md5sum = line.split()[2]
                 if iso_exists:
@@ -558,22 +581,78 @@ class JigdoImage:
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
-    def __init__(self, md5_sum, file_name, repo, target_location, log):
+    def __init__(self, log, reactor, settings, md5_sum, filename, repo, target_location):
         """ Initialize the ImageSlice """
-        self.location = ""
-        self.finished = False
-        self.in_image = False
+        self.log = log
+        self.reactor = reactor
+        self.settings = settings
         self.slice_sum = md5_sum
-        self.file_name = file_name
+        self.filename = filename
         self.repo = repo
         self.target_location = target_location
-        self.log = log
+        self.fs_location = os.path.join( self.target_location,
+                                         self.filename )
+        self.current_source = None
+        self.download_tries = 0
+        self.finished = False
+        self.in_image = False
 
     def __str__(self):
         """ Return information about this slice. """
-        return "Filename: %s Repo: %s Target Location: %s" % (self.file_name,
+        return "Filename: %s Repo: %s Target Location: %s" % ( self.filename,
                                                                self.repo.label,
-                                                               self.target_location)
+                                                               self.fs_location )
+
+    def source(self):
+        """ Return the source location for this Jigdo slice. """
+        self.new_source()
+        return self.current_source
+
+    def target(self):
+        """ Return the target location for this Jigdo slice. """
+        return self.fs_location
+
+    def download_callback_success(self, ign):
+        """ Callback entry point for when self.get() is successful. """
+        self.download_tries += 1
+        self.log.info(_("Successfully downloaded %s" % self.filename))
+        self.reactor.finish_task()
+
+    def download_callback_failure(self, ign):
+        """ Callback entry point for when self.get() fails. """
+        self.download_tries += 1
+        self.log.warning(_("Failed to download %s: \n%s" % ( self.filename,
+                                                             ign )))
+        if self.download_tries >= self.settings.max_download_attempts:
+            self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
+        else:
+            self.new_source()
+            self.reactor.add_task(self.get())
+        self.reactor.finish_task()
+
+    def get(self):
+        """ Download the Jigdo slice using the reactor.
+            Return the reactor task. """
+        if self.download_tries >= self.settings.max_download_attempts:
+            attempt = "last"
+        else:
+            attempt = self.download_tries + 1
+        self.log.status(_("Attempting to download file: %s (attempt: %s)" % \
+                       (self.filename, attempt)))
+        return self.reactor.download_object(self)
+
+    def new_source(self):
+        """ Populate self.current_source with something we have not tried. """
+        url = None
+        servers_only = self.settings.servers_only
+        if (self.download_tries >= self.settings.fallback_number): servers_only = True
+        url = self.repo.get_url( self.filename,
+                                 self.download_tries,
+                                 use_only_servers = servers_only)
+        if not url:
+           self.download_tries = self.settings.max_download_attempts
+        else:
+           self.current_source = url
 
     def run_download(self, timeout, max_mirror_tries, total = None, pending = None):
         """ Download and confirm this slice.

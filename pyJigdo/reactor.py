@@ -19,6 +19,8 @@ from twisted.internet import reactor as treactor
 from twisted.internet import defer, task
 import twisted.web.client
 from constants import PYJIGDO_USER_AGENT
+from jigdo_file import execJigdoFile
+from pyJigdo.util import check_directory
 import os, types, time
 
 import pyJigdo.translate as translate
@@ -73,12 +75,18 @@ class PyJigdoReactor:
         self.pending_actions = []
         self.pending_tasks = 0
         self.base = None # PyJigdoBase()
+        self.jigdo_file = None # execJigdoFile()
 
     def seed(self, base):
         """ Seed the reactor, assigning the PyJigdoBase() and
             then using data from this object to setup the first
-            needed actions to kick everything off. """
+            needed actions to kick everything off.
+
+            Setup execJigdoFile().  """
         self.base = base
+        self.jigdo_file = execJigdoFile( self.log,
+                                         self.base.settings,
+                                         self.base.settings.jigdo_file_bin )
         self.log.debug(_("Seeding the reactor with requested jigdo resources."))
         for jigdo_file in self.base.jigdo_files.values():
             self.log.debug(_("Adding %s download task." % jigdo_file.id))
@@ -179,8 +187,10 @@ class PyJigdoReactor:
         """ Try to download the data from jigdo_object.source()
             to jigdo_object.target() and call
             jigdo_object.download_callback() when done. """
+        target_location = jigdo_object.target()
+        check_directory(self.log, target_location)
         d = self.getFile( jigdo_object.source(),
-                          jigdo_object.target(),
+                          target_location,
                           agent = PYJIGDO_USER_AGENT,
                           timeout = self.timeout )
         d.addCallback(jigdo_object.download_callback_success)

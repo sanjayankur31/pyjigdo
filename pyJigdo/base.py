@@ -109,9 +109,10 @@ class PyJigdoBase:
                 self.log.debug(_("Adding Jigdo file %s" % jigdo_url.geturl()))
                 self.log.debug(_("Storing Jigdo %s at %s" % ( jigdo_filename,
                                                                   jigdo_storage_location )))
-                self.jigdo_files[jigdo] = JigdoFile( self.reactor,
-                                                     self.log,
+                self.jigdo_files[jigdo] = JigdoFile( self.log,
+                                                     self.reactor,
                                                      self.settings,
+                                                     self,
                                                      jigdo_url.geturl(),
                                                      jigdo_storage_location )
             else:

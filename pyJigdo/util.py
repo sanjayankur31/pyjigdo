@@ -60,3 +60,12 @@ def url_to_file_name(url, target_directory):
     file_name = os.path.join(target_directory, file_basename)
     return file_name
 
+def check_directory(log, directory):
+    """ Check if directory exists. If not, try to create it. """
+    target_location = os.path.dirname(directory)
+    if not os.access(target_location, os.R_OK):
+       log.debug(_("Going to try to create %s..." % target_location))
+       try:
+           os.makedirs(target_location)
+       except OSError, e:
+           log.critical(_("Directory %s could not be created!" % target_location))

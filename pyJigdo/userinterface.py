@@ -29,11 +29,12 @@ class SelectImages:
         they would like to download based on the Jigdo data
         we have already been able to acquire. """
 
-    def __init__(self, log, settings, jigdo_definition):
+    def __init__(self, log, settings, base, jigdo_definition):
         """ Interactively work with the user to select what images to download. """
         # FIXME (class wide): NO bare print()
         self.log = log
         self.settings = settings
+        self.base = base
         self.jigdo_definition = jigdo_definition
         choosing_images = True
         num_images = len(self.jigdo_definition.images)
@@ -44,7 +45,10 @@ class SelectImages:
             for image in self.jigdo_definition.images:
                 print "%*s: %s" % (image_maxwidth+1, "#" + str(image), self.jigdo_definition.images[image].filename)
 
-            image_choice = raw_input("What image(s) would you like to download? [1-%s] " % num_images )
+            try:
+                image_choice = raw_input("What image(s) would you like to download? [1-%s] " % num_images )
+            except KeyboardInterrupt:
+                self.base.abort()
             if image_choice == "":
                 print "Choose the number(s) of the image file(s), seperated by commas or spaces, or specify a range (1-5)"
                 continue
@@ -70,7 +74,10 @@ class SelectImages:
                 self.select_image(choice)
 
             print "Currently going to download image(s): %s" % ", ".join(self.selected_images())
-            continue_selecting = raw_input("Would you like to select another image for download? [y/N] ")
+            try:
+                continue_selecting = raw_input("Would you like to select another image for download? [y/N] ")
+            except KeyboardInterrupt:
+                self.base.abort()
             if continue_selecting.lower() not in ["y", "yes"]:
                 choosing_images = False
 
