@@ -77,7 +77,7 @@ class JigdoFile:
             attempt = "last"
         else:
             attempt = self.download_tries + 1
-        self.log.status(_("Attempting to download file: %s (attempt: %s)" % \
+        self.log.status(_("Adding a task to download: %s (attempt: %s)" % \
                        (self.id, attempt)))
         return self.reactor.download_object(self)
 
@@ -478,7 +478,7 @@ class JigdoImage:
             attempt = "last"
         else:
             attempt = self.download_tries + 1
-        self.log.status(_("Attempting to download file: %s (attempt: %s)" % \
+        self.log.status(_("Adding a task to download: %s (attempt: %s)" % \
                        (self.filename, attempt)))
         return self.reactor.download_object(self)
 
@@ -637,7 +637,7 @@ class JigdoImageSlice:
             attempt = "last"
         else:
             attempt = self.download_tries + 1
-        self.log.status(_("Attempting to download file: %s (attempt: %s)" % \
+        self.log.status(_("Adding a task to download: %s (attempt: %s)" % \
                        (self.filename, attempt)))
         return self.reactor.download_object(self)
 

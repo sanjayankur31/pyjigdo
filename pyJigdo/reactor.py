@@ -100,9 +100,10 @@ class PyJigdoReactor:
         self.pending_tasks += 1
 
     def finish_task(self):
-        """ Reduce pending_tasks by one and then checkpoint. """
+        """ Reduce pending_tasks by one and checkpoint
+            if we are out of things to do. """
         self.pending_tasks -= 1
-        self.checkpoint(None)
+        if self.pending_tasks <= 0: self.checkpoint(None, relax=True)
 
     def get_tasks(self):
         """ Get all of the pending tasks. """
@@ -131,7 +132,7 @@ class PyJigdoReactor:
                 dc = c.coiterate(pending_tasks)
                 d.append(dc)
             dl = defer.DeferredList(d)
-            dl.addCallback(self.checkpoint)
+            #dl.addCallback(self.checkpoint)
         elif not self.pending_tasks > 0:
             self.finish()
 
@@ -188,7 +189,7 @@ class PyJigdoReactor:
             to jigdo_object.target() and call
             jigdo_object.download_callback() when done. """
         target_location = jigdo_object.target()
-        check_directory(self.log, target_location)
+        check_directory(self.log, os.path.dirname(target_location))
         d = self.getFile( jigdo_object.source(),
                           target_location,
                           agent = PYJIGDO_USER_AGENT,
@@ -207,10 +208,11 @@ class PyJigdoReactor:
         return d
 
     def getFile(self, url, file, contextFactory=None, *args, **kwargs):
-        """Download a web page to a file.
+        """Download an url to a file.
         @param file: path to file on filesystem, or file-like object.
         See jigdoHTTPDownloader to see what extra args can be passed.
         """
+        self.log.debug(_("Attempting to download %s..." % url))
         scheme, host, port, path = twisted.web.client._parse(url)
         factory = jigdoHTTPDownloader(url, file, *args, **kwargs)
         if scheme == 'https':
