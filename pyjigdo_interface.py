@@ -71,7 +71,7 @@ class PyJigdo:
         default_fallback = 3
         default_max_attempts = 6
         default_timeout = 30
-        default_threads = 2
+        default_threads = 4
         default_jigdo_file_location = "/usr/bin/jigdo-file"
 
         ##

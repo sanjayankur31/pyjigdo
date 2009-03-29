@@ -108,7 +108,6 @@ class PyJigdoReactor:
         coop = task.Cooperator()
         work = (download.get() for download in objects)
         self.pending_tasks += len(objects)
-        self.clear_pending_downloads()
         return defer.DeferredList([coop.coiterate(work) for i in xrange(count)])
 
     def checkpoint(self, ign, relax=False):
@@ -121,7 +120,8 @@ class PyJigdoReactor:
                 self.log.critical(_("Shutting down on user request!"))
                 self.stop()
         if self.pending_downloads:
-            r = self.parallel_get( self.pending_downloads,
+            downloads = self.get_pending_downloads()
+            r = self.parallel_get( downloads,
                                    self.base.settings.download_threads )
         elif not self.pending_tasks > 0:
             self.finish()
@@ -162,9 +162,12 @@ class PyJigdoReactor:
         else:
             self.stop()
 
-    def clear_pending_downloads(self):
-        """ Clear pening actions. """
-        self.pending_downloads = []
+    def get_pending_downloads(self):
+        """ Attempt to safely get a list of pending downloads. """
+        r = []
+        while self.pending_downloads:
+            r.append(self.pending_downloads.pop(0))
+        return r
 
     def download_complete(self, r, url):
         """ The reactor reports a successful download. """
