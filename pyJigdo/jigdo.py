@@ -70,6 +70,10 @@ class JigdoFile:
             self.reactor.add_task(self.get())
         self.reactor.finish_task()
 
+    def queue_download(self):
+        """ Queue the self.get() in the reactor. """
+        self.reactor.request_download(self)
+
     def get(self):
         """ Download the Jigdo file using the reactor.
             Return the reactor task. """
@@ -90,7 +94,7 @@ class JigdoFile:
         # download request.
         for jigdo_template in self.jigdo_data.images.values():
             if jigdo_template.selected:
-                self.reactor.add_task(jigdo_template.get())
+                jigdo_template.queue_download()
 
     def select_images(self):
         """ Interact with the user to select what images we want. """
@@ -468,8 +472,12 @@ class JigdoImage:
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
         else:
-            self.reactor.add_task(self.get())
+            self.queue_download()
         self.reactor.finish_task()
+
+    def queue_download(self):
+        """ Queue the self.get() in the reactor. """
+        self.reactor.request_download(self)
 
     def get(self):
         """ Download the Jigdo template using the reactor.
@@ -488,7 +496,7 @@ class JigdoImage:
         # we now leave the template object callback from the
         # JigdoTemplate download request.
         for jigdo_slice_hash,jigdo_slice in self.missing_slices().iteritems():
-            self.reactor.add_task(jigdo_slice.get())
+            jigdo_slice.queue_download()
 
     def add_option(self,name, val = None):
         setattr(self,name,val)
@@ -627,8 +635,12 @@ class JigdoImageSlice:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
         else:
             self.new_source()
-            self.reactor.add_task(self.get())
+            self.queue_download()
         self.reactor.finish_task()
+
+    def queue_download(self):
+        """ Queue the self.get() in the reactor. """
+        self.reactor.request_download(self)
 
     def get(self):
         """ Download the Jigdo slice using the reactor.
@@ -640,7 +652,7 @@ class JigdoImageSlice:
         self.log.status(_("Adding a task to download: %s (attempt: %s)" % \
                        (self.filename, attempt)))
         return self.reactor.download_object(self)
-
+ 
     def new_source(self):
         """ Populate self.current_source with something we have not tried. """
         url = None
@@ -648,6 +660,7 @@ class JigdoImageSlice:
         if (self.download_tries >= self.settings.fallback_number): servers_only = True
         url = self.repo.get_url( self.filename,
                                  self.download_tries,
+
                                  use_only_servers = servers_only)
         if not url:
            self.download_tries = self.settings.max_download_attempts

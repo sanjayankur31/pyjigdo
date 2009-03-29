@@ -72,7 +72,7 @@ class PyJigdoReactor:
         self.reactor = treactor
         self.threads = threads
         self.timeout = timeout
-        self.pending_actions = []
+        self.pending_downloads = []
         self.pending_tasks = 0
         self.base = None # PyJigdoBase()
         self.jigdo_file = None # execJigdoFile()
@@ -90,30 +90,26 @@ class PyJigdoReactor:
         self.log.debug(_("Seeding the reactor with requested jigdo resources."))
         for jigdo_file in self.base.jigdo_files.values():
             self.log.debug(_("Adding %s download task." % jigdo_file.id))
-            self.add_task(jigdo_file.get())
-
-    def add_task(self, task_object):
-        """ Add an object to the pending actions.
-            This object must have a run(reactor) function we can
-            call when the reactor is ready to run it. """
-        self.pending_actions.append(task_object)
-        self.pending_tasks += 1
+            self.request_download(jigdo_file)
 
     def finish_task(self):
         """ Reduce pending_tasks by one and checkpoint
             if we are out of things to do. """
         self.pending_tasks -= 1
-        if self.pending_tasks <= 0: self.checkpoint(None, relax=True)
+        if self.pending_tasks <= 0: self.checkpoint(None)
 
-    def get_tasks(self):
-        """ Get all of the pending tasks. """
-        if self.pending_actions:
-            for t in self.pending_actions:
-                try:
-                    yield t.run(self)
-                except AttributeError:
-                    pass
-            self.clear_pending_actions()
+    def request_download(self, object):
+        """ Add a request that the reactor download given object.
+            Call object.get() to actually fetch the object. """
+        self.pending_downloads.append(object)
+
+    def parallel_get(self, objects, count, *args, **named):
+        """ Run count number of objects.get() at a time. """
+        coop = task.Cooperator()
+        work = (download.get() for download in objects)
+        self.pending_tasks += len(objects)
+        self.clear_pending_downloads()
+        return defer.DeferredList([coop.coiterate(work) for i in xrange(count)])
 
     def checkpoint(self, ign, relax=False):
         """ Check to see if we have anything to do.
@@ -124,22 +120,16 @@ class PyJigdoReactor:
             except KeyboardInterrupt:
                 self.log.critical(_("Shutting down on user request!"))
                 self.stop()
-        if self.pending_actions:
-            pending_tasks = self.get_tasks()
-            d = []
-            c = task.Cooperator()
-            for i in xrange(self.threads):
-                dc = c.coiterate(pending_tasks)
-                d.append(dc)
-            dl = defer.DeferredList(d)
-            #dl.addCallback(self.checkpoint)
+        if self.pending_downloads:
+            r = self.parallel_get( self.pending_downloads,
+                                   self.base.settings.download_threads )
         elif not self.pending_tasks > 0:
             self.finish()
 
     def run(self):
         """ Start the reactor, first checking to see if we have
             anything to do. """
-        if self.pending_actions:
+        if self.pending_downloads:
             self.checkpoint(None)
             try:
                 self.reactor.run()
@@ -163,7 +153,7 @@ class PyJigdoReactor:
             If so, attempt to stop() the reactor. It is possible
             there are still pending items, and if so checkpoint(). """
         self.log.debug(_("finish() has been called, checking for pending actions..."))
-        if self.pending_actions:
+        if self.pending_downloads:
             self.log.debug(_("Still pending items, checkpointing..."))
             self.checkpoint(None)
         elif self.pending_tasks > 0:
@@ -172,9 +162,9 @@ class PyJigdoReactor:
         else:
             self.stop()
 
-    def clear_pending_actions(self):
+    def clear_pending_downloads(self):
         """ Clear pening actions. """
-        self.pending_actions = []
+        self.pending_downloads = []
 
     def download_complete(self, r, url):
         """ The reactor reports a successful download. """
