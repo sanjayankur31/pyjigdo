@@ -76,6 +76,7 @@ class PyJigdoReactor:
         self.pending_tasks = 0
         self.base = None # PyJigdoBase()
         self.jigdo_file = None # execJigdoFile()
+        self.lame_mirrors = task.LoopingCall(self.lame_mirror_check)
 
     def seed(self, base):
         """ Seed the reactor, assigning the PyJigdoBase() and
@@ -91,6 +92,14 @@ class PyJigdoReactor:
         for jigdo_file in self.base.jigdo_files.values():
             self.log.debug(_("Adding %s download task." % jigdo_file.id))
             self.request_download(jigdo_file)
+
+    def lame_mirror_check(self):
+        """ Check to see if we have a lame mirror holding up our
+            task.Cooperator(). If so, just fire off another round
+            of downloads. """
+        if self.pending_tasks < self.base.settings.download_threads \
+           and self.pending_downloads:
+            self.checkpoint(None)
 
     def finish_task(self):
         """ Reduce pending_tasks by one and checkpoint
@@ -133,6 +142,9 @@ class PyJigdoReactor:
             anything to do. """
         if self.pending_downloads:
             self.checkpoint(None)
+            self.log.debug(_("Scheduling lame mirror detection events (every %s seconds)...") % \
+                         self.base.settings.lame_mirror_frequency)
+            self.lame_mirrors.start(self.base.settings.lame_mirror_frequency)
             try:
                 self.reactor.run()
             except KeyboardInterrupt:
@@ -145,6 +157,7 @@ class PyJigdoReactor:
     def stop(self):
         """ Stop the reactor. """
         try:
+            self.lame_mirrors.stop()
             self.reactor.stop()
         except RuntimeError, e:
             self.log.critical(_("Reactor reported: %s" % e))

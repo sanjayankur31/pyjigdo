@@ -71,6 +71,7 @@ class PyJigdo:
         default_fallback = 3
         default_max_attempts = 6
         default_timeout = 30
+        default_lame_mirror_frequency = 30
         default_threads = 8
         default_jigdo_file_location = "/usr/bin/jigdo-file"
 
@@ -141,6 +142,14 @@ class PyJigdo:
                                     type    = 'float',
                                     help    = _("Number of seconds to wait before switching to different slice source. (Default: %s)" % default_timeout),
                                     metavar = _("[number of seconds]"))
+        general_group.add_option(   "--lame-mirror-checkpoint",
+                                    dest    = "lame_mirror_frequency",
+                                    action  = "store",
+                                    default = default_lame_mirror_frequency,
+                                    type    = 'float',
+                                    help    = _("Schedule lame mirror checks every N seconds. (Default: %s)" % default_lame_mirror_frequency),
+                                    metavar = _("[number of seconds]"))
+
 
         ## Downloading Options
         ## Purpose: Allow a user to non-interactively download a defined image or images.
