@@ -22,7 +22,7 @@ import os, urlparse, sys, gzip
 from ConfigParser import RawConfigParser
 
 from pyJigdo.userinterface import SelectImages
-from pyJigdo.util import url_to_file_name
+from pyJigdo.util import url_to_file_name, check_complete
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -35,7 +35,7 @@ class JigdoFile:
         self.settings = settings
         self.base = base
         self.jigdo_location = jigdo_location
-        self.jigdo_storage_location = jigdo_storage_location
+        self.fs_location = jigdo_storage_location
         self.jigdo_data = None # JigdoDefinition()
         self.image_selection = None # SelectImages()
         self.id = jigdo_location
@@ -48,7 +48,7 @@ class JigdoFile:
 
     def target(self):
         """ Return the target location for this jigdo file. """
-        return self.jigdo_storage_location
+        return self.fs_location
 
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
@@ -62,16 +62,18 @@ class JigdoFile:
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
         self.download_tries += 1
-        self.log.warning(_("Failed to download %s: \n%s" % ( self.id,
+        self.log.warning(_("Failed to download %s: \n\t%s" % ( self.id,
                                                              ign )))
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.id))
         else:
-            self.reactor.add_task(self.get())
+            self.queue_download()
         self.reactor.finish_task()
 
     def queue_download(self):
-        """ Queue the self.get() in the reactor. """
+        """ Queue the self.get() in the reactor. 
+            We always need to re-fetch the jigdo file as we don't
+            have a verified sum for the data. """
         self.reactor.request_download(self)
 
     def get(self):
@@ -105,14 +107,14 @@ class JigdoFile:
 
     def parse(self):
         """ Parse the jigdo file. """
-        if os.path.isfile(self.jigdo_storage_location):
+        if os.path.isfile(self.fs_location):
             self.log.debug(_("Successfully downloaded %s to %s" % ( self.id,
-                                                                    self.jigdo_storage_location )))
+                                                                    self.fs_location )))
             self.log.debug(_("Attempting to parse %s ..." % self.id))
             self.jigdo_data = JigdoDefinition( self.reactor,
                                                self.log,
                                                self.settings,
-                                               self.jigdo_storage_location )
+                                               self.fs_location )
 
 class JigdoDefinition:
     """ A Jigdo Definition File.
@@ -437,7 +439,7 @@ class JigdoImage:
         self.filename_md5sum = ''
         self.template = ''
         self.template_md5sum = ''
-        self.template_file = ''
+        self.fs_location = ''
         self.target_location = self.settings.download_target
         self.location = ''
         self.tmp_location = ''
@@ -453,8 +455,7 @@ class JigdoImage:
 
     def target(self):
         """ Return the target location for this Jigdo template. """
-        self.template_file = url_to_file_name(self.template, self.target_location)
-        return self.template_file
+        return self.fs_location
 
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
@@ -462,12 +463,12 @@ class JigdoImage:
         self.log.info(_("Successfully downloaded %s" % self.template))
         self.collect_slices()
         self.get_slices()
-        self.reactor.finish_task()
+        if ign: self.reactor.finish_task()
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
         self.download_tries += 1
-        self.log.warning(_("Failed to download %s: \n%s" % ( self.filename,
+        self.log.warning(_("Failed to download %s: \n\t%s" % ( self.filename,
                                                              ign )))
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
@@ -476,8 +477,14 @@ class JigdoImage:
         self.reactor.finish_task()
 
     def queue_download(self):
-        """ Queue the self.get() in the reactor. """
-        self.reactor.request_download(self)
+        """ Queue the self.get() in the reactor.
+            First check to see if the template is already there and is complete. """
+        if not self.fs_location:
+            self.fs_location = url_to_file_name(self.template, self.target_location)
+        if check_complete(self.log, self.fs_location, self.template_md5sum):
+            self.download_callback_success(None)
+        else:
+            self.reactor.request_download(self)
 
     def get(self):
         """ Download the Jigdo template using the reactor.
@@ -505,7 +512,7 @@ class JigdoImage:
         """ Collects the slices needed for this template. """
         self.location = os.path.join(self.target_location, self.filename)
         self.tmp_location = "%s.tmp" % self.location
-        template_target = self.template_file
+        template_target = self.fs_location
         iso_exists = False
         if os.access(self.tmp_location, os.W_OK):
             template_target = self.tmp_location
@@ -556,19 +563,6 @@ class JigdoImage:
 
     def unselect(self):
         self.selected = False
-
-    def get_template(self, work_dir):
-        """ Make sure we have the template and it checks out, or fetch it again. """
-        #self.template_file = pyJigdo.misc.url_to_file_name(self.template, work_dir)
-        #if pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-        #    self.log.info("Template %s exists and checksum matches." % self.template_file)
-        #else:
-        #    self.template_file = pyJigdo.misc.get_file(self.template, working_directory = work_dir)
-        #    if not pyJigdo.misc.check_file(self.template_file, checksum = self.template_md5sum):
-        #        # FIXME: Prompt user asking if we should clear this data, try again?
-        #        self.log.error("Template data for %s does not match defined checksum. Disabling image." % self.filename)
-        #        self.unselect()
-        pass
 
     # FIXME: Duplicate check_file function!! (See misc.py:120)
     def check_self(self):
@@ -624,12 +618,12 @@ class JigdoImageSlice:
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.filename))
-        self.reactor.finish_task()
+        if ign: self.reactor.finish_task()
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
         self.download_tries += 1
-        self.log.warning(_("Failed to download %s: \n%s" % ( self.filename,
+        self.log.warning(_("Failed to download %s: \n\t%s" % ( self.filename,
                                                              ign )))
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
@@ -639,8 +633,12 @@ class JigdoImageSlice:
         self.reactor.finish_task()
 
     def queue_download(self):
-        """ Queue the self.get() in the reactor. """
-        self.reactor.request_download(self)
+        """ Queue the self.get() in the reactor.
+            First check to see if the file is already there and is complete. """
+        if check_complete(self.log, self.fs_location, self.slice_sum):
+            self.download_callback_success(None)
+        else:
+            self.reactor.request_download(self)
 
     def get(self):
         """ Download the Jigdo slice using the reactor.
@@ -891,7 +889,7 @@ class JigdoJobPool:
                                                       os.path.basename(jigdo_image.location))))
         command = [ "jigdo-file", "make-image",
                     "--image", jigdo_image.location,
-                    "--template", jigdo_image.template_file,
+                    "--template", jigdo_image.fs_location,
                     "--jigdo", self.jigdo_definition.file_name,
                     "-r", "quiet",
                     "--force",

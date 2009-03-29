@@ -19,12 +19,22 @@
 Utility functions, shared across classes.
 """
 
-import os
+import os, re, base64
 
 from urlparse import urlparse
 
+try:
+    # Py2.5
+    import hashlib as md5_hashlib
+except ImportError:
+    # Py2.4
+    import md5 as md5_hashlib
+
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
+
+eq = re.compile('=')
+B, K, M, G = 1, 1024, 1024*1024, 1024*1024*1024
 
 def image_numstr_to_list(image_numstr):
     """ Expand a comma-separated list of image numbers and ranges into a list.
@@ -70,3 +80,35 @@ def check_directory(log, directory):
             log.critical(_("Directory %s could not be created!" % directory))
     elif not os.path.isdir(directory):
         log.critical(_("%s exists, but is not a directory!" % directory))
+
+def check_complete(log, file, hash):
+    """ Check to see if file is on disk and matches hash. """
+    if os.access(file, os.R_OK) and check_hash(log, file, hash):
+        log.debug(_("File %s is already downloaded and is complete." % file))
+        return True
+    return False
+
+def check_hash(log, file, hash):
+    """ Hash a file and see if it matches given hash. """
+    matches = False
+    if os.path.isfile(file):
+        bufsize = 8*K*B
+        mode = 'rb'
+        try:
+            f = open(file, mode)
+            md5 = md5_hashlib.md5()
+            while True:
+                d = f.read(bufsize)
+                if not d:
+                    f.close()
+                    break
+                md5.update(d)
+            md5_digest = md5.digest()
+            base64_md5_digest = base64.urlsafe_b64encode(md5_digest)
+            file_hash = eq.sub('', base64_md5_digest)
+            log.debug(_("Checking %s against %s for %s ..." % \
+                       (file_hash, hash, file)))
+            if file_hash == hash: matches = True
+        except Exception, e:
+            log.warning(_("Reading file %s failed: %s" % (file, e)))
+    return matches

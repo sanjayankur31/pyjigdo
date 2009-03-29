@@ -108,7 +108,9 @@ class PyJigdoReactor:
         coop = task.Cooperator()
         work = (download.get() for download in objects)
         self.pending_tasks += len(objects)
-        return defer.DeferredList([coop.coiterate(work) for i in xrange(count)])
+        d = defer.DeferredList([coop.coiterate(work) for i in xrange(count)])
+        d.addCallback(self.checkpoint)
+        return d
 
     def checkpoint(self, ign, relax=False):
         """ Check to see if we have anything to do.
