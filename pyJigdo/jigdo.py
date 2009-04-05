@@ -58,6 +58,7 @@ class JigdoFile:
         self.select_images()
         self.get_templates()
         self.reactor.finish_task()
+        self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
@@ -67,8 +68,9 @@ class JigdoFile:
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.id))
         else:
-            self.queue_download()
+            self.reactor.request_download(self)
         self.reactor.finish_task()
+        self.log.debug(_("Failed download of %s, added new task to try again." % self.id))
 
     def queue_download(self):
         """ Queue the self.get() in the reactor. 
@@ -464,6 +466,7 @@ class JigdoImage:
         self.collect_slices()
         self.get_slices()
         if ign: self.reactor.finish_task()
+        self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
@@ -473,8 +476,9 @@ class JigdoImage:
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
         else:
-            self.queue_download()
+            self.reactor.request_download(self)
         self.reactor.finish_task()
+        self.log.debug(_("Failed download of %s, added new task to try again." % self.filename))
 
     def queue_download(self):
         """ Queue the self.get() in the reactor.
@@ -619,6 +623,7 @@ class JigdoImageSlice:
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.filename))
         if ign: self.reactor.finish_task()
+        self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
@@ -629,8 +634,9 @@ class JigdoImageSlice:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
         else:
             self.new_source()
-            self.queue_download()
+            self.reactor.request_download(self)
         self.reactor.finish_task()
+        self.log.debug(_("Failed download of %s, added new task to try again." % self.filename))
 
     def queue_download(self):
         """ Queue the self.get() in the reactor.

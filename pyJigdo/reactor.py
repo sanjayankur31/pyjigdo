@@ -17,6 +17,7 @@
 
 from twisted.internet import reactor as treactor
 from twisted.internet import defer, task
+from twisted.python import log
 import twisted.web.client
 from constants import PYJIGDO_USER_AGENT
 from jigdo_file import execJigdoFile
@@ -105,7 +106,6 @@ class PyJigdoReactor:
         """ Reduce pending_tasks by one and checkpoint
             if we are out of things to do. """
         self.pending_tasks -= 1
-        if self.pending_tasks <= 0: self.checkpoint(None)
 
     def request_download(self, object):
         """ Add a request that the reactor download given object.
@@ -116,14 +116,13 @@ class PyJigdoReactor:
         """ Run count number of objects.get() at a time. """
         coop = task.Cooperator()
         work = (download.get() for download in objects)
-        self.pending_tasks += len(objects)
-        d = defer.DeferredList([coop.coiterate(work) for i in xrange(count)])
-        d.addCallback(self.checkpoint)
-        return d
+        return defer.DeferredList([coop.coiterate(work) for i in xrange(count)])
 
     def checkpoint(self, ign, relax=False):
         """ Check to see if we have anything to do.
             Conditionally, sleep. """
+        self.log.debug(_("Pending downloads: %s Running tasks: %s" % \
+                        (len(self.pending_downloads), self.pending_tasks)))
         if relax:
             try:
                 time.sleep(5)
@@ -134,6 +133,7 @@ class PyJigdoReactor:
             downloads = self.get_pending_downloads()
             r = self.parallel_get( downloads,
                                    self.base.settings.download_threads )
+            r.addCallback(self.checkpoint)
         elif not self.pending_tasks > 0:
             self.finish()
 
@@ -142,9 +142,9 @@ class PyJigdoReactor:
             anything to do. """
         if self.pending_downloads:
             self.checkpoint(None)
-            self.log.debug(_("Scheduling lame mirror detection events (every %s seconds)...") % \
-                         self.base.settings.lame_mirror_frequency)
-            self.lame_mirrors.start(self.base.settings.lame_mirror_frequency)
+            #self.log.debug(_("Scheduling lame mirror detection events (every %s seconds)...") % \
+            #             self.base.settings.lame_mirror_frequency)
+            #self.lame_mirrors.start(self.base.settings.lame_mirror_frequency)
             try:
                 self.reactor.run()
             except KeyboardInterrupt:
@@ -157,7 +157,7 @@ class PyJigdoReactor:
     def stop(self):
         """ Stop the reactor. """
         try:
-            self.lame_mirrors.stop()
+            #self.lame_mirrors.stop()
             self.reactor.stop()
         except RuntimeError, e:
             self.log.critical(_("Reactor reported: %s" % e))
@@ -180,7 +180,9 @@ class PyJigdoReactor:
     def get_pending_downloads(self):
         """ Attempt to safely get a list of pending downloads. """
         r = []
-        while self.pending_downloads:
+        get_factor = 2
+        while self.pending_downloads:# and \
+            #  not (len(r) > (self.base.settings.download_threads * get_factor)):
             r.append(self.pending_downloads.pop(0))
         return r
 
@@ -198,6 +200,7 @@ class PyJigdoReactor:
             jigdo_object.download_callback() when done. """
         target_location = jigdo_object.target()
         check_directory(self.log, os.path.dirname(target_location))
+        self.pending_tasks += 1
         d = self.getFile( jigdo_object.source(),
                           target_location,
                           agent = PYJIGDO_USER_AGENT,
