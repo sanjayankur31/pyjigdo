@@ -108,13 +108,14 @@ class PyJigdoBase:
                                                        jigdo_filename )
                 self.log.debug(_("Adding Jigdo file %s" % jigdo_url.geturl()))
                 self.log.debug(_("Storing Jigdo %s at %s" % ( jigdo_filename,
-                                                                  jigdo_storage_location )))
+                                                              jigdo_storage_location )))
                 self.jigdo_files[jigdo] = JigdoFile( self.log,
                                                      self.reactor,
                                                      self.settings,
                                                      self,
                                                      jigdo_url.geturl(),
                                                      jigdo_storage_location )
+                if os.path.isfile(jigdo_url.path): self.jigdo_files[jigdo].has_data = True
             else:
                 self.log.error(_("Jigdo file %s seems to not be valid." % jigdo))
                 self.log.error(_("Cowardly refusing to use/download."))

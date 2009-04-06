@@ -57,8 +57,8 @@ class JigdoFile:
         self.parse()
         self.select_images()
         self.get_templates()
-        self.reactor.finish_task()
-        self.log.debug(_("Ending download event for %s" % self.filename))
+        if ign: self.reactor.finish_task()
+        self.log.debug(_("Ending download event for %s" % self.id))
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """

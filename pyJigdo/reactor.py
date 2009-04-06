@@ -77,7 +77,6 @@ class PyJigdoReactor:
         self.pending_tasks = 0
         self.base = None # PyJigdoBase()
         self.jigdo_file = None # execJigdoFile()
-        self.lame_mirrors = task.LoopingCall(self.lame_mirror_check)
 
     def seed(self, base):
         """ Seed the reactor, assigning the PyJigdoBase() and
@@ -91,16 +90,12 @@ class PyJigdoReactor:
                                          self.base.settings.jigdo_file_bin )
         self.log.debug(_("Seeding the reactor with requested jigdo resources."))
         for jigdo_file in self.base.jigdo_files.values():
-            self.log.debug(_("Adding %s download task." % jigdo_file.id))
-            self.request_download(jigdo_file)
-
-    def lame_mirror_check(self):
-        """ Check to see if we have a lame mirror holding up our
-            task.Cooperator(). If so, just fire off another round
-            of downloads. """
-        if self.pending_tasks < self.base.settings.download_threads \
-           and self.pending_downloads:
-            self.checkpoint(None)
+            if jigdo_file.has_data:
+                self.log.info(_("A local file was given, not downloading %s" % jigdo_file.id))
+                jigdo_file.download_callback_success(None)
+            else:
+                self.log.debug(_("Adding %s download task." % jigdo_file.id))
+                self.request_download(jigdo_file)
 
     def finish_task(self):
         """ Reduce pending_tasks by one and checkpoint
@@ -115,8 +110,13 @@ class PyJigdoReactor:
     def parallel_get(self, objects, count, *args, **named):
         """ Run count number of objects.get() at a time. """
         coop = task.Cooperator()
-        work = (download.get() for download in objects)
+        work = self.yield_work(objects)
         return defer.DeferredList([coop.coiterate(work) for i in xrange(count)])
+
+    def yield_work(self, download_objects):
+        """ Yield the work to be completed. """
+        for download in download_objects:
+            yield download.get()
 
     def checkpoint(self, ign, relax=False):
         """ Check to see if we have anything to do.
@@ -133,7 +133,9 @@ class PyJigdoReactor:
             downloads = self.get_pending_downloads()
             r = self.parallel_get( downloads,
                                    self.base.settings.download_threads )
+            # Neither of these fire. Something is going wrong here.
             r.addCallback(self.checkpoint)
+            r.addErrback(self.checkpoint)
         elif not self.pending_tasks > 0:
             self.finish()
 
@@ -142,9 +144,6 @@ class PyJigdoReactor:
             anything to do. """
         if self.pending_downloads:
             self.checkpoint(None)
-            #self.log.debug(_("Scheduling lame mirror detection events (every %s seconds)...") % \
-            #             self.base.settings.lame_mirror_frequency)
-            #self.lame_mirrors.start(self.base.settings.lame_mirror_frequency)
             try:
                 self.reactor.run()
             except KeyboardInterrupt:
@@ -157,7 +156,6 @@ class PyJigdoReactor:
     def stop(self):
         """ Stop the reactor. """
         try:
-            #self.lame_mirrors.stop()
             self.reactor.stop()
         except RuntimeError, e:
             self.log.critical(_("Reactor reported: %s" % e))
@@ -180,9 +178,9 @@ class PyJigdoReactor:
     def get_pending_downloads(self):
         """ Attempt to safely get a list of pending downloads. """
         r = []
-        get_factor = 2
-        while self.pending_downloads:# and \
-            #  not (len(r) > (self.base.settings.download_threads * get_factor)):
+        get_factor = 1
+        while self.pending_downloads and \
+              not (len(r) > (self.base.settings.download_threads * get_factor)):
             r.append(self.pending_downloads.pop(0))
         return r
 
