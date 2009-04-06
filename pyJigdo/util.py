@@ -86,6 +86,8 @@ def check_complete(log, file, hash):
     if os.access(file, os.R_OK) and check_hash(log, file, hash):
         log.debug(_("File %s is already downloaded and is complete." % file))
         return True
+    elif os.path.isfile(file):
+        log.debug(_("File %s is not complete. Marking for re-download." % file))
     return False
 
 def check_hash(log, file, hash):

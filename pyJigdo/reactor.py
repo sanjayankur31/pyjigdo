@@ -98,8 +98,8 @@ class PyJigdoReactor:
                 self.request_download(jigdo_file)
 
     def finish_task(self):
-        """ Reduce pending_tasks by one and checkpoint
-            if we are out of things to do. """
+        """ Reduce pending_tasks by one. """
+        self.log.debug(_("Finished task fired."))
         self.pending_tasks -= 1
 
     def request_download(self, object):
@@ -135,9 +135,10 @@ class PyJigdoReactor:
                                    self.base.settings.download_threads )
             # Neither of these fire. Something is going wrong here.
             r.addCallback(self.checkpoint)
-            r.addErrback(self.checkpoint)
+            #r.addErrback(self.checkpoint)
         elif not self.pending_tasks > 0:
             self.finish()
+        self.log.debug(_("Checkpoint exit."))
 
     def run(self):
         """ Start the reactor, first checking to see if we have
@@ -180,7 +181,7 @@ class PyJigdoReactor:
         r = []
         get_factor = 1
         while self.pending_downloads and \
-              not (len(r) > (self.base.settings.download_threads * get_factor)):
+              not (len(r) >= (self.base.settings.download_threads * get_factor)):
             r.append(self.pending_downloads.pop(0))
         return r
 
@@ -195,7 +196,7 @@ class PyJigdoReactor:
     def download_object(self, jigdo_object):
         """ Try to download the data from jigdo_object.source()
             to jigdo_object.target() and call
-            jigdo_object.download_callback() when done. """
+            jigdo_object.download_callback_$status() when done. """
         target_location = jigdo_object.target()
         check_directory(self.log, os.path.dirname(target_location))
         self.pending_tasks += 1
