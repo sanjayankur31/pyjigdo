@@ -18,7 +18,7 @@
 import sys, os
 from urlparse import urlparse
 import pyJigdo.logger
-import pyJigdo.reactor
+import pyJigdo.pyasync
 from pyJigdo.jigdo import JigdoFile
 
 import pyJigdo.translate as translate
@@ -38,11 +38,11 @@ class PyJigdoBase:
         self.jigdo_templates = {} # {JigdoTemplate().id: JigdoTemplate(),}
         self.jigdo_slices = {} # {JigdoSlice().id: JigdoSlice(),}
         self.slice_sources = {} # {SliceSource().id: SliceSource(),}
-        self.log = None # pyJigdoLogger()
-        self.reactor = None # pyJigdoReactor()
-        self.stats = None # pyJigdoStats()
-        self.interface = None # pyJigdoTextInterface()
-        self.scan_targets = [] # [pyJigdoScanTarget(),]
+        self.log = None # PyJigdoLogger()
+        self.async = None # PyJigdoReactor()
+        self.stats = None # PyJigdoStats()
+        self.interface = None # PyJigdoTextInterface()
+        self.scan_targets = [] # [PyJigdoScanTarget(),]
 
         # Set our exit points to callback.
         self.abort = pyjigdo_entry.abort
@@ -60,24 +60,17 @@ class PyJigdoBase:
     def run(self):
         """ Start up the reactor and start performing operations to
             put the Jigdo together. """
-        try:
-            # Setup Reactor
-            self.reactor = pyJigdo.reactor.PyJigdoReactor( self.log,
-                           threads = self.settings.download_threads,
-                           timeout = self.settings.download_timeout )
-            # Prepare Jigdo
-            if self.prep_jigdo_files():
-                # Seed Reactor
-                self.reactor.seed(self)
-                # Get the party started...
-                self.reactor.run()
-            else:
-                self.log.critical(_("Seems there is nothing to do!"))
-        except KeyboardInterrupt:
-            print "\n\n"
-            self.log.status(_("Exiting on user request.\n"))
-            return self.abort()
-        return self.done()
+        # Setup Reactor
+        self.async = pyJigdo.pyasync.PyJigdoReactor( self.log,
+                     threads = self.settings.download_threads,
+                     timeout = self.settings.download_timeout )
+        # Prepare Jigdo
+        if self.prep_jigdo_files():
+            # Seed Reactor
+            self.async.seed(self)
+        else:
+            self.log.critical(_("Seems there is nothing to do!"))
+            return self.done()
 
     def create_logger(self):
         """ Create a logger instance setting an appropriate loglevel
@@ -110,7 +103,7 @@ class PyJigdoBase:
                 self.log.debug(_("Storing Jigdo %s at %s" % ( jigdo_filename,
                                                               jigdo_storage_location )))
                 self.jigdo_files[jigdo] = JigdoFile( self.log,
-                                                     self.reactor,
+                                                     self.async,
                                                      self.settings,
                                                      self,
                                                      jigdo_url.geturl(),

@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from twisted.internet import reactor as treactor
+from twisted.internet import reactor
 from twisted.internet import defer, task
 from twisted.python import log
 import twisted.web.client
@@ -70,7 +70,7 @@ class PyJigdoReactor:
         """ Our main async gears for connecting to remote sites
             and downloading the data that we need. """
         self.log = log
-        self.reactor = treactor
+        self.reactor = reactor
         self.threads = threads
         self.timeout = timeout
         self.pending_downloads = []
@@ -133,26 +133,10 @@ class PyJigdoReactor:
             downloads = self.get_pending_downloads()
             r = self.parallel_get( downloads,
                                    self.base.settings.download_threads )
-            # Neither of these fire. Something is going wrong here.
             r.addCallback(self.checkpoint)
-            #r.addErrback(self.checkpoint)
         elif not self.pending_tasks > 0:
             self.finish()
         self.log.debug(_("Checkpoint exit."))
-
-    def run(self):
-        """ Start the reactor, first checking to see if we have
-            anything to do. """
-        if self.pending_downloads:
-            self.checkpoint(None)
-            try:
-                self.reactor.run()
-            except KeyboardInterrupt:
-                print "\n\n"
-                self.log.status(_("Exiting on user request.\n"))
-                return self.base.abort()
-        else:
-            self.log.critical(_("Reactor started with nothing to do!"))
 
     def stop(self):
         """ Stop the reactor. """

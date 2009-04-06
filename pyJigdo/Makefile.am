@@ -4,7 +4,7 @@ PYTHON_FILES = \
     __init__.py \
     jigdo.py \
     logger.py \
-    reactor.py \
+    pyasync.py \
     userinterface.py \
     util.py \
     translate.py

@@ -29,9 +29,9 @@ from pyJigdo.translate import _, N_
 
 class JigdoFile:
     """ A Jigdo file that has been requested to be downloaded. """
-    def __init__(self, log, reactor, settings, base, jigdo_location, jigdo_storage_location):
+    def __init__(self, log, async, settings, base, jigdo_location, jigdo_storage_location):
         self.log = log
-        self.reactor = reactor
+        self.async = async
         self.settings = settings
         self.base = base
         self.jigdo_location = jigdo_location
@@ -39,7 +39,7 @@ class JigdoFile:
         self.jigdo_data = None # JigdoDefinition()
         self.image_selection = None # SelectImages()
         self.id = jigdo_location
-        self.have_data = False
+        self.has_data = False
         self.download_tries = 0
 
     def source(self):
@@ -57,7 +57,7 @@ class JigdoFile:
         self.parse()
         self.select_images()
         self.get_templates()
-        if ign: self.reactor.finish_task()
+        if ign: self.async.finish_task()
         self.log.debug(_("Ending download event for %s" % self.id))
 
     def download_callback_failure(self, ign):
@@ -68,26 +68,26 @@ class JigdoFile:
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.id))
         else:
-            self.reactor.request_download(self)
-        self.reactor.finish_task()
+            self.async.request_download(self)
+        self.async.finish_task()
         self.log.debug(_("Failed download of %s, added new task to try again." % self.id))
 
     def queue_download(self):
-        """ Queue the self.get() in the reactor. 
+        """ Queue the self.get() in the async. 
             We always need to re-fetch the jigdo file as we don't
             have a verified sum for the data. """
-        self.reactor.request_download(self)
+        self.async.request_download(self)
 
     def get(self):
-        """ Download the Jigdo file using the reactor.
-            Return the reactor task. """
+        """ Download the Jigdo file using the async.
+            Return the async task. """
         if self.download_tries >= self.settings.max_download_attempts:
             attempt = "last"
         else:
             attempt = self.download_tries + 1
         self.log.status(_("Adding a task to download: %s (attempt: %s)" % \
                        (self.id, attempt)))
-        return self.reactor.download_object(self)
+        return self.async.download_object(self)
 
     def get_templates(self):
         """ Download the Jigdo file's defined templates that
@@ -113,7 +113,7 @@ class JigdoFile:
             self.log.debug(_("Successfully downloaded %s to %s" % ( self.id,
                                                                     self.fs_location )))
             self.log.debug(_("Attempting to parse %s ..." % self.id))
-            self.jigdo_data = JigdoDefinition( self.reactor,
+            self.jigdo_data = JigdoDefinition( self.async,
                                                self.log,
                                                self.settings,
                                                self.fs_location )
@@ -121,8 +121,8 @@ class JigdoFile:
 class JigdoDefinition:
     """ A Jigdo Definition File.
         just_print is used to suppress the creation of objects. """
-    def __init__(self, reactor, log, settings, file_name, just_print = False):
-        self.reactor = reactor
+    def __init__(self, async, log, settings, file_name, just_print = False):
+        self.async = async
         self.log = log
         self.settings = settings
         self.file_name = file_name
@@ -197,7 +197,7 @@ class JigdoDefinition:
                     if sectname == "Image":
                         self.image_unique_id += 1
                         section = JigdoImage( self.log,
-                                              self.reactor,
+                                              self.async,
                                               self.settings,
                                               self,
                                               unique_id = self.image_unique_id )
@@ -425,10 +425,10 @@ class JigdoRepoDefinition:
 
 class JigdoImage:
     """ An Image in the Jigdo Definition File, defining JigdoTemplate and JigdoImageSlices. """
-    def __init__(self, log, reactor, settings, jigdo_definition, unique_id = 0):
+    def __init__(self, log, async, settings, jigdo_definition, unique_id = 0):
         """ Setup JigdoImage() with needed relations. """
         self.log = log
-        self.reactor = reactor
+        self.async = async
         self.settings = settings
         self.jigdo_definition = jigdo_definition
         self.selected = False
@@ -465,7 +465,7 @@ class JigdoImage:
         self.log.info(_("Successfully downloaded %s" % self.template))
         self.collect_slices()
         self.get_slices()
-        if ign: self.reactor.finish_task()
+        if ign: self.async.finish_task()
         self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):
@@ -476,30 +476,30 @@ class JigdoImage:
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
         else:
-            self.reactor.request_download(self)
-        self.reactor.finish_task()
+            self.async.request_download(self)
+        self.async.finish_task()
         self.log.debug(_("Failed download of %s, added new task to try again." % self.filename))
 
     def queue_download(self):
-        """ Queue the self.get() in the reactor.
+        """ Queue the self.get() in the async.
             First check to see if the template is already there and is complete. """
         if not self.fs_location:
             self.fs_location = url_to_file_name(self.template, self.target_location)
         if check_complete(self.log, self.fs_location, self.template_md5sum):
             self.download_callback_success(None)
         else:
-            self.reactor.request_download(self)
+            self.async.request_download(self)
 
     def get(self):
-        """ Download the Jigdo template using the reactor.
-            Return the reactor task. """
+        """ Download the Jigdo template using the async.
+            Return the async task. """
         if self.download_tries >= self.settings.max_download_attempts:
             attempt = "last"
         else:
             attempt = self.download_tries + 1
         self.log.status(_("Adding a task to download: %s (attempt: %s)" % \
                        (self.filename, attempt)))
-        return self.reactor.download_object(self)
+        return self.async.download_object(self)
 
     def get_slices(self):
         """ Download the template file's defined slices. """
@@ -522,13 +522,13 @@ class JigdoImage:
             template_target = self.tmp_location
             self.log.info(_("Temporary template found at %s" % template_target))
             # FIXME: Need a test to see if this tmp image is usable.
-        template_data = self.reactor.jigdo_file.get_template_data(template_target)
+        template_data = self.async.jigdo_file.get_template_data(template_target)
         if os.access(self.location, os.R_OK): iso_exists = True
         for line in template_data:
             if line.startswith('need-file'):
                 slice_hash = line.split()[3]
                 (slice_server_id, slice_file_name) = self.jigdo_definition.parts[slice_hash].split(':')
-                if not iso_exists: self.slices[slice_hash] = JigdoImageSlice( self.log, self.reactor,
+                if not iso_exists: self.slices[slice_hash] = JigdoImageSlice( self.log, self.async,
                                                              self.settings,
                                                              slice_hash,
                                                              slice_file_name,
@@ -587,10 +587,10 @@ class JigdoImage:
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
-    def __init__(self, log, reactor, settings, md5_sum, filename, repo, target_location):
+    def __init__(self, log, async, settings, md5_sum, filename, repo, target_location):
         """ Initialize the ImageSlice """
         self.log = log
-        self.reactor = reactor
+        self.async = async
         self.settings = settings
         self.slice_sum = md5_sum
         self.filename = filename
@@ -622,7 +622,7 @@ class JigdoImageSlice:
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.filename))
-        if ign: self.reactor.finish_task()
+        if ign: self.async.finish_task()
         self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):
@@ -633,29 +633,29 @@ class JigdoImageSlice:
         if self.download_tries >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
         else:
-            self.new_source()
-            self.reactor.request_download(self)
-        self.reactor.finish_task()
+            #self.new_source()
+            self.async.request_download(self)
+        self.async.finish_task()
         self.log.debug(_("Failed download of %s, added new task to try again." % self.filename))
 
     def queue_download(self):
-        """ Queue the self.get() in the reactor.
+        """ Queue the self.get() in the async.
             First check to see if the file is already there and is complete. """
         if check_complete(self.log, self.fs_location, self.slice_sum):
             self.download_callback_success(None)
         else:
-            self.reactor.request_download(self)
+            self.async.request_download(self)
 
     def get(self):
-        """ Download the Jigdo slice using the reactor.
-            Return the reactor task. """
+        """ Download the Jigdo slice using the async.
+            Return the async task. """
         if self.download_tries >= self.settings.max_download_attempts:
             attempt = "last"
         else:
             attempt = self.download_tries + 1
         self.log.status(_("Adding a task to download: %s (attempt: %s)" % \
                        (self.filename, attempt)))
-        return self.reactor.download_object(self)
+        return self.async.download_object(self)
  
     def new_source(self):
         """ Populate self.current_source with something we have not tried. """

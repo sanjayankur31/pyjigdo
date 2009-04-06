@@ -224,7 +224,7 @@ class PyJigdo:
 
     def check_options(self):
         """ Check if we have the bare minimum needed options. """
-        if not self.jigdo_files: return Falsea
+        if not self.jigdo_files: return False
         # FIXME: Don't restrict to just one source
         # jigdo file. This is needed because we don't
         # have a lockable UI yet.
@@ -256,6 +256,17 @@ class PyJigdo:
 # If we are being run interactively,
 # it's time to start up.
 if __name__ == "__main__":
+    return_code = 0
     pyJigdo_interface = PyJigdo()
-    return_code = pyJigdo_interface.run()
+    pyJigdo_interface.base.run()
+    if pyJigdo_interface.base.async.pending_downloads:
+        pyJigdo_interface.base.async.checkpoint(None)
+        try:
+            return_code = pyJigdo_interface.base.async.reactor.run()
+        except KeyboardInterrupt:
+            print "\n\n"
+            pyJigdo_interface.log.status(_("Exiting on user request.\n"))
+            return_code = pyJigdo_interface.abort()
+    else:
+        self.log.critical(_("Reactor started with nothing to do!"))
     sys.exit(return_code)
