@@ -1,14 +1,15 @@
 # German translation of pyJigdo
 # Copyright (C) 2008 pyJigdo
 # This file is distributed under the same license as the pyJigdo package.
-# Fabian Affolter <fab@fedoraproject.org>, 2008.
+#
+# Fabian Affolter <fab@fedoraproject.org>, 2008-2009.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: pyjigdo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-01 13:35+0000\n"
-"PO-Revision-Date: 2008-12-08 23:13+0100\n"
+"POT-Creation-Date: 2008-09-04 11:55+0200\n"
+"PO-Revision-Date: 2009-04-17 12:01+0100\n"
 "Last-Translator: Fabian Affolter <fab@fedoraproject.org>\n"
 "Language-Team: German <fedora-trans-de@redhat.com>\n"
 "MIME-Version: 1.0\n"
@@ -424,7 +425,7 @@ msgstr "Einhängen von %s unter %s ..."
 #: ../pyjigdo/jigdo.py:581
 #, python-format
 msgid "Adding a job for %s: %s"
-msgstr "Füge Auftrag für %s hinzu: %s"
+msgstr "Auftrag für %s hinzufügen: %s"
 
 #: ../pyjigdo/jigdo.py:631
 #, python-format
