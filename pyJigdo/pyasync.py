@@ -42,8 +42,11 @@ class jigdoHTTPDownloader(HTTPDownloader):
 
        This requires python-twisted-web-8.2.0! """
 
+    # For the 8.2.0 packages: http://jsteffan.fedorapeople.org/SRPMS/
+    # These will go into Fedora project ASAP.
+
     # We have commented this out because it's an overhead we don't
-    # wnat to deal with right now. We will be getting pyjigdo running
+    # want to deal with right now. We will be getting pyjigdo running
     # with 8.2.0 and will then worry about supporting user-defined
     # timeout values.
 
