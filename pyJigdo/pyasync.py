@@ -18,7 +18,7 @@
 from twisted.internet import reactor
 from twisted.internet import defer, task
 from twisted.python import log
-import twisted.web.client
+from twisted.web.client import *
 from constants import PYJIGDO_USER_AGENT
 from jigdo_file import execJigdoFile
 from pyJigdo.util import check_directory
@@ -35,33 +35,39 @@ from pyJigdo.translate import _, N_
 # but it *will* break other code that does something hacky
 # such as this.
 
-class jigdoHTTPDownloader(twisted.web.client.HTTPDownloader):
+class jigdoHTTPDownloader(HTTPDownloader):
     """Download to a file.
        This is a nasty hack to support download timeouts.
-       This is supposed to be fixed in 9.x. """
+       This is supposed to be fixed in 9.x.
 
-    def __init__(self, url, fileOrName,
-                 method='GET', postdata=None, headers=None,
-                 agent="Twisted client", supportPartial=0,
-                 timeout=0):
-        self.requestedPartial = 0
-        if isinstance(fileOrName, types.StringTypes):
-            self.fileName = fileOrName
-            self.file = None
-            if supportPartial and os.path.exists(self.fileName):
-                fileLength = os.path.getsize(self.fileName)
-                if fileLength:
-                    self.requestedPartial = fileLength
-                    if headers == None:
-                        headers = {}
-                    headers["range"] = "bytes=%d-" % fileLength
-        else:
-            self.file = fileOrName
-        twisted.web.client.HTTPClientFactory.__init__(self, url, 
-                           method=method, postdata=postdata,
-                           headers=headers, agent=agent, timeout=timeout)
-        self.deferred = defer.Deferred()
-        self.waiting = 1
+       This requires python-twisted-web-8.2.0! """
+
+    # We have commented this out because it's an overhead we don't
+    # wnat to deal with right now. We will be getting pyjigdo running
+    # with 8.2.0 and will then worry about supporting user-defined
+    # timeout values.
+
+    #def __init__(self, url, fileOrName,
+    #             method='GET', postdata=None, headers=None,
+    #             agent="Twisted client", supportPartial=0,
+    #             timeout=0):
+    #    self.requestedPartial = 0
+    #    if isinstance(fileOrName, types.StringTypes):
+    #        self.fileName = fileOrName
+    #        self.file = None
+    #        if supportPartial and os.path.exists(self.fileName):
+    #            fileLength = os.path.getsize(self.fileName)
+    #            if fileLength:
+    #                self.requestedPartial = fileLength
+    #                if headers == None:
+    #                    headers = {}
+    #                headers["range"] = "bytes=%d-" % fileLength
+    #    else:
+    #        self.file = fileOrName
+    #    HTTPClientFactory.__init__(self, url, method=method, postdata=postdata,
+    #                               headers=headers, agent=agent, timeout=timeout)
+    #    self.deferred = defer.Deferred()
+    #    self.waiting = 1
 
 class PyJigdoReactor:
     """ The pyJigdo Reactor. Used for async operations. """
@@ -130,6 +136,7 @@ class PyJigdoReactor:
                 self.log.critical(_("Shutting down on user request!"))
                 self.stop()
         if self.pending_downloads:
+            #downloads = self.get_pending_downloads(get_factor=1)
             downloads = self.get_pending_downloads()
             r = self.parallel_get( downloads,
                                    self.base.settings.download_threads )
@@ -160,13 +167,16 @@ class PyJigdoReactor:
         else:
             self.stop()
 
-    def get_pending_downloads(self):
+    def get_pending_downloads(self, get_factor=0):
         """ Attempt to safely get a list of pending downloads. """
         r = []
-        get_factor = 1
-        while self.pending_downloads and \
+        if get_factor:
+            while self.pending_downloads and \
               not (len(r) >= (self.base.settings.download_threads * get_factor)):
-            r.append(self.pending_downloads.pop(0))
+                r.append(self.pending_downloads.pop(0))
+        else:
+            while self.pending_downloads:
+                r.append(self.pending_downloads.pop(0))
         return r
 
     def download_complete(self, r, url):
@@ -184,10 +194,10 @@ class PyJigdoReactor:
         target_location = jigdo_object.target()
         check_directory(self.log, os.path.dirname(target_location))
         self.pending_tasks += 1
-        d = self.getFile( jigdo_object.source(),
+        d = downloadPage( jigdo_object.source(),
                           target_location,
-                          agent = PYJIGDO_USER_AGENT,
-                          timeout = self.timeout )
+                          agent = PYJIGDO_USER_AGENT )
+        #                  timeout = self.timeout )
         d.addCallback(jigdo_object.download_callback_success)
         d.addErrback(jigdo_object.download_callback_failure)
         return d
@@ -195,26 +205,8 @@ class PyJigdoReactor:
     def download_data(self, remote_target, storage_location):
         """ Try to download the data from remote_target to 
             given storage_location. """
-        d = self.getFile(remote_target, storage_location,
-                         agent=PYJIGDO_USER_AGENT, timeout=self.timeout)
+        d = downloadPage( remote_target, storage_location,
+                          agent=PYJIGDO_USER_AGENT ) # , timeout=self.timeout)
         d.addCallback(self.download_complete, remote_target)
         d.addErrback(self.download_failure, remote_target)
         return d
-
-    def getFile(self, url, file, contextFactory=None, *args, **kwargs):
-        """Download an url to a file.
-        @param file: path to file on filesystem, or file-like object.
-        See jigdoHTTPDownloader to see what extra args can be passed.
-        """
-        self.log.debug(_("Attempting to download %s..." % url))
-        scheme, host, port, path = twisted.web.client._parse(url)
-        factory = jigdoHTTPDownloader(url, file, *args, **kwargs)
-        if scheme == 'https':
-            from twisted.internet import ssl
-            if contextFactory is None:
-                 contextFactory = ssl.ClientContextFactory()
-            self.reactor.connectSSL(host, port, factory, contextFactory)
-        else:
-            self.reactor.connectTCP(host, port, factory)
-        return factory.deferred
-
