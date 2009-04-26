@@ -30,7 +30,8 @@ class SelectImages:
         we have already been able to acquire. """
 
     def __init__(self, log, settings, base, jigdo_definition):
-        """ Interactively work with the user to select what images to download. """
+        """ Interactively work with the user to select what images to download
+            if there were not runtime options defining what to download.  """
         # FIXME (class wide): NO bare print()
         self.log = log
         self.settings = settings
@@ -40,7 +41,10 @@ class SelectImages:
         num_images = len(self.jigdo_definition.images)
         image_maxwidth = len(str(num_images))
 
-        while choosing_images:
+        if self.settings.image_numbers or self.settings.image_filenames or self.settings.image_all:
+            self.select_images()
+        else:
+         while choosing_images:
             print "Please select one or more of the available Images:"
             for image in self.jigdo_definition.images:
                 print "%*s: %s" % (image_maxwidth+1, "#" + str(image), self.jigdo_definition.images[image].filename)
@@ -55,8 +59,8 @@ class SelectImages:
             try:
                 ret = image_choice.index('all')
                 choosing_images = False
-                self.cfg.image_all = True
-                self.base.select_images()
+                self.settings.image_all = True
+                self.select_images()
                 continue
             except ValueError, e:
                 pass
@@ -100,16 +104,16 @@ class SelectImages:
             Return True if actions were successful. """
         self.log.debug(_("Selecting Images"))
         success = False
-        if self.cfg.image_all or len(self.jigdo_definition.images) == 1:
+        if self.settings.image_all or len(self.jigdo_definition.images) == 1:
             for image in self.jigdo_definition.images:
                 # Select all Images
                 self.select_image(image)
             success = True
-        elif self.cfg.image_numbers or self.cfg.image_filenames:
+        elif self.settings.image_numbers or self.settings.image_filenames:
             # Select images by number
-            if self.cfg.image_numbers:
-                for image_numstr in self.cfg.image_numbers:
-                    for image in pyJigdo.misc.image_numstr_to_list(image_numstr):
+            if self.settings.image_numbers:
+                for image_numstr in self.settings.image_numbers:
+                    for image in pyJigdo.util.image_numstr_to_list(image_numstr):
                         if self.select_image(image):
                             # At least one image was able to be selected,
                             # return successfully. We might want to make it more
@@ -119,8 +123,8 @@ class SelectImages:
                             self.log.warning(_("Could not select image %s") % image)
             # Select images by whole filename or glob pattern
             import re, fnmatch
-            if self.cfg.image_filenames:
-                for image_filestr in self.cfg.image_filenames:     # -f "*i386*,*ppc*" -f "file"
+            if self.settings.image_filenames:
+                for image_filestr in self.settings.image_filenames:     # -f "*i386*,*ppc*" -f "file"
                     for image_file in image_filestr.replace(',',' ').split(): # [*i386*,*ppc*], [file]
                         regex = re.compile(fnmatch.translate(image_file))
                         for jignum, jigimg in self.jigdo_definition.images.iteritems():
