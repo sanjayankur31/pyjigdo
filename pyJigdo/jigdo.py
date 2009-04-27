@@ -57,7 +57,6 @@ class JigdoFile:
         self.parse()
         self.select_images()
         self.get_templates()
-        if ign: self.async.finish_task()
         self.log.debug(_("Ending download event for %s" % self.id))
 
     def download_callback_failure(self, ign):
@@ -69,7 +68,6 @@ class JigdoFile:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.id))
         else:
             self.async.request_download(self)
-        self.async.finish_task()
         self.log.debug(_("Failed download of %s, added new task to try again." % self.id))
 
     def queue_download(self):
@@ -465,7 +463,6 @@ class JigdoImage:
         self.log.info(_("Successfully downloaded %s" % self.template))
         self.collect_slices()
         self.get_slices()
-        if ign: self.async.finish_task()
         self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):
@@ -477,7 +474,6 @@ class JigdoImage:
             self.log.error(_("Max tries for %s reached. Not downloading." % self.filename))
         else:
             self.async.request_download(self)
-        self.async.finish_task()
         self.log.debug(_("Failed download of %s, added new task to try again." % self.filename))
 
     def queue_download(self):
@@ -622,7 +618,6 @@ class JigdoImageSlice:
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.filename))
-        if ign: self.async.finish_task()
         self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):
@@ -635,7 +630,6 @@ class JigdoImageSlice:
         else:
             #self.new_source()
             self.async.request_download(self)
-        self.async.finish_task()
         self.log.debug(_("Failed download of %s, added new task to try again." % self.filename))
 
     def queue_download(self):

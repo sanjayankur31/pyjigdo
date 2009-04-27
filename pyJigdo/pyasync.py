@@ -83,7 +83,6 @@ class PyJigdoReactor:
         self.threads = threads
         self.timeout = timeout
         self.pending_downloads = []
-        self.pending_tasks = 0
         self.base = None # PyJigdoBase()
         self.jigdo_file = None # execJigdoFile()
 
@@ -104,12 +103,7 @@ class PyJigdoReactor:
                 jigdo_file.download_callback_success(None)
             else:
                 self.log.debug(_("Adding %s download task." % jigdo_file.id))
-                self.request_download(jigdo_file)
-
-    def finish_task(self):
-        """ Reduce pending_tasks by one. """
-        self.log.debug(_("Finished task fired."))
-        self.pending_tasks -= 1
+                jigdo_file.queue_download()
 
     def request_download(self, object):
         """ Add a request that the reactor download given object.
@@ -127,24 +121,18 @@ class PyJigdoReactor:
         for download in download_objects:
             yield download.get()
 
-    def checkpoint(self, ign, relax=False):
-        """ Check to see if we have anything to do.
-            Conditionally, sleep. """
-        self.log.debug(_("Pending downloads: %s Running tasks: %s" % \
-                        (len(self.pending_downloads), self.pending_tasks)))
-        if relax:
-            try:
-                time.sleep(5)
-            except KeyboardInterrupt:
-                self.log.critical(_("Shutting down on user request!"))
-                self.stop()
+    def checkpoint(self, ign):
+        """ Check to see if we have anything to do. """
+        self.log.debug(_("Pending Downloads: %s | Download Threads: %s" % \
+                        ( len(self.pending_downloads),
+                          self.base.settings.download_threads )))
         if self.pending_downloads:
             #downloads = self.get_pending_downloads(get_factor=1)
             downloads = self.get_pending_downloads()
             r = self.parallel_get( downloads,
                                    self.base.settings.download_threads )
             r.addCallback(self.checkpoint)
-        elif not self.pending_tasks > 0:
+        else:
             self.finish()
         self.log.debug(_("Checkpoint exit."))
 
@@ -164,9 +152,6 @@ class PyJigdoReactor:
         if self.pending_downloads:
             self.log.debug(_("Still pending items, checkpointing..."))
             self.checkpoint(None)
-        elif self.pending_tasks > 0:
-            self.log.debug(_("Still pending tasks, relaxed checkpointing..."))
-            self.checkpoint(None, relax=True)
         else:
             self.stop()
 
@@ -196,7 +181,6 @@ class PyJigdoReactor:
             jigdo_object.download_callback_$status() when done. """
         target_location = jigdo_object.target()
         check_directory(self.log, os.path.dirname(target_location))
-        self.pending_tasks += 1
         d = downloadPage( jigdo_object.source(),
                           target_location,
                           agent = PYJIGDO_USER_AGENT )
