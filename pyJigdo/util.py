@@ -19,7 +19,7 @@
 Utility functions, shared across classes.
 """
 
-import os, re, base64
+import os, re, base64, time, subprocess
 
 from urlparse import urlparse
 
@@ -114,3 +114,22 @@ def check_hash(log, file, hash):
         except Exception, e:
             log.warning(_("Reading file %s failed: %s" % (file, e)))
     return matches
+
+def run_command(log, settings, command, rundir=None, inshell=False, env=None, stdout=subprocess.PIPE):
+    """ Run a command and return output. Remember command must be ['command', 'arg1', 'arg2'] """
+    ret = []
+    if not rundir: rundir = settings.download_storage
+    check_directory(log, rundir)
+    if not env: env = {'PATH': os.getenv('PATH')}
+    if not command: return ""
+    log.debug(_("Running command: '%s'" % " ".join(command)))
+    p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False, env=env)
+    while p.poll() == None:
+        for item in p.stdout.read().split('\n'):
+            ret.append(item)
+        time.sleep(0.01)
+    for item in p.stdout.read().split('\n'):
+        ret.append(item)
+    p.stdout.close()
+    return ret
+

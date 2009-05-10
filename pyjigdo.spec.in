@@ -12,6 +12,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  intltool, gettext, python
 Requires:	python, rhpl, python-urlgrabber, jigdo, fuseiso
+Requires:	python-twisted-web >= 8.2.0, python-twisted-core >= 8.2.0
 
 %description
 PyJigdo is a Python rewrite of the popular Jigdo distribution framework. It has

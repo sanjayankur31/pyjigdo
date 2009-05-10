@@ -20,8 +20,8 @@ jigdo-file calls and functions. These need to be implemented directly, without
 shelling out for this information. For now, we just shell out to jigdo-file.
 """
 
-import subprocess, os, time
-from pyJigdo.util import check_directory
+import os
+from pyJigdo.util import check_directory, run_command
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -40,23 +40,9 @@ class execJigdoFile:
     def get_template_data(self, template_file):
         """ Return the template data from the given template_file. """
         # TODO: Return an object, not just the output.
-        return self.run_command(["jigdo-file", "ls", "--template", template_file], inshell=True)
+        return run_command( self.log,
+                            self.settings,
+                            ["jigdo-file", "ls", "--template", template_file],
+                            env=self.jigdo_env,
+                            inshell=True )
 
-
-    def run_command(self, command, rundir=None, inshell=False, env=None, stdout=subprocess.PIPE):
-        """ Run a command and return output. Remember command must be ['command', 'arg1', 'arg2'] """
-        ret = []
-        if not rundir: rundir = self.settings.download_storage
-        check_directory(self.log, rundir)
-        if not env: env = self.jigdo_env
-        if not command: return ""
-        self.log.debug(_("Running command: '%s'" % " ".join(command)))
-        p = subprocess.Popen(command, cwd=rundir, stdout=stdout, stderr=subprocess.STDOUT, shell=False, env=env)
-        while p.poll() == None:
-            for item in p.stdout.read().split('\n'):
-                ret.append(item)
-            time.sleep(0.01)
-        for item in p.stdout.read().split('\n'):
-            ret.append(item)
-        p.stdout.close()
-        return ret

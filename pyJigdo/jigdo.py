@@ -22,7 +22,7 @@ import os, urlparse, sys, gzip
 from ConfigParser import RawConfigParser
 
 from pyJigdo.userinterface import SelectImages
-from pyJigdo.util import url_to_file_name, check_complete
+from pyJigdo.util import url_to_file_name, check_complete, run_command
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -451,6 +451,7 @@ class JigdoImage:
         self.unique_id = unique_id
         self.slices = {}
         self.download_tries = 0
+        self.scan_targets = [] # [ JigdoScanTarget(), ]
         # These are filled in when parsing the .jigdo definition
         self.filename = ''
         self.filename_md5sum = ''
@@ -480,6 +481,7 @@ class JigdoImage:
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.template))
         self.collect_slices()
+        self.scan_local_sources()
         self.get_slices()
         self.log.debug(_("Ending download event for %s" % self.filename))
 
@@ -598,6 +600,28 @@ class JigdoImage:
                 os.unlink(self.tmp_location)
         except OSError:
             pass
+
+    def scan_local_sources(self):
+        """ Check to see if we have been given any local sources
+            to scan for data before downloading. """
+        slices_by_filename = {}
+        for (k, s) in self.slices.items():
+            slices_by_filename[ s.filename ] = s
+        for scan_dir in self.settings.scan_dirs:
+            d = JigdoScanTarget( self.log,
+                                 self.settings,
+                                 scan_dir,
+                                 slices_by_filename )
+            self.scan_targets.append( d )
+        for scan_iso in self.settings.scan_isos:
+            i = JigdoScanTarget( self.log,
+                                 self.settings,
+                                 scan_dir,
+                                 slices_by_filename,
+                                 is_iso = True )
+            self.scan_targets.append( i )
+        for scan_target in self.scan_targets:
+            scan_target.run_scan()
 
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
@@ -730,12 +754,12 @@ class JigdoImageSlice:
 
 class JigdoScanTarget:
     """ A definition of where to look for existing bits. """
-    def __init__(self, location, cfg, log, needed_files, is_iso=False):
+    def __init__(self, log, settings, location, needed_files, is_iso=False):
+        self.log = log
+        self.settings = settings
         self.location = location
         self.mounted = False
         self.mount_location = ""
-        self.cfg = cfg
-        self.log = log
         self.is_iso = is_iso
         self.needed_files = needed_files
         # Make location absolute:
@@ -749,14 +773,20 @@ class JigdoScanTarget:
         for (path, directories, files) in os.walk(self.location):
             for name in files:
                 try:
-                    self.log.status(_("Looking for file %s ..." % name))
-                    target_slice = self.needed_files[name]
+                    # Wow, this is a hack. There has got to be a better way to do this.
+                    target_name = os.path.join(path, name).split(self.location)[1].strip('/')
+                    target_slice = self.needed_files[target_name]
+                    self.log.debug(_("Found file %s checking match..." % name))
                     found_target = os.path.join(path, name)
-                    target_slice.location = found_target
-                    self.log.debug(_("Found file %s, marking location." % name))
+                    if check_complete(self.log, found_target, target_slice.slice_sum):
+                        self.log.info(_("Found a matching file during scan: %s" % name))
+                        target_slice.location = found_target
+                        target_slice.finished = True
+                    else:
+                        self.log.info(_("Found a matching file, but it did not sum: %s" % name))
                 except KeyError:
-                    # We don't need this file
-                    pass
+                    # We don't need this file, hopefully
+                    self.log.debug(_("Ignoring non-matching file %s" % name))
 
     def mount(self):
         """ Mount the ISO. """
@@ -764,13 +794,12 @@ class JigdoScanTarget:
         self.mount_location = os.path.join(self.cfg.working_directory,
                                            "mounts",
                                            os.path.basename(self.location))
-        #pyJigdo.misc.check_directory(self.mount_location)
         mount_command = ["fuseiso",
                          "-p",
                          self.location,
                          self.mount_location]
         self.log.debug(_("Mounting %s at %s ..." % (self.location, self.mount_location)))
-        #pyJigdo.misc.run_command(mount_command)
+        run_command( self.log, self.settings, mount_command )
         self.mounted = True
         self.location = self.mount_location
 
@@ -778,7 +807,7 @@ class JigdoScanTarget:
         """ Un-Mount the ISO. """
         if not self.mounted: return
         umount_command = ["fusermount", "-u", self.mount_location]
-        #pyJigdo.misc.run_command(umount_command)
+        run_command( self.log, self.settings, umount_command )
 
 class JigdoJobPool:
     """ A pool to contain all our pending jobs.
