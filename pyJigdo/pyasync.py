@@ -127,7 +127,6 @@ class PyJigdoReactor:
                         ( len(self.pending_downloads),
                           self.base.settings.download_threads )))
         if self.pending_downloads:
-            #downloads = self.get_pending_downloads(get_factor=1)
             downloads = self.get_pending_downloads()
             r = self.parallel_get( downloads,
                                    self.base.settings.download_threads )
@@ -153,6 +152,14 @@ class PyJigdoReactor:
             self.log.debug(_("Still pending items, checkpointing..."))
             self.checkpoint(None)
         else:
+            # Stuff any remaining bits we have downloaded.
+            images_status = []
+            for jigdo_file in self.base.jigdo_files.values():
+                for image in jigdo_file.jigdo_data.images.values():
+                    if image.selected: images_status.append( image.finish() )
+            if not all(images_status):
+                # FIXME: Don't stop(), we are not done.
+                self.log.critical("We're not done, fail!!!")
             self.stop()
 
     def get_pending_downloads(self, get_factor=0):

@@ -549,13 +549,15 @@ class JigdoImage:
                                                              slice_hash,
                                                              slice_file_name,
                                                              self.jigdo_definition.servers.objects[slice_server_id],
-                                                             self.settings.download_storage )
+                                                             self.settings.download_storage,
+                                                             self )
             elif line.startswith('image-info'):
                 self.filename_md5sum = line.split()[2]
                 if iso_exists:
                     self.log.info(_("%s exists, checking..." % self.filename))
                     if check_complete( self.log, self.location, self.filename_md5sum):
-                        self.log.info(_("%s is complete." % self.filename))
+                        self.log.status(_("%s is complete and located at %s" % \
+                                         ( self.filename, self.location) ))
                         self.finished = True
                         self.selected = False
                         self.cleanup_template()
@@ -613,9 +615,36 @@ class JigdoImage:
         for scan_target in self.scan_targets:
             scan_target.run_scan()
 
+    def notify_slice_done(self):
+        """ The main checkpoint callback to stuff data into the ISO. """
+        ready_slices = self.finished_slices()
+        if len(ready_slices.keys()) >= self.settings.download_stuff_bits:
+            self.stuff_data()
+
+    def stuff_data(self):
+        """ Stuff data into the target ISO file. """
+        for slice in self.finished_slices().values():
+            if self.async.jigdo_file.stuff_bits_into_image( self,
+                                                            slice.fs_location,
+                                                            destroy = self.settings.download_stuff_then_remove ):
+                slice.in_image = True
+
+    def finish(self):
+        """ Finish processing this template.
+            Complain if we are not really done. """
+        self.log.debug(_("finish() has been called on %s, stuffing data." % self.filename))
+        self.stuff_data()
+        if self.missing_slices():
+            # FIXME: Do something other then complain.
+            self.log.critical(_("finish() was called on template %s, but there is missing data!" % self.filename))
+            return False
+        self.log.status(_("ISO Image %s is complete and located at %s" % ( self.filename,
+                                                                           self.location )))
+        return True
+
 class JigdoImageSlice:
     """ A file needing to be downloaded for an image. """
-    def __init__(self, log, async, settings, md5_sum, filename, repo, target_location):
+    def __init__(self, log, async, settings, md5_sum, filename, repo, target_location, template):
         """ Initialize the ImageSlice """
         self.log = log
         self.async = async
@@ -626,6 +655,7 @@ class JigdoImageSlice:
         self.target_location = target_location
         self.fs_location = os.path.join( self.target_location,
                                          self.filename )
+        self.template = template
         self.current_source = None
         self.download_tries = 0
         self.finished = False
@@ -650,6 +680,9 @@ class JigdoImageSlice:
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.filename))
+        # FIXME: Verify we have gotten the data we want.
+        self.finished = True
+        self.template.notify_slice_done()
         self.log.debug(_("Ending download event for %s" % self.filename))
 
     def download_callback_failure(self, ign):

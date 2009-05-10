@@ -35,9 +35,11 @@ class PyJigdoBase:
             setup to start creating Jigdo objects. """
 
         self.jigdo_files = {} # {JigdoFile().id: JigdoFile(),}
-        self.jigdo_templates = {} # {JigdoTemplate().id: JigdoTemplate(),}
-        self.jigdo_slices = {} # {JigdoSlice().id: JigdoSlice(),}
-        self.slice_sources = {} # {SliceSource().id: SliceSource(),}
+        # FIXME: Populate these entry points.
+        #self.jigdo_templates = {} # {JigdoTemplate().id: JigdoTemplate(),}
+        #self.jigdo_slices = {} # {JigdoSlice().id: JigdoSlice(),}
+        #self.slice_sources = {} # {SliceSource().id: SliceSource(),}
+        # / FIXME
         self.log = None # PyJigdoLogger()
         self.async = None # PyJigdoReactor()
         self.stats = None # PyJigdoStats()

@@ -281,6 +281,7 @@ class PyJigdo:
     def done(self):
         """ Make sure we are done and then exit. """
         # FIXME: Add checks for any last minute things and exit.
+        # FIXME: Issue a report about what was done and what worked.
         return 0
 
 # If we are being run interactively,

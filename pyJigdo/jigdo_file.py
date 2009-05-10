@@ -55,14 +55,14 @@ class execJigdoFile:
         stuff_command = [ "jigdo-file", "make-image",
                           "--image", jigdo_image.location,
                           "--template", jigdo_image.fs_location,
-                          "--jigdo", self.jigdo_definition.file_name,
+                          "--jigdo", jigdo_image.jigdo_definition.file_name,
                           "-r", "quiet",
                           "--force",
                           file ]
         run_command( self.log,
                      self.settings,
-                     command,
-                     env-self.jigdo_env,
+                     stuff_command,
+                     env=self.jigdo_env,
                      inshell=True )
         if destroy: os.remove(file)
 
