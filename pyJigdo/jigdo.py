@@ -55,8 +55,14 @@ class JigdoFile:
         self.download_tries += 1
         self.log.info(_("Successfully downloaded %s" % self.id))
         self.parse()
-        self.select_images()
-        self.get_templates()
+        if self.settings.list_images or self.settings.jigdo_info:
+            # List Defined Images
+            if self.settings.list_images: self.list_images()
+            # Give all information we know back to the user:
+            if self.settings.jigdo_info: self.full_info()
+        else:
+            self.select_images()
+            self.get_templates()
         self.log.debug(_("Ending download event for %s" % self.id))
 
     def download_callback_failure(self, ign):
@@ -116,6 +122,15 @@ class JigdoFile:
                                                self.settings,
                                                self.fs_location )
 
+    def list_images(self):
+        """ List the images defined in this Jigdo. """
+        self.jigdo_data.list_images()
+
+    def full_info(self):
+        """ Print all information we know based on what we have
+            downloaded so far. """
+        self.jigdo_data.print_information()
+
 class JigdoDefinition:
     """ A Jigdo Definition File.
         just_print is used to suppress the creation of objects. """
@@ -134,21 +149,21 @@ class JigdoDefinition:
 
     def list_images(self):
         """ Print the details about all images. """
-        self.log.info(_("==== Images defined in Jigdo ===="))
+        self.log.status(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
-            self.log.info(_("Image Number %s:\n\t %s" % (image_id, image)))
+            self.log.status(_("Image Number %s:\n%s" % (image_id, image)))
 
     def print_information(self):
         """ Print the contents of the definition. """
-        self.log.info(_("==== Servers listed in Jigdo ===="))
-        self.log.info(self.servers)
-        self.log.info(_("==== Mirror list sources listed in Jigdo ===="))
-        self.log.info(self.mirrors)
-        self.log.info(_("==== Images defined in Jigdo ===="))
+        self.log.status(_("==== Servers listed in Jigdo ===="))
+        self.log.status(self.servers)
+        self.log.status(_("==== Mirror list sources listed in Jigdo ===="))
+        self.log.status(self.mirrors)
+        self.log.status(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
-            self.log.info(_("Number %s:\n\t %s" % (image_id, image)))
-        self.log.info(_("==== Parts defined in Jigdo ===="))
-        self.log.info(self.parts)
+            self.log.status(_("Number %s:\n\t %s" % (image_id, image)))
+        self.log.status(_("==== Parts defined in Jigdo ===="))
+        self.log.status(self.parts)
 
 
     def parse(self):
@@ -445,10 +460,11 @@ class JigdoImage:
         self.tmp_location = ''
 
     def __str__(self):
-        """ Print information about the given image. """
-        return "Filename: %s Template: %s Template MD5SUM: %s" % ( self.filename,
-                                                                   self.template,
-                                                                   self.template_md5sum)
+        """ Return formatted information about the given image.
+            Note this is tab indented and return cleared. """
+        return "\tFilename: %s\n\tTemplate: %s\n\tTemplate MD5SUM: %s\n" % \
+               (self.filename, self.template, self.template_md5sum)
+
     def source(self):
         """ Return the source location for this Jigdo template. """
         return self.template

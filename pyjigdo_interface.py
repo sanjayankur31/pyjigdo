@@ -279,8 +279,8 @@ if __name__ == "__main__":
             return_code = pyJigdo_interface.base.async.reactor.run()
         except KeyboardInterrupt:
             print "\n\n"
-            pyJigdo_interface.log.status(_("Exiting on user request.\n"))
+            pyJigdo_interface.base.log.status(_("Exiting on user request.\n"))
             return_code = pyJigdo_interface.abort()
     else:
-        self.log.critical(_("Reactor started with nothing to do!"))
+        pyJigdo_interface.base.log.critical(_("Reactor started with nothing to do!"))
     sys.exit(return_code)
