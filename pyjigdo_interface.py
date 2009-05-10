@@ -230,7 +230,12 @@ class PyJigdo:
         # have a lockable UI yet.
         if len(self.jigdo_files) > 1:
             print _("Sorry, multiple jigdo files are not supported yet.")
-            print _("Soon!")
+            print _("Soon we will support this!")
+            print _("Given files were:")
+            for f in self.jigdo_files:
+                print "\t%s" % f
+            if self.cli_options.image_filenames:
+                self.shell_escape_help()
             sys.exit(1)
         return True
 
@@ -238,6 +243,15 @@ class PyJigdo:
         """ Show the help, with a logo. """
         print PYJIGDO_LOGO+"\n"
         self.parser.print_help()
+
+    def shell_escape_help(self):
+        """ Explain about shell escaping. """
+        print _("\nYou have used -f and/or some sort of shell glob. (*)")
+        print _("Your shell expanded that option and did not correctly pass")
+        print _("it into pyjigdo. For example, if you selected all the DVD")
+        print _("images with '-f *DVD*' you need to select them with the")
+        print _("following:")
+        print _("\t-f \*DVD\*\n")
 
     def run(self):
         return self.base.run()

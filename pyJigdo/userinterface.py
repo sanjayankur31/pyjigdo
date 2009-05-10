@@ -102,7 +102,7 @@ class SelectImages:
     def select_images(self):
         """ Select images based on selections by the user.
             Return True if actions were successful. """
-        self.log.debug(_("Selecting Images"))
+        self.log.debug(_("Selecting Images..."))
         success = False
         if self.settings.image_all or len(self.jigdo_definition.images) == 1:
             for image in self.jigdo_definition.images:
@@ -110,31 +110,25 @@ class SelectImages:
                 self.select_image(image)
             success = True
         elif self.settings.image_numbers or self.settings.image_filenames:
-            # Select images by number
+            # Here we allow using both selection by number and filenames.
+            # This offers the most flexibility.
+            # Select images by number:
             if self.settings.image_numbers:
                 for image_numstr in self.settings.image_numbers:
                     for image in pyJigdo.util.image_numstr_to_list(image_numstr):
                         if self.select_image(image):
-                            # At least one image was able to be selected,
-                            # return successfully. We might want to make it more
-                            # verbose if an image fails to select.
                             success = True
-                        else:
-                            self.log.warning(_("Could not select image %s") % image)
-            # Select images by whole filename or glob pattern
-            import re, fnmatch
+            # Select images by whole filename or glob pattern:
             if self.settings.image_filenames:
+                import re, fnmatch
                 for image_filestr in self.settings.image_filenames:     # -f "*i386*,*ppc*" -f "file"
                     for image_file in image_filestr.replace(',',' ').split(): # [*i386*,*ppc*], [file]
                         regex = re.compile(fnmatch.translate(image_file))
-                        for jignum, jigimg in self.jigdo_definition.images.iteritems():
-                            #print jignum, jigimg.filename
+                        for (jignum, jigimg) in self.jigdo_definition.images.iteritems():
                             if regex.match(jigimg.filename):
                                 self.log.debug(_("%s MATCHED: %d: %s") % (image_file, jignum, jigimg.filename))
                                 if self.select_image(jignum):
                                     success = True
-                                else:
-                                    self.log.warning(_("Could not select image %s") % image)
         return success
 
     def selected_images(self, fullObjects=False):
