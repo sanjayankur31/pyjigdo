@@ -7,13 +7,14 @@ git-clone git://git.fedorahosted.org/git/pyjigdo.git && cd pyjigdo
 
 == 2. Building pyjigdo ==
 
+./autogen.sh
+
+OR
+
 autoreconf
 ./configure
 make
 
-OR
-
-./reconfigure
 
 
 == 3. Run pyjigdo ==
