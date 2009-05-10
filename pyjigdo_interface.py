@@ -72,6 +72,8 @@ class PyJigdo:
         default_max_attempts = 6
         default_timeout = 30
         default_threads = 8
+        default_stuff_bits = default_threads*10
+        default_stuff_then_remove = False
         default_jigdo_file_location = "/usr/bin/jigdo-file"
 
         ##
@@ -173,6 +175,18 @@ class PyJigdo:
                                     help    = _("Number of threads to use when downloading. (Default: %s)" % default_threads),
                                     type    = "int",
                                     metavar = _("[number]"))
+        download_group.add_option(  "--stuff-bits",
+                                    dest    = "download_stuff_bits",
+                                    action  = "store",
+                                    default = default_stuff_bits,
+                                    help    = _("Number of files to download before stuffing into ISO. (Default: %s)" % default_stuff_bits),
+                                    type    = "int",
+                                    metavar = _("[number]"))
+        download_group.add_option(  "--stuff-then-remove",
+                                    dest    = "download_stuff_then_remove",
+                                    action  = "store_true",
+                                    default = default_stuff_then_remove,
+                                    help    = _("Remove downloaded data after stuffing into ISO. (Default: %s)" % default_stuff_then_remove))
         download_group.add_option(  "--download-storage",
                                     dest    = "download_storage",
                                     action  = "store",

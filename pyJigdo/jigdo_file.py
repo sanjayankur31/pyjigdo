@@ -46,3 +46,24 @@ class execJigdoFile:
                             env=self.jigdo_env,
                             inshell=True )
 
+    def stuff_bits_into_image(self, jigdo_image, file, destroy=False):
+        """ Put given file into given jigdo_image.
+            If destroy, the bits will be removed after being added to the
+            target image. """
+        self.log.debug(_("Stuffing %s into %s ..." % \
+                        ( file, os.path.basename(jigdo_image.location) )))
+        stuff_command = [ "jigdo-file", "make-image",
+                          "--image", jigdo_image.location,
+                          "--template", jigdo_image.fs_location,
+                          "--jigdo", self.jigdo_definition.file_name,
+                          "-r", "quiet",
+                          "--force",
+                          file ]
+        run_command( self.log,
+                     self.settings,
+                     command,
+                     env-self.jigdo_env,
+                     inshell=True )
+        if destroy: os.remove(file)
+
+
