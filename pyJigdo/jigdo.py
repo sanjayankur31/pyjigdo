@@ -161,7 +161,7 @@ class JigdoDefinition:
         self.log.status(self.mirrors)
         self.log.status(_("==== Images defined in Jigdo ===="))
         for (image_id, image) in self.images.iteritems():
-            self.log.status(_("Number %s:\n\t %s" % (image_id, image)))
+            self.log.status(_("Number %s:\n%s" % (image_id, image)))
         self.log.status(_("==== Parts defined in Jigdo ===="))
         self.log.status(self.parts)
 
@@ -301,10 +301,11 @@ class JigdoServersDefinition:
         self.objects = {}
 
     def __str__(self):
-        """ Print the contents of the definition. """
+        """ Return the contents of the definition.
+            Note this is tab indented and return cleared. """
         server_data = []
         for (server_id, server_url_list) in self.i.iteritems():
-            server_data.append("ID: %s URL(s): %s" % (server_id, " ".join(server_url_list)))
+            server_data.append("ID: %s\n\tURL(s): %s\n" % (server_id, " ".join(server_url_list)))
         return "\n".join(server_data)
 
     def add_option(self, name, val = None):
@@ -332,10 +333,11 @@ class JigdoMirrorlistsDefinition:
         self.i = {}
 
     def __str__(self):
-        """ Print the mirror lists we know about. """
+        """ Return the mirror lists we know about.
+            Note this is tab indented and return cleared. """
         mirror_data = []
         for (mirror_id, mirror_list_urls) in self.i.iteritems():
-            mirror_data.append("ID: %s URL(s): %s" % (mirror_id, " ".join(mirror_list_urls)))
+            mirror_data.append("ID: %s\n\tURL(s): %s\n" % (mirror_id, " ".join(mirror_list_urls)))
         return "\n".join(mirror_data)
 
     def add_option(self, name, val = None):
@@ -367,7 +369,7 @@ class JigdoPartsDefinition:
         return self.i[item]
 
     def __str__(self):
-        return "There are %s files defined." % len(self.i)
+        return "\tThere are %s files defined." % len(self.i)
 
     def add_option(self, name, val = None):
         self.i[name] = val
