@@ -167,14 +167,6 @@ class PyJigdoReactor:
                 r.append(self.pending_downloads.pop(0))
         return r
 
-    def download_complete(self, r, url):
-        """ The reactor reports a successful download. """
-        self.log.info(_("%s downloaded successfully." % url))
-
-    def download_failure(self, e, url):
-        """ The reactor reports something went wrong. """
-        self.log.error(_("%s failed to download." % url))
-
     def download_object(self, jigdo_object):
         """ Try to download the data from jigdo_object.source()
             to jigdo_object.target() and call
@@ -187,13 +179,4 @@ class PyJigdoReactor:
         #                  timeout = self.timeout )
         d.addCallback(jigdo_object.download_callback_success)
         d.addErrback(jigdo_object.download_callback_failure)
-        return d
-
-    def download_data(self, remote_target, storage_location):
-        """ Try to download the data from remote_target to 
-            given storage_location. """
-        d = downloadPage( remote_target, storage_location,
-                          agent=PYJIGDO_USER_AGENT ) # , timeout=self.timeout)
-        d.addCallback(self.download_complete, remote_target)
-        d.addErrback(self.download_failure, remote_target)
         return d
