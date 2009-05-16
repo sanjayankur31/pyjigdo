@@ -19,6 +19,7 @@ Implementation of Jigdo concepts, calling jigdo-file when needed.
 """
 
 import os, urlparse, sys, gzip
+from random import shuffle
 from ConfigParser import RawConfigParser
 
 from pyJigdo.userinterface import SelectImages
@@ -231,7 +232,10 @@ class JigdoDefinition:
                     # request and we expect a list of valid (or thought to be valid) URLs
                     # for which we can iterate to find a server with the given file.
                     elif sectname == "Mirrorlists":
-                        section = JigdoMirrorlistsDefinition(sectname, self.log)
+                        section = JigdoMirrorlistsDefinition( sectname,
+                                                              self.log,
+                                                              self.async,
+                                                              self.settings )
                         self.mirrors = section
                     else:
                         section = JigdoDefinitionSection(sectname)
@@ -280,7 +284,7 @@ class JigdoDefinition:
         if self.servers:
             self.servers.create_objects()
         else:
-            self.log.error(_("[Servers] section is not present or can't be parsed. Abort!"), recoverable = False)
+            self.log.critical(_("[Servers] section is not present or can't be parsed. Abort!"))
         # This will stuff the mirror information into the correct JigdoRepoDefinition
         if self.mirrors: self.mirrors.create_objects(self.servers)
 
@@ -327,10 +331,50 @@ class JigdoMirrorlistsDefinition:
         is called upon to inject the mirrorlists into the JigdoRepoDefinition.
         To be able to use the [mirrorlists] definition, the backwards-compatable
         [servers] section must also be used with the same repo id. """
-    def __init__(self, name, log):
+    def __init__(self, name, log, async, settings):
         self._section_name = name
         self.log = log
+        self.async = async
+        self.settings = settings
         self.i = {}
+        self.servers = None
+        self.mirror_data = {} # {repo_id: {download_tries: n, data: [] },}
+
+    def fetch_callback_success(self, ign, repo_id=None):
+        """ Callback entry point for when self.get() is successful. """
+        for l in ign.split('\n'):
+            if not l.startswith("#"): self.mirror_data[repo_id]["data"].append(l.rstrip('\n'))
+        self.log.info(_("Successfully downloaded %s" % repo_id))
+        self.mirror_data[repo_id]["download_tries"] += 1
+        self.add_results(repo_id)
+        self.log.debug(_("Ending download event for mirrorlist %s" % repo_id))
+
+    def fetch_callback_failure(self, ign, repo_id=None):
+        """ Callback entry point for when self.get() fails. """
+        print ign
+        self.mirror_data[repo_id]["download_tries"] += 1
+        self.log.warning(_("Failed to download mirrorlist %s: \n\t%s" % ( repo_id,
+                                                               ign )))
+        if self.mirror_data[repo_id]["download_tries"] >= self.settings.max_download_attempts:
+            self.log.error(_("Max tries for mirrorlist %s reached. Not downloading." % repo_id))
+        else:
+            self.async.request_fetch(self)
+        self.log.debug(_("Failed download of mirrorlist %s, added new task to try again." % repo_id))
+
+    def get(self, repo_id):
+        """ Download the Mirror lists file using the async.
+            Return the async task. """
+        if self.mirror_data[repo_id]["download_tries"] >= self.settings.max_download_attempts:
+            attempt = "last"
+        else:
+            attempt = self.mirror_data[repo_id]["download_tries"] + 1
+        self.log.status(_("Adding a task to download mirrorlist for: %s (attempt: %s)" % \
+                       (repo_id, attempt)))
+        # FIXME: Support multiple mirror list sources.
+        return self.async.fetch_data( self.i[repo_id][0],
+                                      self.fetch_callback_success,
+                                      self.fetch_callback_failure,
+                                      repo_id )
 
     def __str__(self):
         """ Return the mirror lists we know about.
@@ -347,15 +391,26 @@ class JigdoMirrorlistsDefinition:
             self.i[name] = []
         self.i[name].append(val)
 
+    def add_results(self, repo_id):
+        """ Take the mirror list results and add them to the correct servers section. """
+        try:
+            shuffle(self.mirror_data[repo_id]["data"])
+            self.servers.objects[repo_id].mirrorlist = self.mirror_data[repo_id]["data"]
+        except KeyError, e:
+            self.log.error(_("Failed to add mirror list for repo %s: %s" % (repo_id, e)))
+
     def create_objects(self, servers):
-        """ Find the JigdoRepoDefinition and inject the mirrorlists into it. """
-        for (repo_id, repo) in servers.objects.iteritems():
+        """ Find the JigdoRepoDefinition, add a task to download the mirror list
+            data. Gracefully fail if there is not a match. """
+        self.servers = servers
+        for (repo_id, repo) in self.servers.objects.iteritems():
             try:
-                #repo.mirrorlist = pyJigdo.misc.get_mirror_list(self.i[repo_id], self.log)
-                self.log.debug(repo)
+                check_mirrorlist = self.i[repo_id]
+                self.mirror_data[repo_id] = { "download_tries": 0,
+                                              "data": [] }
+                self.get(repo_id)
             except KeyError:
                 self.log.warning(_("Server ID '%s' does not have a matching matching mirrorlist.") % repo_id)
-
 
 class JigdoPartsDefinition:
     """ The [parts] section of a jigdo configuration file. """
@@ -700,6 +755,7 @@ class JigdoImageSlice:
         """ Queue the self.get() in the async.
             First check to see if the file is already there and is complete. """
         if check_complete(self.log, self.fs_location, self.slice_sum):
+            self.log.status(_("Requested data %s was found and is complete." % self.filename))
             self.download_callback_success(None)
         else:
             self.async.request_download(self)
@@ -721,8 +777,7 @@ class JigdoImageSlice:
         servers_only = self.settings.servers_only
         if (self.download_tries >= self.settings.fallback_number): servers_only = True
         url = self.repo.get_url( self.filename,
-                                 self.download_tries,
-
+                                 priority=self.download_tries,
                                  use_only_servers = servers_only)
         if not url:
            self.download_tries = self.settings.max_download_attempts

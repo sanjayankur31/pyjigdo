@@ -187,3 +187,15 @@ class PyJigdoReactor:
         d.addCallback(jigdo_object.download_callback_success)
         d.addErrback(jigdo_object.download_callback_failure)
         return d
+
+    def fetch_data(self, url, call_success, call_failure, repo_id):
+        """ Try to download the data from given url.
+            Callback to call_success() or call_failure()
+            based on task status. """
+        d = getPage( url,
+                     agent = PYJIGDO_USER_AGENT )
+        #            timeout = self.timeout )
+        d.addCallback(call_success, repo_id=repo_id)
+        d.addErrback(call_failure, repo_id=repo_id)
+        return d
+
