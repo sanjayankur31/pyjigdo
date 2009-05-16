@@ -471,6 +471,7 @@ class JigdoRepoDefinition:
                     if source not in self.history[file]:
                         base_url = source
                         self.history[file].append(source)
+                        break
 
         self.log.debug(_("Sourced base URL %s for file %s" % (base_url, file)))
 
