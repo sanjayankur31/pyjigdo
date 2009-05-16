@@ -32,29 +32,37 @@ class SelectImages:
     def __init__(self, log, settings, base, jigdo_definition):
         """ Interactively work with the user to select what images to download
             if there were not runtime options defining what to download.  """
-        # FIXME (class wide): NO bare print()
         self.log = log
         self.settings = settings
         self.base = base
         self.jigdo_definition = jigdo_definition
+
+    def run(self):
+        """ Run the selection and user interaction, returning if we selected
+            any images or not. """
+
         choosing_images = True
         num_images = len(self.jigdo_definition.images)
         image_maxwidth = len(str(num_images))
 
         if self.settings.image_numbers or self.settings.image_filenames or self.settings.image_all:
-            self.select_images()
-        else:
-         while choosing_images:
-            print "Please select one or more of the available Images:"
+            if not self.select_images():
+                self.log.status(_("Selection is invalid, please try again."))
+            else:
+                choosing_images = False
+
+        while choosing_images:
+            self.log.status(_("Please select one or more of the available Images:"))
             for image in self.jigdo_definition.images:
-                print "%*s: %s" % (image_maxwidth+1, "#" + str(image), self.jigdo_definition.images[image].filename)
+                self.log.status(_("%*s: %s" % (image_maxwidth+1, "#" + str(image), self.jigdo_definition.images[image].filename)))
 
             try:
                 image_choice = raw_input("What image(s) would you like to download? [1-%s] " % num_images )
             except KeyboardInterrupt:
                 self.base.abort()
+                break
             if image_choice == "":
-                print "Choose the number(s) of the image file(s), seperated by commas or spaces, or specify a range (1-5)"
+                self.log.status(_("Choose the number(s) of the image file(s), seperated by commas or spaces, or specify a range (1-5)"))
                 continue
             try:
                 ret = image_choice.index('all')
@@ -71,19 +79,29 @@ class SelectImages:
             for choice in expanded_image_choices:
                 try:
                     choice = int(choice)
+                    if choice > num_images: raise ValueError
                 except ValueError, e:
-                    self.log.error(_("Invalid selection."))
+                    self.log.status(_("Invalid selection: %s" % choice))
                     continue
 
                 self.select_image(choice)
 
-            print "Currently going to download image(s): %s" % ", ".join(self.selected_images())
+            active_images = ", ".join(self.selected_images())
+            if not active_images: active_images = "None!"
+
+            self.log.status(_("Currently going to download image(s): %s" % active_images))
             try:
                 continue_selecting = raw_input("Would you like to select another image for download? [y/N] ")
             except KeyboardInterrupt:
                 self.base.abort()
+                break
             if continue_selecting.lower() not in ["y", "yes"]:
                 choosing_images = False
+
+        if len(self.selected_images()) > 0:
+            return True
+        else:
+            return False
 
     def select_image(self, image_unique_id):
         """ Flip the switch to set an image to download.

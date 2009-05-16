@@ -1,3 +1,6 @@
+== Notes ==
+pyJigdo currently requires twisted 8.2.0+ to even run.
+
 
 == 1. Checkout the source ==
 

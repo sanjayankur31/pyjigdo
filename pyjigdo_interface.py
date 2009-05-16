@@ -299,5 +299,5 @@ if __name__ == "__main__":
             pyJigdo_interface.base.log.status(_("Exiting on user request.\n"))
             return_code = pyJigdo_interface.abort()
     else:
-        pyJigdo_interface.base.log.critical(_("Reactor started with nothing to do!"))
+        pyJigdo_interface.base.log.critical(_("pyJigdo started with nothing to do!"))
     sys.exit(return_code)

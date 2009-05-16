@@ -22,7 +22,7 @@ import os, urlparse, sys, gzip
 from ConfigParser import RawConfigParser
 
 from pyJigdo.userinterface import SelectImages
-from pyJigdo.util import url_to_file_name, check_complete, run_command
+from pyJigdo.util import url_to_file_name, check_complete, run_command, check_directory
 
 import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
@@ -61,8 +61,7 @@ class JigdoFile:
             # Give all information we know back to the user:
             if self.settings.jigdo_info: self.full_info()
         else:
-            self.select_images()
-            self.get_templates()
+            if self.select_images(): self.get_templates()
         self.log.debug(_("Ending download event for %s" % self.id))
 
     def download_callback_failure(self, ign):
@@ -110,6 +109,7 @@ class JigdoFile:
                                              self.settings,
                                              self.base,
                                              self.jigdo_data )
+        self.image_selection.run()
 
     def parse(self):
         """ Parse the jigdo file. """
@@ -608,7 +608,7 @@ class JigdoImage:
         for scan_iso in self.settings.scan_isos:
             i = JigdoScanTarget( self.log,
                                  self.settings,
-                                 scan_dir,
+                                 scan_iso,
                                  slices_by_filename,
                                  is_iso = True )
             self.scan_targets.append( i )
@@ -759,7 +759,7 @@ class JigdoScanTarget:
                     found_target = os.path.join(path, name)
                     if check_complete(self.log, found_target, target_slice.slice_sum):
                         self.log.info(_("Found a matching file during scan: %s" % name))
-                        target_slice.location = found_target
+                        target_slice.fs_location = found_target
                         target_slice.finished = True
                     else:
                         self.log.info(_("Found a matching file, but it did not sum: %s" % name))
@@ -770,9 +770,10 @@ class JigdoScanTarget:
     def mount(self):
         """ Mount the ISO. """
         if self.mounted: return
-        self.mount_location = os.path.join(self.cfg.working_directory,
+        self.mount_location = os.path.join(self.settings.download_storage,
                                            "mounts",
                                            os.path.basename(self.location))
+        check_directory(self.log, self.mount_location)
         mount_command = ["fuseiso",
                          "-p",
                          self.location,

@@ -52,7 +52,8 @@ for name, target in urls.iteritems():
           (target, os.path.join(os.getcwd(), name))
     get_file.get(http_downloader)
 
+print "Ctrl-c to exit main loop."
 reactor.run()
 
-print "Succes!"
+print "\nSucces!"
 
