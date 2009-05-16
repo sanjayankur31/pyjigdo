@@ -351,7 +351,6 @@ class JigdoMirrorlistsDefinition:
 
     def fetch_callback_failure(self, ign, repo_id=None):
         """ Callback entry point for when self.get() fails. """
-        print ign
         self.mirror_data[repo_id]["download_tries"] += 1
         self.log.warning(_("Failed to download mirrorlist %s: \n\t%s" % ( repo_id,
                                                                ign )))
@@ -438,6 +437,7 @@ class JigdoRepoDefinition:
         self.log = log
         self.mirrorlist = mirrorlist
         self.data_source = data_source
+        self.history = {} # { file: [base_url,] }
 
     def __str__(self):
         """ Return data about this JigdoRepo. """
@@ -445,41 +445,34 @@ class JigdoRepoDefinition:
                                                             self.baseurls,
                                                             self.mirrorlist )
 
-    def get_url(self, file, priority=0, use_only_servers = False):
-        """ Get a resolved url from this repo, given a file name and resolution priority.
-            The higher the priority, the more direct a response will be given.
+    def get_url(self, file, use_only_servers = False):
+        """ Get a resolved url from this repo, given a file name.
             If use_only_servers is True, only baseurls will be tried. """
-
-        num_sources = len(self.baseurls) + len(self.mirrorlist)
         base_url = None
-        if not priority and not use_only_servers:
-            # Mirror lists: order of response from mirror list server, these are tried first
-            # Servers: first listed -> down; meaning, try the first listed match
-            # This can all be affected by using priority. The larger the priority, the more specific we
-            # need for a response.
-            if self.mirrorlist:
-                base_url = self.mirrorlist[0]
-            else:
-                base_url = self.baseurls[0]
-        elif use_only_servers:
+        # Make sure we have a history for this file.
+        try:
+            c = self.history[file]
+        except KeyError:
+            self.history[file] = []
+        
+        if use_only_servers:
             # Only look for a source defined by a [servers] section
-            while not base_url and (priority > -1) and (priority < len(self.baseurls)):
-                try:
-                    base_url = self.baseurls[priority]
-                except IndexError:
-                    pass
-                priority -= 1
+            if not (len(self.history[file]) >= len(self.baseurls)):
+                for source in self.baseurls:
+                    if source not in self.history[file]:
+                        base_url = source
+                        self.history[file].append(source)
+                        break
         else:
-            # Find the closest match to the priority requested.
-            while not base_url and (priority > -1) and (priority < num_sources):
-                try:
-                    base_url = self.mirrorlist[priority]
-                except IndexError:
-                    try:
-                        base_url = self.baseurls[priority]
-                    except IndexError:
-                        pass
-                priority -= 1
+            # Find a mirror we have not tried yet.
+            source_list = self.mirrorlist + self.baseurls
+            if not (len(self.history[file]) >= len(source_list)):
+                for source in source_list:
+                    if source not in self.history[file]:
+                        base_url = source
+                        self.history[file].append(source)
+
+        self.log.debug(_("Sourced base URL %s for file %s" % (base_url, file)))
 
         if not base_url: return None
         urldata = urlparse.urlsplit(base_url)
@@ -777,7 +770,6 @@ class JigdoImageSlice:
         servers_only = self.settings.servers_only
         if (self.download_tries >= self.settings.fallback_number): servers_only = True
         url = self.repo.get_url( self.filename,
-                                 priority=self.download_tries,
                                  use_only_servers = servers_only)
         if not url:
            self.download_tries = self.settings.max_download_attempts
