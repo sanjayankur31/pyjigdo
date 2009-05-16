@@ -112,9 +112,9 @@ class SelectImages:
         # Find the image with unique_id
         if self.jigdo_definition.images.has_key(image_unique_id):
             self.jigdo_definition.images[image_unique_id].select()
+            success = True
         else:
             self.log.warning(_("Could not select image %s") % image_unique_id)
-            success = False
         return success
 
     def select_images(self):

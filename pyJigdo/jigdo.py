@@ -109,7 +109,7 @@ class JigdoFile:
                                              self.settings,
                                              self.base,
                                              self.jigdo_data )
-        self.image_selection.run()
+        return self.image_selection.run()
 
     def parse(self):
         """ Parse the jigdo file. """
