@@ -431,19 +431,17 @@ class JigdoPartsDefinition:
 class JigdoRepoDefinition:
     """ A repo definition that can return an url for a given label.
         Baseurls and mirrorlist need to be lists. """
-    def __init__(self, label, baseurls, log, mirrorlist=[], data_source=None):
+    def __init__(self, label, baseurls, log, mirrorlist=[]):
         self.label = label
         self.baseurls = baseurls
         self.log = log
         self.mirrorlist = mirrorlist
-        self.data_source = data_source
         self.history = {} # { file: [base_url,] }
 
     def __str__(self):
         """ Return data about this JigdoRepo. """
-        return "Label: '%s' \n\tBaseurls: %s \n\tMirrorlist: %s" % ( self.label,
-                                                            self.baseurls,
-                                                            self.mirrorlist )
+        return "Label: '%s' \n\tBaseurls: %s \n\tMirrorlist: %s" % \
+               ( self.label, self.baseurls, self.mirrorlist )
 
     def get_url(self, file, use_only_servers = False):
         """ Get a resolved url from this repo, given a file name.
@@ -457,12 +455,12 @@ class JigdoRepoDefinition:
         
         if use_only_servers:
             # Only look for a source defined by a [servers] section
-            if not (len(self.history[file]) >= len(self.baseurls)):
-                for source in self.baseurls:
-                    if source not in self.history[file]:
-                        base_url = source
-                        self.history[file].append(source)
-                        break
+            # Always try all [servers]
+            for source in self.baseurls:
+                if source not in self.history[file]:
+                    base_url = source
+                    self.history[file].append(source)
+                    break
         else:
             # Find a mirror we have not tried yet.
             source_list = self.mirrorlist + self.baseurls
@@ -474,6 +472,7 @@ class JigdoRepoDefinition:
                         break
 
         self.log.debug(_("Sourced base URL %s for file %s" % (base_url, file)))
+        self.log.debug(_("File %s history: %s" % (file, " ".join(self.history[file]))))
 
         if not base_url: return None
         urldata = urlparse.urlsplit(base_url)
