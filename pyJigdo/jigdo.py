@@ -357,7 +357,7 @@ class JigdoMirrorlistsDefinition:
         if self.mirror_data[repo_id]["download_tries"] >= self.settings.max_download_attempts:
             self.log.error(_("Max tries for mirrorlist %s reached. Not downloading." % repo_id))
         else:
-            self.async.request_fetch(self)
+            self.get(repo_id)
         self.log.debug(_("Failed download of mirrorlist %s, added new task to try again." % repo_id))
 
     def get(self, repo_id):

@@ -3,7 +3,7 @@
 Summary:        Python version of Jigdo, slightly modified
 Name:           pyjigdo
 Version:        @VERSION@
-Release:        2%{?dist}
+Release:        1%{?dist}
 License:        GPLv2+
 Group:          Applications/System
 URL:            http://fedorahosted.org/pyjigdo
@@ -44,6 +44,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Sat May 16 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0-1
+- Build 0.4.x to get some wider testing done
+
 * Wed Apr 30 2008 Jason Farrell <farrellj a gmail.com> 0.3.0-2
 - Added pyjigdo.1 manpage
 

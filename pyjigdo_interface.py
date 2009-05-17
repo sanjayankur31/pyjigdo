@@ -21,7 +21,7 @@ import os, sys
 
 # Add a hack to allow running from a git clone.
 # This needs to be removed before any public release.
-sys.path.append(os.getcwd())
+#sys.path.append(os.getcwd())
 
 import pyJigdo.base
 from pyJigdo.constants import *

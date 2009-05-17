@@ -11,7 +11,7 @@ PYTHON_FILES = \
 
 EXTRA_DIST = \
     $(PYTHON_FILES) \
-    constants.py.in
+    constants.py.in \
     __init__.py.in
 
 pydir = $(pythondir)/pyJigdo

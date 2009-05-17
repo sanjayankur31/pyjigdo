@@ -21,27 +21,4 @@ if [ "$?" -ne "0" ]; then
   need_deps
 fi
 
-echo -n "Run configure? [y/N] " 
-read -n 2 INPUT
-echo ""
-if [ "$INPUT" != "y" ]; then
-  exit
-fi
 ./configure
-
-echo -n "Run make srpm? [y/N] " 
-read -n 2 INPUT
-echo ""
-if [ "$INPUT" != "y" ]; then
-  exit
-fi
-make srpm
-
-echo -n "Run make rpm? [y/N] "
-read -n 2 INPUT
-echo ""
-if [ "$INPUT" != "y" ]; then
-  exit
-fi
-make rpm
-
