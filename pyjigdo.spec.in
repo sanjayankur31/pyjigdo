@@ -44,6 +44,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Mon May 18 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0.1-1
+- Fix missing file in package
+
 * Sat May 16 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0-1
 - Build 0.4.x to get some wider testing done
 
