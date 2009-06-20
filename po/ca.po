@@ -1,7 +1,7 @@
 # Catalan translations for pyjigdo package.
 # Copyright (C) 2009 Red Hat, Inc.
 # This file is distributed under the same license as the
-#  revisor package.
+#  pyjigdo package.
 #
 # This file is translated according to the glossary and style guide of
 #   Softcatalà. If you plan to modify this file, please read first the page
@@ -20,8 +20,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-09-04 11:55+0200\n"
-"PO-Revision-Date: 2009-05-30 22:12+0100\n"
-"Last-Translator: Xavier Conde Rueda <xavi.conde@gmail.com>\n"
+"PO-Revision-Date: 2009-06-19 12:53+0100\n"
+"Last-Translator: Tomàs Bigordà <t0mynoker@gmail.com>\n"
 "Language-Team: Catalan <fedora@softcatala.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -37,23 +37,21 @@ msgstr "Opcions d'execució"
 
 #: ../pyjigdo.py:71
 msgid "Use the CLI rather than GUI (default)"
-msgstr ""
+msgstr "Utilitza la línia d'ordres en comptes de la interfície gràfica (per defecte)"
 
 #. TODO: when the GUI is ready, a pyjigdo-gui symlink should default to --gui (by checking argv[0])
 #. help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors. (pyjigdo-gui default)"))
 #: ../pyjigdo.py:78
-msgid ""
-"Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI "
-"related errors"
-msgstr ""
+msgid "Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors"
+msgstr "Força el pyJigdo a utilitzar la UI. No hi ha l'alternativa de la línia d'ordres, i per tant mostra errors relacionats amb la interfície"
 
 #: ../pyjigdo.py:83
 msgid "List available images for a given Jigdo file."
-msgstr ""
+msgstr "Llista les imatges disponibles per a un determinat fitxer jigdo."
 
 #: ../pyjigdo.py:92
 msgid "Set debugging level (0 by default)"
-msgstr ""
+msgstr "Estableix el nivell de depuració (0 per defecte)"
 
 #. #
 #. # Redundant Options
@@ -68,69 +66,68 @@ msgstr ""
 #. #
 #: ../pyjigdo.py:106
 msgid "Configuration Options"
-msgstr ""
+msgstr "Opcions de configuració"
 
 #: ../pyjigdo.py:111
 msgid "PyJigdo configuration file to use"
-msgstr ""
+msgstr "Fitxer de configuració PyJigdo per utilitzar"
 
 #: ../pyjigdo.py:112
 msgid "[config file]"
-msgstr ""
+msgstr "[fitxer de configuració]"
 
 #: ../pyjigdo.py:117
 #, python-format
 msgid "Destination directory for products. (Default: %s)"
-msgstr ""
+msgstr "Directori de destinació per als productes. (Per defecte: %s)"
 
-#: ../pyjigdo.py:118 ../pyjigdo.py:124 ../pyjigdo.py:226
+#: ../pyjigdo.py:118
+#: ../pyjigdo.py:124
+#: ../pyjigdo.py:226
 msgid "[directory]"
-msgstr ""
+msgstr "[directori]"
 
 #: ../pyjigdo.py:123
 #, python-format
 msgid "Working directory. (Default: %s)"
-msgstr ""
+msgstr "Directori de treball. (Per defecte: %s)"
 
 #. # Information Options
 #. # Purpose: We should allow a user to query a jigdo and get lots-o-info from just
 #. #          downloading the jigdo file.
 #: ../pyjigdo.py:129
 msgid "General Options"
-msgstr ""
+msgstr "Opcions generals"
 
 #: ../pyjigdo.py:134
 msgid "Location of jigdo file."
-msgstr ""
+msgstr "Ubicació del fitxer jidgo."
 
 #: ../pyjigdo.py:135
 msgid "[url]"
-msgstr ""
+msgstr "[url]"
 
 #: ../pyjigdo.py:140
 msgid "Print information about the jigdo image and exit."
-msgstr ""
+msgstr "Escriu informació quant a la imatge jidgo i surt."
 
 #: ../pyjigdo.py:146
 #, python-format
-msgid ""
-"Number of public mirrors to try before using a fallback mirror. (Default: %s)"
-msgstr ""
+msgid "Number of public mirrors to try before using a fallback mirror. (Default: %s)"
+msgstr "Nombre de rèpliques públiques a provar abans d'utilitzar una rèplica predeterminada. (Per defecte: %s)"
 
 #: ../pyjigdo.py:147
 msgid "[number of tries]"
-msgstr ""
+msgstr "[nombre d'intents]"
 
 #: ../pyjigdo.py:153
 #, python-format
-msgid ""
-"Number of seconds to wait before switching to different slice source. "
-"(Default: %s)"
-msgstr ""
+msgid "Number of seconds to wait before switching to different slice source. (Default: %s)"
+msgstr "Nombre de segons a esperar abans de canviar entre els diferents tipus de font. (Per defecte: %s)"
 
 #: ../pyjigdo.py:154
 msgid "[number of seconds]"
-msgstr ""
+msgstr "[nombre de segons]"
 
 #. # Downloading Options
 #. # Purpose: Allow a user to non-interactively download a defined image or images.
@@ -138,31 +135,29 @@ msgstr ""
 #. #          This is also for download options, like how many threads to use, to cache or not, etc.
 #: ../pyjigdo.py:160
 msgid "Download Options"
-msgstr ""
+msgstr "Opcions de baixada"
 
 #: ../pyjigdo.py:166
-msgid ""
-"Download or Host a given comma-separated list of image number(s) or range"
-"(s). e.g.: \"7,15,23,8-13\""
+msgid "Download or Host a given comma-separated list of image number(s) or range(s). e.g.: \"7,15,23,8-13\""
 msgstr ""
+"Baixa o allotja una llista de números d'imatges o rangs (separada per comes). P.e: \"7,15,23,8-13\""
 
 #: ../pyjigdo.py:167
 msgid "[image numbers]"
-msgstr ""
+msgstr "[números de la imatge]"
 
 #: ../pyjigdo.py:173
-msgid ""
-"Download or Host a given comma-separated list of image filenames or file "
-"glob patterns. e.g.: \"*i386*CD*,foo.iso\""
+msgid "Download or Host a given comma-separated list of image filenames or file glob patterns. e.g.: \"*i386*CD*,foo.iso\""
 msgstr ""
+"Baixa o allotja una llista de noms de fitxer d'imatges o patrons del glob (separada per comes). \"*i386*CD*,foo.iso\""
 
 #: ../pyjigdo.py:174
 msgid "[image filenames]"
-msgstr ""
+msgstr "[noms de fitxer d'imatge]"
 
 #: ../pyjigdo.py:179
 msgid "Download or Host all images defined in jigdo. Same as -f \"*\""
-msgstr ""
+msgstr "Baixa o allotja totes les imatges definides en el jigdo. Igual que -f \"*\""
 
 #. # FIXME: Any creative ways to take this data and not limit to just two repos?
 #. download_group.add_option(  "--download-mirror-base",
@@ -202,144 +197,147 @@ msgstr ""
 #.
 #: ../pyjigdo.py:220
 msgid "Scan Options"
-msgstr ""
+msgstr "Opcions d'escaneig"
 
 #: ../pyjigdo.py:225
 msgid "Scan given directory for files needed by selected image(s)."
-msgstr ""
+msgstr "Escaneja el directori donat pels fitxers necessaris per a les imatges seleccionades."
 
 #: ../pyjigdo.py:231
-msgid ""
-"Mount and then scan existing ISO images for files needed by selected image"
-"(s)."
-msgstr ""
+msgid "Mount and then scan existing ISO images for files needed by selected image(s)."
+msgstr "Munta i després escaneja les imatges ISO existents pels fitxers necessaris per a les imatges seleccionades."
 
 #: ../pyjigdo.py:232
 msgid "[iso image]"
-msgstr ""
+msgstr "[imatge ISO]"
 
 #: ../pyjigdo/base.py:78
 msgid "Running PyJigdo in CLI mode..."
-msgstr ""
+msgstr "S'està executant el PyJigdo en mode de línia d'ordres..."
 
 #: ../pyjigdo/base.py:89
 msgid "Running PyJigdo in GUI mode..."
-msgstr ""
+msgstr "S'està executant el PyJigdo en mode d'interfície gràfica..."
 
 #: ../pyjigdo/base.py:136
 #, python-format
 msgid "Loading Jigdo file %s"
-msgstr ""
+msgstr "S'està carregant el fitxer jigdo %s"
 
 #: ../pyjigdo/base.py:159
 #, python-format
 msgid "Selecting Image %d"
-msgstr ""
+msgstr "S'està seleccionant la imatge %d"
 
-#: ../pyjigdo/base.py:165 ../pyjigdo/base.py:190 ../pyjigdo/base.py:204
+#: ../pyjigdo/base.py:165
+#: ../pyjigdo/base.py:190
+#: ../pyjigdo/base.py:204
 #, python-format
 msgid "Could not select image %s"
-msgstr ""
+msgstr "No s'ha pogut seleccionar la imatge %s"
 
 #: ../pyjigdo/base.py:172
 msgid "Selecting Images"
-msgstr ""
+msgstr "Selecció d'imatges"
 
 #: ../pyjigdo/base.py:200
 #, python-format
 msgid "%s MATCHED: %d: %s"
-msgstr ""
+msgstr "%s concordança: %d: %s"
 
 #: ../pyjigdo/base.py:227
 msgid "Initting progress bar for "
-msgstr ""
+msgstr "S'està inicialitzant la barra de progrés per a "
 
 #: ../pyjigdo/base.py:252
 #, python-format
 msgid "Adding image %s to our queue."
-msgstr ""
+msgstr "S'està afegint la imatge %s a la nostra cua."
 
 #: ../pyjigdo/base.py:258
 #, python-format
 msgid "Creating download tasks for %s"
-msgstr ""
+msgstr "S'està creant les tasques de baixada per a %s"
 
 #: ../pyjigdo/base.py:264
 #, python-format
 msgid "Adding source %s to be scanned for data."
-msgstr ""
+msgstr "S'està afegint la font %s per analitzar-la per dades."
 
 #: ../pyjigdo/base.py:294
 msgid "Something failed to finish...\n"
-msgstr ""
+msgstr "Alguna cosa ha fallat per acabar...\n"
 
 #: ../pyjigdo/cfg.py:63
 msgid "Running from CLI but no .jigdo file specified"
-msgstr ""
+msgstr "S'està executant des de línia d'ordres però no s'ha especificat cap fitxer .jigdo"
 
 #: ../pyjigdo/cfg.py:66
 msgid "Info requested from a .jigdo file but no .jigdo file specified"
-msgstr ""
+msgstr "S'ha sol·licitat informació d'un fitxer .jigdo però no s'ha especificat el fitxer"
 
 #: ../pyjigdo/cfg.py:73
 msgid "Setting options from configuration file"
-msgstr ""
+msgstr "S'està establint les opcions des del fitxer de configuració"
 
 #: ../pyjigdo/cfg.py:92
 #, python-format
 msgid "Configuration file %s not readable, continuing without"
-msgstr ""
+msgstr "No es pot llegir el fitxer de configuració %s, es continua sense ell"
 
 #: ../pyjigdo/cfg.py:96
 #, python-format
 msgid "Reading configuration file %s"
-msgstr ""
+msgstr "S'està llegint el fitxer de configuració %s"
 
 #: ../pyjigdo/cfg.py:100
 #, python-format
 msgid "Invalid configuration file %s"
-msgstr ""
+msgstr "Fitxer de configuració no vàlid %s"
 
 #: ../pyjigdo/cfg.py:139
 #, python-format
 msgid "Setting %s to %r (from configuration file)"
-msgstr ""
+msgstr "S'està establint %s a %r (des del fitxer de configuració)"
 
 #: ../pyjigdo/cfg.py:143
 msgid "Setting options from command-line"
-msgstr ""
+msgstr "S'està establint les opcions des de la línia d'ordres"
 
-#: ../pyjigdo/cfg.py:157 ../pyjigdo/cfg.py:161 ../pyjigdo/cfg.py:163
+#: ../pyjigdo/cfg.py:157
+#: ../pyjigdo/cfg.py:161
+#: ../pyjigdo/cfg.py:163
 #, python-format
 msgid "Setting %s to %r (from command line)"
-msgstr ""
+msgstr "S'està establint %s a %r (des de la línia d'ordres)"
 
 #: ../pyjigdo/cfg.py:159
 #, python-format
 msgid "No check_setting_%s()"
-msgstr ""
+msgstr "No existeix check_setting_%s()"
 
 #: ../pyjigdo/cli.py:90
 msgid "Invalid selection."
-msgstr ""
+msgstr "Selecció invàlida."
 
 #: ../pyjigdo/cli.py:115
 msgid "All images have reported as complete. Nothing to do."
-msgstr ""
+msgstr "Totes les imatges estan completes. Res més a fer."
 
 #: ../pyjigdo/cli.py:132
 #, python-format
 msgid "Image %s successfully downloaded to: %s"
-msgstr ""
+msgstr "Imatge %s baixada correctament a: %s"
 
 #: ../pyjigdo/cli.py:136
 #, python-format
 msgid "Image %s failed to complete. Try running pyjigdo again."
-msgstr ""
+msgstr "La imatge %s no s'ha completat. Proveu d'executar el pyjigdo un altre cop."
 
-#: ../pyjigdo/jigdo.py:45 ../pyjigdo/jigdo.py:55
+#: ../pyjigdo/jigdo.py:45
+#: ../pyjigdo/jigdo.py:55
 msgid "==== Images defined in Jigdo ===="
-msgstr ""
+msgstr "==== Imatges definides amb Jigdo ===="
 
 #: ../pyjigdo/jigdo.py:47
 #, python-format
@@ -347,14 +345,16 @@ msgid ""
 "Image Number %s:\n"
 "\t %s"
 msgstr ""
+"Número de la imatge %s:\n"
+"\t %s"
 
 #: ../pyjigdo/jigdo.py:51
 msgid "==== Servers listed in Jigdo ===="
-msgstr ""
+msgstr "==== Servidors enumerats en Jigdo ===="
 
 #: ../pyjigdo/jigdo.py:53
 msgid "==== Mirror list sources listed in Jigdo ===="
-msgstr ""
+msgstr "==== Llistes de rèpliques de fonts enumerades en el Jigdo ===="
 
 #: ../pyjigdo/jigdo.py:57
 #, python-format
@@ -362,108 +362,112 @@ msgid ""
 "Number %s:\n"
 "\t %s"
 msgstr ""
+"Número %s:\n"
+"\t %s"
 
 #: ../pyjigdo/jigdo.py:58
 msgid "==== Parts defined in Jigdo ===="
-msgstr ""
+msgstr "==== Parts definides en Jigdo ===="
 
 #: ../pyjigdo/jigdo.py:176
 msgid "[Servers] section is not present or can't be parsed. Abort!"
-msgstr ""
+msgstr "La secció [Servers] no està present o no pot ser analitzada. S'ha avortat."
 
 #: ../pyjigdo/jigdo.py:248
 #, python-format
 msgid "Server ID '%s' does not have a matching matching mirrorlist."
-msgstr ""
+msgstr "ID del servidor '%s' no té una concordança en el llistat de rèpliques."
 
 #: ../pyjigdo/jigdo.py:367
 #, python-format
 msgid "Temporary template found at %s"
-msgstr ""
+msgstr "S'ha trobat una plantilla temporal a %s"
 
 #: ../pyjigdo/jigdo.py:383
 #, python-format
 msgid "%s exists, checking..."
-msgstr ""
+msgstr "%s existeix, comprovant ..."
 
-#: ../pyjigdo/jigdo.py:386 ../pyjigdo/jigdo.py:431
+#: ../pyjigdo/jigdo.py:386
+#: ../pyjigdo/jigdo.py:431
 #, python-format
 msgid "%s is complete."
-msgstr ""
+msgstr "%s s'ha completat."
 
 #: ../pyjigdo/jigdo.py:429
 #, python-format
 msgid "Checking image %s ..."
-msgstr ""
+msgstr "S'està comprovant la imatge %s ..."
 
 #: ../pyjigdo/jigdo.py:483
 #, python-format
 msgid "Trying to download %s"
-msgstr ""
+msgstr "S'està intentat baixar %s"
 
 #: ../pyjigdo/jigdo.py:484
 #, python-format
 msgid "Trying %s for %s"
-msgstr ""
+msgstr "S'està intentant %s per %s"
 
 #: ../pyjigdo/jigdo.py:503
 #, python-format
 msgid "%s exists and checksum matches."
-msgstr ""
+msgstr "%s existeix i la suma de comprovació concorda."
 
 #: ../pyjigdo/jigdo.py:524
 #, python-format
 msgid "Scanning %s for needed files..."
-msgstr ""
+msgstr "S'està escanejant %s per als fitxers necessaris..."
 
 #: ../pyjigdo/jigdo.py:528
 #, python-format
 msgid "Looking for file %s ..."
-msgstr ""
+msgstr "Buscant fitxer %s ..."
 
 #: ../pyjigdo/jigdo.py:532
 #, python-format
 msgid "Found file %s, marking location."
-msgstr ""
+msgstr "S'ha trobat el fitxer %s, s'està marcant la ubicació."
 
 #: ../pyjigdo/jigdo.py:548
 #, python-format
 msgid "Mounting %s at %s ..."
-msgstr ""
+msgstr "S'està muntant %s en %s ..."
 
 #: ../pyjigdo/jigdo.py:581
 #, python-format
 msgid "Adding a job for %s: %s"
-msgstr ""
+msgstr "S'està afegint una tasca per a %s: %s"
 
 #: ../pyjigdo/jigdo.py:631
 #, python-format
 msgid "Download failed: %s"
-msgstr ""
+msgstr "Ha fallat la baixada: %s"
 
 #: ../pyjigdo/jigdo.py:641
 msgid "The following downloads failed:"
-msgstr ""
+msgstr "Han fallat les següents baixades:"
 
+# Descarregar de %s fallat
 #: ../pyjigdo/jigdo.py:643
 #, python-format
 msgid "Download of %s failed."
-msgstr ""
+msgstr "Ha fallat la baixada de %s."
 
 #: ../pyjigdo/jigdo.py:645
 #, python-format
 msgid "Re-queuing %s ..."
-msgstr ""
+msgstr "S'està encuant de nou %s ..."
 
 #: ../pyjigdo/jigdo.py:657
 #, python-format
 msgid "Stuffing bits into Jigdo image %s..."
-msgstr ""
+msgstr "S'està farcint de bits la imatge Jigdo %s..."
 
 #: ../pyjigdo/jigdo.py:682
 #, python-format
 msgid "Stuffing %s into %s ..."
-msgstr ""
+msgstr "S'està farcint de %s a %s ..."
 
 #: ../pyjigdo/jigdo.py:711
 #, python-format
@@ -471,59 +475,65 @@ msgid ""
 "Running %s for:\n"
 " %s"
 msgstr ""
+"S'està executant %s per a:\n"
+" %s"
 
 #: ../pyjigdo/logger.py:87
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: ../pyjigdo/logger.py:102
 msgid "Warning"
-msgstr ""
+msgstr "Advertència"
 
 #. and not self.cfg.answer_yes:
-#: ../pyjigdo/logger.py:115 ../pyjigdo/logger.py:124
+#: ../pyjigdo/logger.py:115
+#: ../pyjigdo/logger.py:124
 msgid "Do you want to continue? [Y/n]"
-msgstr ""
+msgstr "Voleu continuar? [S/n]"
 
-#: ../pyjigdo/logger.py:118 ../pyjigdo/logger.py:127
+#: ../pyjigdo/logger.py:118
+#: ../pyjigdo/logger.py:127
 msgid "Abort! Abort! Abort!"
-msgstr ""
+msgstr "Avorta"
 
 #: ../pyjigdo/misc.py:64
 #, python-format
 msgid "Mirrorlist %s was unable to be fetched."
-msgstr ""
+msgstr "No s'ha pogut recuperar la llista de servidors rèplica %s."
 
 #: ../pyjigdo/misc.py:112
 #, python-format
 msgid "Could not find URL %s: %s"
-msgstr ""
+msgstr "No s'ha pogut trobar la URL %s: %s"
 
-#: ../pyjigdo/misc.py:119 ../pyjigdo/misc.py:122
+#: ../pyjigdo/misc.py:119
+#: ../pyjigdo/misc.py:122
 #, python-format
 msgid "Unable to write to %s, aborting."
-msgstr ""
+msgstr "No es pot escriure a %s, s'està avortant."
 
 #: ../pyjigdo/misc.py:231
 #, python-format
 msgid "Failed to allocate loop device for '%s'"
-msgstr ""
+msgstr "No s'ha pogut assignar un dispositiu loop per a '%s'"
 
 #: ../pyjigdo/misc.py:246
 #, python-format
 msgid "Failed to find loop device associated with '%s' from '/sbin/losetup -a'"
-msgstr ""
+msgstr "No s'ha pogut trobar un dispositiu loop associat amb '%s' des de '/sbin/losetup -a'"
 
 #: ../pyjigdo/misc.py:266
 #, python-format
 msgid "Failed to mount '%s' to '%s'"
-msgstr ""
+msgstr "No s'ha pogut muntar '%s' per '%s'"
 
 #: ../pyjigdo/misc.py:320
 #, python-format
 msgid "Directory %s could not be created. Aborting"
-msgstr ""
+msgstr "No s¡ha pogut crera el directori %s. S'està avortant."
 
 #: ../pyjigdo/misc.py:379
 msgid "Invalid range selection."
-msgstr ""
+msgstr "Selecció de rang invàlid."
+
