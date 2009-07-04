@@ -3,7 +3,7 @@
 Summary:        Python version of Jigdo, slightly modified
 Name:           pyjigdo
 Version:        @VERSION@
-Release:        1%{?dist}
+Release:        2%{?dist}
 License:        GPLv2+
 Group:          Applications/System
 URL:            http://fedorahosted.org/pyjigdo
@@ -11,7 +11,7 @@ Source0:        http://fedorahosted.org/releases/p/y/pyjigdo/%{name}-%{version}.
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  intltool, gettext, python
-Requires:	python, rhpl, python-urlgrabber, jigdo, fuseiso
+Requires:	python, python-urlgrabber, jigdo, fuseiso
 Requires:	python-twisted-web >= 8.2.0, python-twisted-core >= 8.2.0
 
 %description
@@ -44,6 +44,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Sat Jul 4 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0.2-2
+- Switch to using gettext vs rhpl
+
 * Mon May 18 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0.1-1
 - Fix missing file in package
 

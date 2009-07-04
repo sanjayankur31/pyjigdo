@@ -15,5 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import rhpl.translate as translate
-from rhpl.translate import _, N_
+import gettext
+N_ = lambda x: x
+_ = lambda x: gettext.ldgettext("pyjigdo", x)
