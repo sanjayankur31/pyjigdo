@@ -30,7 +30,6 @@ from pyJigdo.constants import *
 pyJigdo interface - Jigdo at its finest
 """
 
-import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 class PyJigdo:

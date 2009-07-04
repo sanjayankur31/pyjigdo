@@ -23,7 +23,6 @@ shelling out for this information. For now, we just shell out to jigdo-file.
 import os
 from pyJigdo.util import check_directory, run_command
 
-import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 

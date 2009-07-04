@@ -21,7 +21,6 @@ User Interface
 
 import pyJigdo.util
 
-import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 class SelectImages:

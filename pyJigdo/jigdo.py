@@ -25,7 +25,6 @@ from ConfigParser import RawConfigParser
 from pyJigdo.userinterface import SelectImages
 from pyJigdo.util import url_to_file_name, check_complete, run_command, check_directory
 
-import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 class JigdoFile:

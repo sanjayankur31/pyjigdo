@@ -21,7 +21,6 @@ import pyJigdo.logger
 import pyJigdo.pyasync
 from pyJigdo.jigdo import JigdoFile
 
-import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 class PyJigdoBase:

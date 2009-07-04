@@ -24,7 +24,6 @@ from jigdo_file import execJigdoFile
 from pyJigdo.util import check_directory
 import os, types, time
 
-import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 

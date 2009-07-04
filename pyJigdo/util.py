@@ -30,7 +30,6 @@ except ImportError:
     # Py2.4
     import md5 as md5_hashlib
 
-import pyJigdo.translate as translate
 from pyJigdo.translate import _, N_
 
 eq = re.compile('=')
