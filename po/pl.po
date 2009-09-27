@@ -6,9 +6,9 @@ msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-09-04 11:55+0200\n"
-"PO-Revision-Date: 2008-10-31 19:53+0100\n"
+"PO-Revision-Date: 2009-09-27 13:24+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
-"Language-Team: Polish <pl@li.org>\n"
+"Language-Team: Polish <fedora-trans-pl@redhat.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -18,11 +18,11 @@ msgstr ""
 #. #
 #: ../pyjigdo.py:66
 msgid "Runtime Options"
-msgstr "Opcje wykonawcze"
+msgstr "Opcje uruchamiania"
 
 #: ../pyjigdo.py:71
 msgid "Use the CLI rather than GUI (default)"
-msgstr "Użyj CLI zamiast GUI (domyślne)"
+msgstr "Użycie CLI zamiast GUI (domyślne)"
 
 #. TODO: when the GUI is ready, a pyjigdo-gui symlink should default to --gui (by checking argv[0])
 #. help    = _("Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors. (pyjigdo-gui default)"))
@@ -31,8 +31,8 @@ msgid ""
 "Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI "
 "related errors"
 msgstr ""
-"Wymuś, aby pyJigdo używało GUI. Nie wraca do CLI w razie niepowodzenia, więc "
-"wyświetla błędy związane z GUI"
+"Wymuszenie, aby pyJigdo używało GUI. Nie wraca do CLI w razie niepowodzenia, "
+"więc wyświetla błędy związane z GUI"
 
 #: ../pyjigdo.py:83
 msgid "List available images for a given Jigdo file."
@@ -68,16 +68,16 @@ msgstr "[plik konfiguracji]"
 #: ../pyjigdo.py:117
 #, python-format
 msgid "Destination directory for products. (Default: %s)"
-msgstr "Folder docelowy dla produktów (domyślnie: %s)."
+msgstr "Katalog docelowy dla produktów (domyślnie: %s)."
 
 #: ../pyjigdo.py:118 ../pyjigdo.py:124 ../pyjigdo.py:226
 msgid "[directory]"
-msgstr "[folder]"
+msgstr "[katalog]"
 
 #: ../pyjigdo.py:123
 #, python-format
 msgid "Working directory. (Default: %s)"
-msgstr "Folder roboczy (domyślnie: %s)"
+msgstr "Katalog roboczy (domyślnie: %s)"
 
 #. # Information Options
 #. # Purpose: We should allow a user to query a jigdo and get lots-o-info from just
@@ -92,11 +92,11 @@ msgstr "Położenie pliku Jigdo."
 
 #: ../pyjigdo.py:135
 msgid "[url]"
-msgstr "[URL]"
+msgstr "[Adres URL]"
 
 #: ../pyjigdo.py:140
 msgid "Print information about the jigdo image and exit."
-msgstr "Wyświetl informacje o obrazie Jigdo i zakończ."
+msgstr "Wyświetla informacje o obrazie Jigdo i kończy pracę."
 
 #: ../pyjigdo.py:146
 #, python-format
@@ -136,8 +136,8 @@ msgid ""
 "Download or Host a given comma-separated list of image number(s) or range"
 "(s). e.g.: \"7,15,23,8-13\""
 msgstr ""
-"Pobierz lub hostuj podaną listę oddzielonych przecinkami numerów obrazów lub "
-"zakresów, np. \"7,15,23,8-13\"."
+"Pobranie lub hostowanie podanej listy oddzielonych przecinkami numerów "
+"obrazów lub zakresów, np. \"7,15,23,8-13\"."
 
 #: ../pyjigdo.py:167
 msgid "[image numbers]"
@@ -148,8 +148,8 @@ msgid ""
 "Download or Host a given comma-separated list of image filenames or file "
 "glob patterns. e.g.: \"*i386*CD*,foo.iso\""
 msgstr ""
-"Pobierz lub hostuj podaną listę oddzielonych przecinkami nazw plików obrazów "
-"lub wyrażeń regularnych, np. \"*i386*CD*,foo.iso\"."
+"Pobranie lub hostowanie podanej listy oddzielonych przecinkami nazw plików "
+"obrazów lub wyrażeń regularnych, np. \"*i386*CD*,foo.iso\"."
 
 #: ../pyjigdo.py:174
 msgid "[image filenames]"
@@ -158,7 +158,8 @@ msgstr "[nazwy plików obrazów]"
 #: ../pyjigdo.py:179
 msgid "Download or Host all images defined in jigdo. Same as -f \"*\""
 msgstr ""
-"Pobierz lub hostuj wszystkie obrazy określone w Jigdo. To samo co -f \"*\""
+"Pobranie lub hostowanie wszystkich obrazów określonych w Jigdo. To samo co "
+"-f \"*\""
 
 #. # FIXME: Any creative ways to take this data and not limit to just two repos?
 #. download_group.add_option(  "--download-mirror-base",
@@ -203,15 +204,14 @@ msgstr "Opcje skanowania"
 #: ../pyjigdo.py:225
 msgid "Scan given directory for files needed by selected image(s)."
 msgstr ""
-"Przeskanuj podany folder w poszukiwaniu plików wymaganych przez wybrane "
-"obrazy."
+"Skanuje podany katalog w poszukiwaniu plików wymaganych przez wybrane obrazy."
 
 #: ../pyjigdo.py:231
 msgid ""
 "Mount and then scan existing ISO images for files needed by selected image"
 "(s)."
 msgstr ""
-"Zamontuj, a następnie przeskanuj istniejące obrazy ISO w poszukiwaniu plików "
+"Montuje, a następnie skanuje istniejące obrazy ISO w poszukiwaniu plików "
 "wymaganych przez wybrane obrazy."
 
 #: ../pyjigdo.py:232
@@ -271,7 +271,7 @@ msgstr "Dodawanie źródła %s do przeskanowania w poszukiwaniu danych."
 
 #: ../pyjigdo/base.py:294
 msgid "Something failed to finish...\n"
-msgstr "Zakończenie czegoś się nie powiodło...\n"
+msgstr "Ukończenie czegoś się nie powiodło...\n"
 
 #: ../pyjigdo/cfg.py:63
 msgid "Running from CLI but no .jigdo file specified"
@@ -326,7 +326,7 @@ msgstr "Nieprawidłowy wybór."
 #: ../pyjigdo/cli.py:115
 msgid "All images have reported as complete. Nothing to do."
 msgstr ""
-"Wszystkie obrazy zostały zgłoszone jako zakończone. Nie ma nic do zrobienia."
+"Wszystkie obrazy zostały zgłoszone jako ukończone. Nie ma nic do zrobienia."
 
 #: ../pyjigdo/cli.py:132
 #, python-format
@@ -337,7 +337,8 @@ msgstr "Obraz %s został pomyślnie pobrany do: %s"
 #, python-format
 msgid "Image %s failed to complete. Try running pyjigdo again."
 msgstr ""
-"Zakończenie obrazu %s nie powiodło się. Spróbuj uruchomić pyJigdo ponownie."
+"Zakończenie obrazu %s nie powiodło się. Proszę spróbować ponownie uruchomić "
+"pyJigdo."
 
 #: ../pyjigdo/jigdo.py:45 ../pyjigdo/jigdo.py:55
 msgid "==== Images defined in Jigdo ===="
@@ -376,8 +377,8 @@ msgstr "==== Fragmenty określone w Jigdo ===="
 #: ../pyjigdo/jigdo.py:176
 msgid "[Servers] section is not present or can't be parsed. Abort!"
 msgstr ""
-"Sekcja [Servers] nie jest obecna lub nie może zostać przeanalizowana. "
-"Przerwij!"
+"Sekcja [Servers] nie jest obecna lub nie może zostać przetworzona. Należy "
+"przerwać."
 
 #: ../pyjigdo/jigdo.py:248
 #, python-format
@@ -389,7 +390,7 @@ msgstr ""
 #: ../pyjigdo/jigdo.py:367
 #, python-format
 msgid "Temporary template found at %s"
-msgstr "Znaleziono tymczasowy szablon na %s"
+msgstr "Odnaleziono tymczasowy szablon na %s"
 
 #: ../pyjigdo/jigdo.py:383
 #, python-format
@@ -399,7 +400,7 @@ msgstr "%s istnieje, sprawdzanie..."
 #: ../pyjigdo/jigdo.py:386 ../pyjigdo/jigdo.py:431
 #, python-format
 msgid "%s is complete."
-msgstr "%s jest zakończone."
+msgstr "%s zostało ukończone."
 
 #: ../pyjigdo/jigdo.py:429
 #, python-format
@@ -409,7 +410,7 @@ msgstr "Sprawdzanie obrazu %s..."
 #: ../pyjigdo/jigdo.py:483
 #, python-format
 msgid "Trying to download %s"
-msgstr "Próbowanie pobrania %s"
+msgstr "Próba pobrania %s"
 
 #: ../pyjigdo/jigdo.py:484
 #, python-format
@@ -434,7 +435,7 @@ msgstr "Wyszukiwanie pliku %s..."
 #: ../pyjigdo/jigdo.py:532
 #, python-format
 msgid "Found file %s, marking location."
-msgstr "Znaleziono plik %s, zaznaczanie położenia."
+msgstr "Odnaleziono plik %s, zaznaczanie położenia."
 
 #: ../pyjigdo/jigdo.py:548
 #, python-format
@@ -495,7 +496,7 @@ msgstr "Ostrzeżenie"
 #. and not self.cfg.answer_yes:
 #: ../pyjigdo/logger.py:115 ../pyjigdo/logger.py:124
 msgid "Do you want to continue? [Y/n]"
-msgstr "Czy chcesz kontynuować? [Y/n]"
+msgstr "Kontynuować? [T/n]"
 
 #: ../pyjigdo/logger.py:118 ../pyjigdo/logger.py:127
 msgid "Abort! Abort! Abort!"
@@ -509,7 +510,7 @@ msgstr "Nie można pobrać listy serwerów lustrzanych %s."
 #: ../pyjigdo/misc.py:112
 #, python-format
 msgid "Could not find URL %s: %s"
-msgstr "Nie można znaleźć URL %s: %s"
+msgstr "Nie można odnaleźć adresu URL %s: %s"
 
 #: ../pyjigdo/misc.py:119 ../pyjigdo/misc.py:122
 #, python-format
@@ -525,7 +526,7 @@ msgstr "Przydzielenie urządzenia loop dla \"%s\" nie powiodło się"
 #, python-format
 msgid "Failed to find loop device associated with '%s' from '/sbin/losetup -a'"
 msgstr ""
-"Znalezienie urządzenie loop powiązanego z \"%s\" z \"/sbin/losetup -a\" nie "
+"Odnalezienie urządzenie loop powiązanego z \"%s\" z \"/sbin/losetup -a\" nie "
 "powiodło się"
 
 #: ../pyjigdo/misc.py:266
@@ -536,7 +537,7 @@ msgstr "Zamontowanie \"%s\" do \"%s\" nie powiodło się"
 #: ../pyjigdo/misc.py:320
 #, python-format
 msgid "Directory %s could not be created. Aborting"
-msgstr "Nie można utworzyć folderu %s. Przerywanie"
+msgstr "Nie można utworzyć katalogu %s. Przerywanie"
 
 #: ../pyjigdo/misc.py:379
 msgid "Invalid range selection."
