@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pyjigdo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-02 01:27+0000\n"
-"PO-Revision-Date: 2008-12-15 17:20-0300\n"
-"Last-Translator: H. Daniel Cabrera <h.daniel.cabrera@gmail.com>\n"
+"POT-Creation-Date: 2008-09-04 11:55+0200\n"
+"PO-Revision-Date: 2009-10-19 15:05-0400\n"
+"Last-Translator: Dennis Tobar <dennis.tobar@gmail.com>\n"
 "Language-Team: Fedora Spanish <fedora-trans-es@redhat.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -202,11 +202,11 @@ msgstr "[imagen iso]"
 
 #: ../pyjigdo/base.py:78
 msgid "Running PyJigdo in CLI mode..."
-msgstr "Ejecutando PyJigdo con líneas de comando..."
+msgstr "Ejecutando PyJigdo en línea de comando..."
 
 #: ../pyjigdo/base.py:89
 msgid "Running PyJigdo in GUI mode..."
-msgstr "Ejecutando PyJigdo con un entorno gráfico..."
+msgstr "Ejecutando PyJigdo en entorno gráfico..."
 
 #: ../pyjigdo/base.py:136
 #, python-format
