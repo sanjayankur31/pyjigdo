@@ -36,8 +36,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc README NEWS AUTHORS COPYING TODO
 %doc %{_mandir}/man1/*
-%doc %{_mandir}/man5/*
-%doc %{_mandir}/man8/*
 %{python_sitelib}/pyJigdo/
 %{_bindir}/*
 %dir %{_sysconfdir}/pyjigdo
@@ -45,7 +43,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Nov 8 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0.3-1
-- Update man pages
+- Update man pages, remove stubs
 - Update to 0.4.0.3
 
 * Sat Jul 4 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0.2-2

@@ -14,4 +14,3 @@ intltool-merge
 intltool-update
 po/POTFILES
 pyjigdo.spec
-pyjigdo/__init__.py
