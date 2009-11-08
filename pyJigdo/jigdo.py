@@ -53,7 +53,7 @@ class JigdoFile:
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
-        self.log.info(_("Successfully downloaded %s" % self.id))
+        self.log.status(_("Successfully downloaded jigdo file %s" % self.id))
         self.parse()
         if self.settings.list_images or self.settings.jigdo_info:
             # List Defined Images
@@ -343,7 +343,7 @@ class JigdoMirrorlistsDefinition:
         """ Callback entry point for when self.get() is successful. """
         for l in ign.split('\n'):
             if not l.startswith("#"): self.mirror_data[repo_id]["data"].append(l.rstrip('\n'))
-        self.log.info(_("Successfully downloaded %s" % repo_id))
+        self.log.status(_("Successfully downloaded mirrorlist for %s" % repo_id))
         self.mirror_data[repo_id]["download_tries"] += 1
         self.add_results(repo_id)
         self.log.debug(_("Ending download event for mirrorlist %s" % repo_id))
@@ -526,7 +526,7 @@ class JigdoImage:
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
-        self.log.info(_("Successfully downloaded %s" % self.template))
+        self.log.status(_("Successfully downloaded jigdo template %s" % self.template))
         self.collect_slices()
         self.scan_local_sources()
         self.get_slices()
@@ -726,7 +726,7 @@ class JigdoImageSlice:
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
         self.download_tries += 1
-        self.log.info(_("Successfully downloaded %s" % self.filename))
+        self.log.status(_("Successfully downloaded jigdo slice %s" % self.filename))
         # FIXME: Verify we have gotten the data we want.
         self.finished = True
         self.template.notify_slice_done()
