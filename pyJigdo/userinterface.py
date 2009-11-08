@@ -50,6 +50,11 @@ class SelectImages:
             else:
                 choosing_images = False
 
+        if num_images == 1:
+            self.log.status(_("Only one image defined, downloading."))
+            self.select_image(1)
+            choosing_images = False
+
         while choosing_images:
             self.log.status(_("Please select one or more of the available Images:"))
             for image in self.jigdo_definition.images:

@@ -523,14 +523,22 @@ class JigdoImage:
         """ Return the target location for this Jigdo template. """
         return self.fs_location
 
+    def verify(self):
+        """ Verify the template we have fetched is the correct template. """
+        return check_complete(self.log, self.target(), self.template_md5sum)
+
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
-        self.download_tries += 1
-        self.log.status(_("Successfully downloaded jigdo template %s" % self.template))
-        self.collect_slices()
-        self.scan_local_sources()
-        self.get_slices()
-        self.log.debug(_("Ending download event for %s" % self.filename))
+        if self.verify():
+            self.download_tries += 1
+            self.log.status(_("Successfully downloaded jigdo template %s" % self.template))
+            self.collect_slices()
+            self.scan_local_sources()
+            self.get_slices()
+            self.log.debug(_("Ending download event for %s" % self.filename))
+        else:
+            self.log.status(_("Download for %s does not match required file." % self.filename))
+            self.download_callback_failure(_("Checksum failed!"))
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """
@@ -723,14 +731,21 @@ class JigdoImageSlice:
         """ Return the target location for this Jigdo slice. """
         return self.fs_location
 
+    def verify(self):
+        """ Verify the slice we have fetched is the correct data. """
+        return check_complete(self.log, self.target(), self.slice_sum)
+
     def download_callback_success(self, ign):
         """ Callback entry point for when self.get() is successful. """
-        self.download_tries += 1
-        self.log.status(_("Successfully downloaded jigdo slice %s" % self.filename))
-        # FIXME: Verify we have gotten the data we want.
-        self.finished = True
-        self.template.notify_slice_done()
-        self.log.debug(_("Ending download event for %s" % self.filename))
+        if self.verify():
+            self.download_tries += 1
+            self.log.status(_("Successfully downloaded jigdo slice %s" % self.filename))
+            self.finished = True
+            self.template.notify_slice_done()
+            self.log.debug(_("Ending download event for %s" % self.filename))
+        else:
+            self.log.status(_("Download for %s does not match required file." % self.filename))
+            self.download_callback_failure(_("Checksum failed!"))
 
     def download_callback_failure(self, ign):
         """ Callback entry point for when self.get() fails. """

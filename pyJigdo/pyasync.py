@@ -158,6 +158,7 @@ class PyJigdoReactor:
                     if image.selected: images_status.append( image.finish() )
             if not all(images_status):
                 # FIXME: Don't stop(), we are not done.
+                # We should also tell the user what's failed/missing.
                 self.log.critical("We're not done, fail!!!")
             self.stop()
 
