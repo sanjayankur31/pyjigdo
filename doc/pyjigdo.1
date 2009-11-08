@@ -1,4 +1,81 @@
-.TH "pyjigdo" "1" "0.3.0" "Fedora Unity" ""
+.TH "pyjigdo" "1" "0.4.0.2" "Fedora Unity" ""
+.SH "OPTIONS"
+.LP 
+\fB\-\-version\fR
+show program's version number and exit
+.TP 
+\fB\-h, \-\-help\fR
+show this help message and exit
+.TP 
+Runtime Options:
+.TP 
+\fB\-\-jigdo\-file\-bin=JIGDO_FILE_BIN\fR
+Use given jigdo\-file binary. (Default: /usr/bin/jigdo\-file)
+.TP 
+\fB\-\-list\-images\fR
+List available images for given Jigdo files and exit.
+.TP 
+\fB\-d, \-\-debug\fR
+Set debugging to on.
+.TP 
+\fB\-v, \-\-verbose\fR
+Increase verbosity.
+.TP 
+\fB\-\-logfile=LOG_FILE\fR
+Logfile location. (Default: ./pyjigdo.log)
+.TP 
+General Options:
+.TP 
+\fB\-\-info\fR
+Print information about the jigdo image and exit.
+.TP 
+\fB\-\-fallback=[number of tries]\fR
+Number of public mirrors to try before using a fallback mirror. (Default: 3)
+.TP 
+\fB\-\-servers\-only\fR
+Don't use mirrorlists, if present. (Default: False)
+.TP 
+\fB\-\-max\-attempts=[number of tries]\fR
+Max number of tries to get a file before giving up. (Default: 6)
+.TP 
+\fB\-t [number of seconds], \-\-timeout=[number of seconds]\fR
+Number of seconds to wait before switching to different slice source. (Default: 30)
+.TP 
+
+Download Options:
+.TP 
+\fB\-n [image numbers], \-\-image\-numbers=[image numbers]\fR
+Download a given comma\-separated list of image number(s) or range(s). e.g.: "7,15,23,8\-13"
+.TP 
+\fB\-f [image filenames], \-\-image\-filenames=[image filenames]\fR
+Download a given comma\-separated list of image filenames or file glob patterns. e.g.: "*i386*CD*,foo.iso"
+.TP 
+\fB\-a, \-\-all\fR
+Download all images defined in jigdo. Same as \-f "*"
+.TP 
+\fB\-\-threads=[number]\fR
+Number of threads to use when downloading. (Default: 8)
+.TP 
+\fB\-\-stuff\-bits=[number]\fR
+Number of files to download before stuffing into ISO. (Default: 80)
+.TP 
+\fB\-\-stuff\-then\-remove\fR
+Remove downloaded data after stuffing into ISO. (Default: False)
+.TP 
+\fB\-\-download\-storage=[directory]\fR
+Directory to store any temporary data for downloads. (Default: ./pyjigdo\-data/)
+.TP 
+\fB\-\-download\-target=[directory]\fR
+Directory to store final download data. (Default: . )
+.TP 
+Scan Options:
+.TP 
+\fB\-s [directory], \-\-scan\-dir=[directory]\fR
+Scan given directory for files needed by selected image(s).
+.TP 
+\fB\-\-scan\-iso=[iso image]\fR
+Mount and then scan existing ISO images for files needed by selected image(s).
+.TP 
 .SH "NAME"
 .LP 
 pyjigdo \- PYthon JIGsaw DOwnloader
@@ -27,66 +104,8 @@ pyjigdo \-n 6,7,16\-21 Fedora\-Unity\-20080331\-8.jigdo
 Automatically start downloading all of the 32bit CD ISO image filenames using a simple wildcard glob pattern:
 .IP 
 pyjigdo \-f "*i386*CD*" Fedora\-Unity\-20080331\-8.jigdo
-.SH "OPTIONS"
-.LP 
-.TP 
-\fB\-\-cli\fR
-Use the CLI rather then GUI (default)
-.TP 
-\fB\-\-gui\fR
-Force pyJigdo to use the GUI. Does not fallback to CLI and thus shows GUI related errors. (pyjigdo\-gui default)
-.TP 
-\fB\-\-list\-images\fR
-List available images for a given Jigdo file.
-.TP 
-\fB\-d DEBUGLEVEL, \-\-debug=DEBUGLEVEL\fR
-Set debugging level (0 by default)
-.TP 
-\fB\-c [\fIconfig file\fP], \-\-config=[\fIconfig file\fP]\fR
-PyJigdo configuration file to use
-.TP 
-\fB\-\-dest\-dir=[\fIdirectory\fP], \-\-destination\-directory=[\fIdirectory\fP]\fR
-Destination directory for products. (Default: /tmp/dl)
-.TP 
-\fB\-\-work\-dir=[\fIdirectory\fP], \-\-working\-directory=[\fIdirectory\fP]\fR
-Working directory. (Default: /tmp/dl/pyjigdo\-data)
-.TP 
-\fB\-j [\fIurl\fP], \-\-jigdo=[\fIurl\fP]\fR
-Location of jigdo file.
-.TP 
-\fB\-\-info\fR
-Print information about the jigdo image and exit.
-.TP 
-\fB\-\-fallback=[number of tries]\fR
-Number of public mirrors to try before using a fallback mirror. (Default: 5)
-.TP 
-\fB\-t [number of seconds], \-\-timeout=[number of seconds]\fR
-Number of seconds to wait before switching to different slice source. (Default: 15)
-.TP 
-\fB\-n [image numbers], \-\-image\-numbers=[image numbers]\fR
-Download or Host a given comma\-separated list of image numbers or ranges. e.g.: "7,15,23,8\-13"
-.TP 
-\fB\-f [image filenames], \-\-image\-filenames=[image filenames]\fR
-Download or Host a given comma\-separated list of image filenames or file glob patterns. e.g.: "*i386*CD*,*64*DVD*"
-.TP 
-\fB\-a, \-\-all\fR
-Download or Host all images defined in jigdo. Same as \fB\-f "*"\fR
-.TP 
-\fB\-s [directory], \-\-scan\-dir=[directory]\fR
-Scan given directory for files needed by selected image(s).
-.TP 
-\fB\-\-scan\-iso=[iso image]\fR
-Mount and then scan existing ISO images for files needed by selected image(s).
-.TP 
-
-\fB\-\-version\fR
-output version information and exit
-.TP 
-\fB\-h, \-\-help\fR
-show help message and exit
 .SH "FILES"
 .LP 
-\fI /etc/pyjigdo/pyjigdo.conf\fP 
 .br 
 \fI ./pyjigdo\-data/\fP
 .br 
@@ -97,6 +116,3 @@ Jonathan Steffan, Jeroen van Meeuwen, Ignacio Vazquez\-Abrams, Stewart Adam, Jas
 .SH "BUGS"
 .LP 
 Report bugs at http://bugzilla.redhat.com/ .
-.SH "SEE ALSO"
-.LP 
-pyjigdo\-conf(5) pyjigdo(8) wget(1)
