@@ -3,7 +3,7 @@
 Summary:        Python version of Jigdo, slightly modified
 Name:           pyjigdo
 Version:        @VERSION@
-Release:        2%{?dist}
+Release:        1%{?dist}
 License:        GPLv2+
 Group:          Applications/System
 URL:            http://fedorahosted.org/pyjigdo
@@ -44,6 +44,10 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/pyjigdo/pyjigdo.conf
 
 %changelog
+* Sat Nov 8 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0.3-1
+- Update man pages
+- Update to 0.4.0.3
+
 * Sat Jul 4 2009 Jonathan Steffan <jon a fedoraunity.org> - 0.4.0.2-2
 - Switch to using gettext vs rhpl
 

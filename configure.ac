@@ -1,4 +1,4 @@
-AC_INIT([pyjigdo], 0.4.0.1)
+AC_INIT([pyjigdo], 0.4.0.3)
 AC_CONFIG_SRCDIR(pyJigdo/__init__.py.in)
 
 #ALL_LINGUAS="bn_IN bn ca cs da de el es fi fr gl gu hi hr hu is it ja ko ml ms nb nl or pa pl pt pt_BR ru sk sl sr@Latn sr sv ta tr uk zh_CN zh_TW"
@@ -24,6 +24,7 @@ Makefile
 pyjigdo.spec
 pyJigdo/Makefile
 pyJigdo/__init__.py
+pyJigdo/constants.py
 ])
 
 AC_OUTPUT
