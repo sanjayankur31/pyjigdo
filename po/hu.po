@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: pyjidgo\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-09-04 11:55+0200\n"
-"PO-Revision-Date: 2010-03-12 18:59+0100\n"
+"PO-Revision-Date: 2010-03-13 15:04+0100\n"
 "Last-Translator: Nikolas Slivka <snicore@gmail.com>\n"
 "Language-Team: Fedora Hungarian Translation Team <fedora-trans-hu@redhat.org>\n"
 "MIME-Version: 1.0\n"
@@ -42,7 +42,7 @@ msgstr ""
 
 #: ../pyjigdo.py:92
 msgid "Set debugging level (0 by default)"
-msgstr ""
+msgstr "Nyomkövetési szint beállítása (0-alapértelmezett)"
 
 #. #
 #. # Redundant Options
@@ -61,55 +61,56 @@ msgstr ""
 
 #: ../pyjigdo.py:111
 msgid "PyJigdo configuration file to use"
-msgstr ""
+msgstr "PyJigdo konfigurációs fájl használata"
 
 #: ../pyjigdo.py:112
 msgid "[config file]"
-msgstr ""
+msgstr "[konfig. fájl]"
 
 #: ../pyjigdo.py:117
-#, python-format
+#, fuzzy, python-format
 msgid "Destination directory for products. (Default: %s)"
-msgstr ""
+msgstr "Termékek célkönyvtára. (Alapértelmezett: %s)"
 
 #: ../pyjigdo.py:118
 #: ../pyjigdo.py:124
 #: ../pyjigdo.py:226
 msgid "[directory]"
-msgstr ""
+msgstr "[könyvtár]"
 
 #: ../pyjigdo.py:123
 #, python-format
 msgid "Working directory. (Default: %s)"
-msgstr ""
+msgstr "Munkakönyvtár. (Alapértelmezett: %s)"
 
 #. # Information Options
 #. # Purpose: We should allow a user to query a jigdo and get lots-o-info from just
 #. #          downloading the jigdo file.
 #: ../pyjigdo.py:129
 msgid "General Options"
-msgstr ""
+msgstr "Általános beállítások"
 
 #: ../pyjigdo.py:134
+#, fuzzy
 msgid "Location of jigdo file."
-msgstr ""
+msgstr "Jidgo fájl elérési útvonala."
 
 #: ../pyjigdo.py:135
 msgid "[url]"
-msgstr ""
+msgstr "[link]"
 
 #: ../pyjigdo.py:140
 msgid "Print information about the jigdo image and exit."
-msgstr ""
+msgstr "Információk megjelenítése a jidgo fájlról és kilépés."
 
 #: ../pyjigdo.py:146
 #, python-format
 msgid "Number of public mirrors to try before using a fallback mirror. (Default: %s)"
-msgstr ""
+msgstr "A próbált nyilvános tükrök száma, mielőtt a tartalék tükröt használná. (Alapértelmezett: %s)"
 
 #: ../pyjigdo.py:147
 msgid "[number of tries]"
-msgstr ""
+msgstr "[próbák száma]"
 
 #: ../pyjigdo.py:153
 #, python-format
@@ -126,7 +127,7 @@ msgstr ""
 #. #          This is also for download options, like how many threads to use, to cache or not, etc.
 #: ../pyjigdo.py:160
 msgid "Download Options"
-msgstr ""
+msgstr "Letöltési opciók"
 
 #: ../pyjigdo.py:166
 msgid "Download or Host a given comma-separated list of image number(s) or range(s). e.g.: \"7,15,23,8-13\""
@@ -142,7 +143,7 @@ msgstr ""
 
 #: ../pyjigdo.py:174
 msgid "[image filenames]"
-msgstr ""
+msgstr "[kép fájlnevek]"
 
 #: ../pyjigdo.py:179
 msgid "Download or Host all images defined in jigdo. Same as -f \"*\""
@@ -198,36 +199,36 @@ msgstr ""
 
 #: ../pyjigdo.py:232
 msgid "[iso image]"
-msgstr ""
+msgstr "[iso kép]"
 
 #: ../pyjigdo/base.py:78
 msgid "Running PyJigdo in CLI mode..."
-msgstr ""
+msgstr "Pyjidgo futtatása konzolos módban..."
 
 #: ../pyjigdo/base.py:89
 msgid "Running PyJigdo in GUI mode..."
-msgstr ""
+msgstr "Pyjidgo futtatása grafikus felületen..."
 
 #: ../pyjigdo/base.py:136
 #, python-format
 msgid "Loading Jigdo file %s"
-msgstr ""
+msgstr "%s Jidgo fájl betöltése"
 
 #: ../pyjigdo/base.py:159
 #, python-format
 msgid "Selecting Image %d"
-msgstr ""
+msgstr "%d kép kiválasztása"
 
 #: ../pyjigdo/base.py:165
 #: ../pyjigdo/base.py:190
 #: ../pyjigdo/base.py:204
 #, python-format
 msgid "Could not select image %s"
-msgstr ""
+msgstr "%s képet nem sikerült kiválasztani"
 
 #: ../pyjigdo/base.py:172
 msgid "Selecting Images"
-msgstr ""
+msgstr "Képek kiválasztása"
 
 #: ../pyjigdo/base.py:200
 #, python-format
@@ -241,7 +242,7 @@ msgstr ""
 #: ../pyjigdo/base.py:252
 #, python-format
 msgid "Adding image %s to our queue."
-msgstr ""
+msgstr "%s kép hozzáadása a sorhoz."
 
 #: ../pyjigdo/base.py:258
 #, python-format
@@ -255,11 +256,12 @@ msgstr ""
 
 #: ../pyjigdo/base.py:294
 msgid "Something failed to finish...\n"
-msgstr ""
+msgstr "Valamit nem sikerült befejezni...\n"
 
 #: ../pyjigdo/cfg.py:63
+#, fuzzy
 msgid "Running from CLI but no .jigdo file specified"
-msgstr ""
+msgstr "Futtatás konzolos módban, de nincs .jidgo fájl megadva"
 
 #: ../pyjigdo/cfg.py:66
 msgid "Info requested from a .jigdo file but no .jigdo file specified"
@@ -267,22 +269,22 @@ msgstr ""
 
 #: ../pyjigdo/cfg.py:73
 msgid "Setting options from configuration file"
-msgstr ""
+msgstr "Beállítás konfigurációs fájlból"
 
 #: ../pyjigdo/cfg.py:92
 #, python-format
 msgid "Configuration file %s not readable, continuing without"
-msgstr ""
+msgstr "%s konfigurációs fájl nem olvasható, folytatás nélküle"
 
 #: ../pyjigdo/cfg.py:96
 #, python-format
 msgid "Reading configuration file %s"
-msgstr ""
+msgstr "%s konfigurációs fájl olvasása"
 
 #: ../pyjigdo/cfg.py:100
 #, python-format
 msgid "Invalid configuration file %s"
-msgstr ""
+msgstr "%s érvénytelen konfigurációs fájl"
 
 #: ../pyjigdo/cfg.py:139
 #, python-format
@@ -291,7 +293,7 @@ msgstr ""
 
 #: ../pyjigdo/cfg.py:143
 msgid "Setting options from command-line"
-msgstr ""
+msgstr "Beállítások megadása parancssorból"
 
 #: ../pyjigdo/cfg.py:157
 #: ../pyjigdo/cfg.py:161
@@ -307,7 +309,7 @@ msgstr ""
 
 #: ../pyjigdo/cli.py:90
 msgid "Invalid selection."
-msgstr ""
+msgstr "Érvénytelen választás."
 
 #: ../pyjigdo/cli.py:115
 msgid "All images have reported as complete. Nothing to do."
@@ -316,7 +318,7 @@ msgstr ""
 #: ../pyjigdo/cli.py:132
 #, python-format
 msgid "Image %s successfully downloaded to: %s"
-msgstr ""
+msgstr "%s kép sikeresen letöltve ide: %s"
 
 #: ../pyjigdo/cli.py:136
 #, python-format
@@ -371,18 +373,18 @@ msgstr ""
 #: ../pyjigdo/jigdo.py:383
 #, python-format
 msgid "%s exists, checking..."
-msgstr ""
+msgstr "%s létezik, ellenőrzés..."
 
 #: ../pyjigdo/jigdo.py:386
 #: ../pyjigdo/jigdo.py:431
 #, python-format
 msgid "%s is complete."
-msgstr ""
+msgstr "%s kész."
 
 #: ../pyjigdo/jigdo.py:429
 #, python-format
 msgid "Checking image %s ..."
-msgstr ""
+msgstr "Kép ellenőrzése %s ..."
 
 #: ../pyjigdo/jigdo.py:483
 #, python-format
@@ -431,7 +433,7 @@ msgstr "Letöltés sikertelen: %s"
 
 #: ../pyjigdo/jigdo.py:641
 msgid "The following downloads failed:"
-msgstr ""
+msgstr "Az alábbi letöltések sikertelenek:"
 
 #: ../pyjigdo/jigdo.py:643
 #, python-format
@@ -472,12 +474,13 @@ msgstr "Figyelmeztetés"
 #: ../pyjigdo/logger.py:115
 #: ../pyjigdo/logger.py:124
 msgid "Do you want to continue? [Y/n]"
-msgstr ""
+msgstr "Folytatni akarja? [Y/n]"
 
 #: ../pyjigdo/logger.py:118
 #: ../pyjigdo/logger.py:127
+#, fuzzy
 msgid "Abort! Abort! Abort!"
-msgstr ""
+msgstr "Kilép! Kilép! Kilép!"
 
 #: ../pyjigdo/misc.py:64
 #, python-format
@@ -487,7 +490,7 @@ msgstr ""
 #: ../pyjigdo/misc.py:112
 #, python-format
 msgid "Could not find URL %s: %s"
-msgstr ""
+msgstr "%s link nem található: %s"
 
 #: ../pyjigdo/misc.py:119
 #: ../pyjigdo/misc.py:122
@@ -513,7 +516,7 @@ msgstr ""
 #: ../pyjigdo/misc.py:320
 #, python-format
 msgid "Directory %s could not be created. Aborting"
-msgstr ""
+msgstr "%s könyvtár nem hozható létre. Kilépés"
 
 #: ../pyjigdo/misc.py:379
 msgid "Invalid range selection."
