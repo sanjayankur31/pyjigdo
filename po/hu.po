@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: pyjidgo\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-09-04 11:55+0200\n"
-"PO-Revision-Date: 2010-03-13 15:04+0100\n"
+"PO-Revision-Date: 2010-03-20 11:38+0100\n"
 "Last-Translator: Nikolas Slivka <snicore@gmail.com>\n"
 "Language-Team: Fedora Hungarian Translation Team <fedora-trans-hu@redhat.org>\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,7 @@ msgstr ""
 #. #
 #: ../pyjigdo.py:66
 msgid "Runtime Options"
-msgstr ""
+msgstr "Futásidejű beállítások"
 
 #: ../pyjigdo.py:71
 msgid "Use the CLI rather than GUI (default)"
@@ -57,7 +57,7 @@ msgstr "Nyomkövetési szint beállítása (0-alapértelmezett)"
 #. #
 #: ../pyjigdo.py:106
 msgid "Configuration Options"
-msgstr ""
+msgstr "Konfigurációs beállítások"
 
 #: ../pyjigdo.py:111
 msgid "PyJigdo configuration file to use"
@@ -247,7 +247,7 @@ msgstr "%s kép hozzáadása a sorhoz."
 #: ../pyjigdo/base.py:258
 #, python-format
 msgid "Creating download tasks for %s"
-msgstr ""
+msgstr "Letöltési feladat létrehozása %s számára"
 
 #: ../pyjigdo/base.py:264
 #, python-format
@@ -323,7 +323,7 @@ msgstr "%s kép sikeresen letöltve ide: %s"
 #: ../pyjigdo/cli.py:136
 #, python-format
 msgid "Image %s failed to complete. Try running pyjigdo again."
-msgstr ""
+msgstr "%s képet nem sikerült befejezni. Futtassa újra a pyjidgo-t."
 
 #: ../pyjigdo/jigdo.py:45
 #: ../pyjigdo/jigdo.py:55
